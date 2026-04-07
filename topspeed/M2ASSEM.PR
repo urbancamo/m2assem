@@ -1,0 +1,8 @@
+#system dos exe
+#model large jpi
+
+#compile adm,exceptions,expression,interface,lex,listing,location,m2assem
+#compile mystring,objectgenerator,pseudoops,table,tableext,tabletrees
+#link %prjname
+
+

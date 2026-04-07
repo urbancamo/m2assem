@@ -1,0 +1,30 @@
+DEFINITION MODULE PseudoOps;
+
+(*
+        MODULE: PseudoOps       Version 1.0     (c)1990 Mark Wickens
+
+        Created: 03/03/90
+
+        This module handles all valid operations not assembler specific,
+        i.e., all the assembly language-independent pseudo operations.
+*)
+
+FROM ADM        IMPORT  DecodedLine;
+
+PROCEDURE AssemblePseudoOp(DecInstr: DecodedLine; PassNo, Type: CARDINAL;
+                           VAR Length: CARDINAL);
+
+PROCEDURE PseudoOpsShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END PseudoOps.
+

@@ -1,0 +1,156 @@
+DEFINITION MODULE MyStrings;
+
+(*
+	This module defines the data type 'String' and operations on
+	variables of type 'String'.
+	
+	The implementation of the data type is defined to be as
+	an array.
+
+	The procedures in this module are defined in terms of Pre-conditions
+	and Post-conditions which must hold for the instant before and after
+	the procedures are called.
+*)
+
+CONST
+	LongestString	= 133;
+	EndOfLine	= CHR(0);
+	
+TYPE
+	StringLengths	= [1..LongestString];
+	String		= ARRAY StringLengths OF CHAR;
+	
+PROCEDURE InitialiseAString(VAR S: String);
+	
+(*
+	PRE:	None.
+	POST:	The variable S is returned as a string that is
+		ready for processing.
+*)
+	
+PROCEDURE ArrayToString(Array: ARRAY OF CHAR; VAR S: String);
+
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	S is a String which contains the ordered sequence of
+		characters contained in Array, upto HIGH(Array) or
+		LongestString, whichever is the shortest.
+*)
+
+PROCEDURE StringToArray(S: String; VAR Array: ARRAY OF CHAR);
+
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	Array is a character array containing the ordered sequence of
+		characters contained in S, upto LengthOfString(S) characters
+		long.  The last character in Array is an EndOfLine.
+*)
+
+PROCEDURE CapitaliseString(VAR S: String);
+
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	FOR Every Character in the string S DO
+		  Capitalise the Character.
+*)
+
+PROCEDURE ConcatStrings(VAR S1: String; S2: String);
+(*
+	PRE:	Strings S1 and S2 are both ready for processing.
+	POST:	IF LengthOfString(S1) + LengthOfString(S2) <= LongestString
+		THEN S1 := S1 + S2 (concatenated with)
+		ELSE S1 := S1 + Substring of S2 upto LongestString
+*)
+
+PROCEDURE CharInString(S: String; P: CARDINAL): CHAR;
+	
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	IF Position <= LengthOfString(S) THEN
+		  Returns the character in string S whose position
+		  corresponds to the P'th character from the start
+		  of the string.
+		ELSE
+		  Returns the character EndOfLine.
+		END
+*)
+	
+PROCEDURE LengthOfString(S: String): CARDINAL;
+	
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	Returns a cardinal value which corresponds to the
+		number of characters in the string S.
+*)
+	
+PROCEDURE MakeSubstring(S: String; StartPos, Length: CARDINAL;
+			VAR Substring: String);
+	
+(*
+	PRE:	S and Substring are strings that are ready for
+		processing.
+		1 <= StartPos <= LengthOfString(S).
+		Length + StartPos <= LengthOfString(S) + 1.
+	POST:	Substring is a sequence of characters taken from S
+		whose starting position in S is StartPos and whose
+		length is Length.
+*)
+					
+PROCEDURE EmptyString(S: String): BOOLEAN;
+	
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	IF LengthOfString(S) = 0
+		    THEN
+			RETURN TRUE;
+		    ELSE
+			RETURN FALSE
+		Returns a value of TRUE is string S is empty, otherwise
+		returns FALSE.
+*)
+
+PROCEDURE ReverseString(VAR S: String);
+	
+(*
+	PRE:	S is a string that is ready for processing.
+	POST:	The string S is reversed.  That is, if the string
+		contains n chars, then char 1 is swapped with char n,
+		char 2 with char (n-1) and so on.
+*)
+	
+PROCEDURE AlphabeticallyLess(S1, S2: String): BOOLEAN;
+	
+(*
+	PRE:	S1 & S2 are strings that are ready for processing.
+		S1 & S2 are strings that contain only alphabetic
+		characters.
+	POST:	Returns a value of TRUE if S1 occurs before S2
+		alphabetically.  If S1 = S2 or S1 occurs after S2
+		then the function returns a value of FALSE.
+*)
+	
+PROCEDURE EqualStrings(S1, S2: String): BOOLEAN;
+	
+(*
+	PRE:	S1 & S2 are strings that are ready for processing.
+		S1 & S2 are strings that contain only alphabetic
+		characters.
+	POST:	Returns TRUE if S1 has the same content, char for char,
+		as S2.  Otherwise, it returns FALSE.
+*)
+
+PROCEDURE StringsShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+	
+END MyStrings.
+	
+

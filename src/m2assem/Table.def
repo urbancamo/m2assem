@@ -1,0 +1,120 @@
+DEFINITION MODULE Table;
+
+(*
+	MODULE Table		Version 1.0	(c) 1989 Mark Wickens
+	
+	Created:	24-11-89
+	
+	This module implements a hash table. Each entry in the hash table
+	is a pointer to the head of a binary search tree. Thus any entry in the
+        hash table can contain any number of records.
+
+        The speed of the hash table in big 'O' notation approximates to one
+        when less than 90% of the entries in the hash table contain
+        only one record (the rest containing none). However, the speed even in
+        the worst scenario where every record hashes to one entry is only
+        log N, thanks to using binary search trees.
+
+        The one operation which hash tables are very slow at performing is an
+        ordered traversal. The NextInOrder procedure has a big 'O' speed of
+        N cubed.
+*)
+
+FROM TableExt	IMPORT	EntryType, SymbolStatus, TableType;
+FROM MyStrings	IMPORT	String;
+
+(* Table operations. *)
+
+PROCEDURE InitialiseTable;
+(*
+        PRE:    None.
+        POST:   The hash table is initialised to be empty and is subsequently
+                ready for processing.
+*)
+
+PROCEDURE IsRoom(): BOOLEAN;
+(*
+        PRE:    The hash table is ready for processing.
+        POST:   If there is room in the hash table then TRUE is returned.
+                The only case when this will ever be FALSE is if dynamic
+                allocation of memory fails.
+*)
+
+PROCEDURE IsIn(Key: String): BOOLEAN;
+(*
+        PRE:    The hash table is ready for processing.
+        POST:   Returns TRUE if an entry with key field Key already exists
+                in the table.
+*)
+
+PROCEDURE Retrieve(Key: String): TableType;
+(*
+        PRE:    The hash table is ready for processing.
+                An entry with key field Key exists in the table.
+        POST:   Returns the record with key field Key.
+*)
+
+PROCEDURE Delete(Key: String);
+(*
+        PRE:    The hash table is ready for processing.
+                An entry with key field Key exists in the table.
+        POST:   Post-Table = Pre-Table - entry with key field Key.
+*)
+
+PROCEDURE Insert(Entry: TableType);
+(*
+        PRE:    The hash table is ready for processing.
+                An entry with key field Entry.Key does not exist in the table.
+        POST:   Post-Table = Pre-Table + entry Entry.
+*)
+
+PROCEDURE Amend(VAR Entry: TableType);
+(*
+        PRE:    The hash table is ready for processing.
+                An entry with key field Key exists in the table.
+        POST:   Post-table = Pre-table - old entry Entry.Key + Entry.
+*)
+
+PROCEDURE Greater(Key: String): BOOLEAN;
+(*
+        PRE:    The hash table is ready for processing.
+        POST:   Returns TRUE if an entry with a key alphabetically greater
+                than Key exists.
+*)
+
+PROCEDURE NextInOrder(Key: String; VAR Entry: TableType);
+(*
+        PRE:    The hash table is ready for processing.
+                Greater(Key).
+        POST:   Returns the entry with next key in order from Key.
+*)
+
+PROCEDURE SizeOfTable(): CARDINAL;
+(*
+        PRE:    The hash table is ready for processing.
+        POST:   Returns the number of possible locations which can be hashed
+                to (the number of entries).
+*)
+
+PROCEDURE ElementsAtLocation(Location: CARDINAL): CARDINAL;
+(*
+        PRE:    The hash table is ready for processing.
+                0 < Location <= SizeOfTable()
+        POST:   Returns the number of records in the BST at entry number
+                Location in the hash table.
+*)
+
+
+PROCEDURE TableShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END Table.

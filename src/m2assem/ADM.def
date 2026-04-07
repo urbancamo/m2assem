@@ -1,0 +1,96 @@
+DEFINITION MODULE ADM;
+
+(*
+	Module: ADM		Version 1.0	(c)1990	Mark Wickens
+	
+	Created: 22/01/90
+	
+	This is the module in the meta-assembler that performs the assembler
+	specific operations.  This module defines assembler operation for the
+	Motorola MC680x0 series of processors (specifically including
+	instructions for the MC68000).  The instructions are as defined in
+	the proposed IEEE Assembly Language Standard Draft of 1979.
+*)
+
+FROM MyStrings	IMPORT	String;
+
+CONST
+  WORDLENGTH			= 16;
+  MAXINDICES			= 2;
+  MAXOPERANDS			= 2;
+  MAXWORDSPERINSTRUCTION	= 5;
+  MEMLOW			= 0;
+  MEMHIGH			= 1000 * 1024;
+  NOOFREGISTERS			= 17;
+
+TYPE
+  Word		= SET OF [0..WORDLENGTH - 1];
+  Instruction	= ARRAY [1..MAXWORDSPERINSTRUCTION] OF Word;
+  ValidAddressingModes	= (
+  				Dir,
+  				Abs,
+  				Rel,
+  				BPage,
+  				Ind,
+  				Imm,
+  				Index,
+  				Reg,
+  				AutoPreInc,
+  				AutoPostInc,
+  				AutoPreDec,
+  				AutoPostDec,
+  				IndPreIndex,
+  				IndPostIndex
+  			);
+  OperandElement	= RECORD
+  			    Prefix	: CHAR;
+  			    Argument	: String;
+  			    Indices	: ARRAY [1..MAXINDICES] OF String;
+  			    Postfix	: CHAR;
+  			    NoOfIndices	: CARDINAL
+  			  END;
+  			
+  DecodedLine		= RECORD
+  			    Label	: String;
+  			    Command	: String;
+  			    Modifier	: CHAR;
+  			    Operand	: ARRAY [1..MAXOPERANDS] OF
+  			    					OperandElement;
+  			    Comment	: String;
+  			    NoOfOperands: CARDINAL
+  			  END;
+
+VAR
+  ValidRegisters	: ARRAY [1..NOOFREGISTERS] OF String;
+
+PROCEDURE InsertOpcodesInTable;
+(*
+	PRE:	The table has been initialised.
+	POST:	The opdcodes specific to the assembler have been inserted in
+		the opcode/symbol table.
+*)
+
+PROCEDURE Assemble(DecInstr: DecodedLine; PassNo: CARDINAL;
+		   VAR AI: Instruction; VAR Length: CARDINAL);
+(*
+	PRE:	None.
+	POST:	The decoded instruction DecInstr is assembled if possible,
+		otherwise error messages are produced.  The assembled
+		instruction is returned in AI and its length in Length.  If
+		PassNo = 1 then the instruction is not assembled.
+*)
+
+PROCEDURE ADMShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END ADM.
+

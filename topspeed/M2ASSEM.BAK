@@ -1,0 +1,6 @@
+#system dos exe
+#model large jpi
+
+#compile adm,exceptions
+#link %prjname
+
