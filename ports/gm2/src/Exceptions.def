@@ -1,0 +1,58 @@
+DEFINITION MODULE Exceptions;
+
+(*
+	MODULE: Exceptions	Version 1.0	(c) 1989 Mark Wickens
+	
+	Created: 28-11-89
+	Updated: 04-01-90	Uses interface module.
+		
+	This module handles all exception processing for the meta-assembler.
+*)
+
+FROM MyStrings	IMPORT	String;
+
+TYPE
+  ExceptionLevel	= (Warning, Error, Fatal);
+  ExceptionType		= (Code, User, Environment, Internal);
+  StatusType		= (Normal, NoCode, NoList, NoOutput);
+
+PROCEDURE Raise(Type: ExceptionType; Level: ExceptionLevel;
+		Message: ARRAY OF CHAR);
+(* Message takes an open array of CHAR (rather than the project's `String`
+   type) as a workaround for a gm2 15.2 bug — passing a string literal to a
+   value parameter of type ARRAY [1..N] OF CHAR shifts the content by one
+   byte.  Open arrays sidestep the issue, and existing String callers still
+   pass cleanly. *)
+
+(*
+	PRE:	Message is ready for processing.
+	POST:	The exception is brought to the attention of the user, either
+		via the screen or listing file (depending on the Type).
+		Action taken depends on the Level:
+		Warning - Code and Listing generation is continued.
+		Error	- Code generation is terminated.
+		Fatal	- All files are close and the assembler exited.
+*)
+
+PROCEDURE ChangeStatus(NewStatus: StatusType);
+
+(*
+	PRE:	None.
+	POST:	The output status of the program is changed to NewStatus.
+*)
+
+PROCEDURE ProgramStatus(): StatusType;
+
+(*
+	PRE:	None.
+	POST:	The current output status of the assembler is returned.
+*)
+
+PROCEDURE Number(): CARDINAL;
+
+(*
+	PRE:	None.
+	POST:	Returns the number of exceptions raised since asssembly started.
+*)
+
+END Exceptions.

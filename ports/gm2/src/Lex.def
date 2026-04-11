@@ -1,0 +1,73 @@
+DEFINITION MODULE Lex;
+
+(*
+	MODULE: Lex		Version 1.0	(c) 1989 Mark Wickens
+	
+	Created: 03-12-89
+        Updated: 22-01-90	The procedure ScanOperand has been included
+        			as it is an assembler-inspecific operation.
+
+	This module converts the free format source code into a fixed format
+	assembler instruction, the layout of which conforms to the IEEE
+	proposed assembler language format, which is:
+	
+	[label:] comm [[pre] arg [(index[, index])] [post] [,...]] [;comment]
+	
+	where,
+	
+	label	a user defined symbol which can contain any alphanumeric
+		characters apart from ':' and spaces.  It must appear in the
+		first column of the source line.
+	
+	comm	command, an assembler opcode or directive containing
+		alphanumeric characters, but no spaces.
+	
+	pre	prefix, alphanumeric.
+	
+	arg	argument, which can be an expression, constant, or label.
+	
+	index	argument index, similar to argument in structure.
+	
+	post	postfix, alphanumeric.
+	
+	comment	may appear on its own in a source line but must start with a
+		semicolon.
+*)
+
+FROM MyStrings		IMPORT	String;
+FROM ADM		IMPORT	MAXINDICES, MAXOPERANDS, ValidAddressingModes,
+				DecodedLine, OperandElement;
+
+PROCEDURE ScanLine(Line: String; VAR Decoded: DecodedLine);
+(*
+	PRE:	None.
+	POST:	Input:	A free-format assembly language instruction.
+		Output:	A fixed-format assembly language instruction.
+	
+	This procedure performs the lexical scan of the source line.
+*)
+
+PROCEDURE ScanOperand(	OperandToScan: OperandElement;
+			VAR AddressingMode: ValidAddressingModes);
+(*
+	PRE:	OperandToScan has is part of a DecodedLine that has been
+		decoded.
+	POST:	The addressing mode of the operand is returned.
+		If the addressing mode is invalid an error is produced.
+*)
+
+(* Utility. *)
+PROCEDURE LexShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END Lex.
+

@@ -1,0 +1,57 @@
+DEFINITION MODULE Location;
+
+(*
+	MODULE: Location	Version 1.0	(c) 1989 Mark Wickens
+	
+	Created: 28-11-89
+	
+	Handles the location of the location counter relative to the start
+	of the source file.
+*)
+
+PROCEDURE ResetLocation;
+(*
+	PRE:	None.
+	POST:	The location counter is reset to MEMLOW.
+*)
+
+PROCEDURE SetLocation(NewLocation: LONGCARD);
+(*
+	PRE:	None.
+	POST:	IF NewLocation >= MEMLOW AND NewLocation <= MEMHIGH THEN
+		  The location counter is set to NewLocation
+		ELSE
+		  An error is produced.
+		END
+*)
+
+PROCEDURE CurrentLocation(): LONGCARD;
+(*
+	PRE:	ResetLocation has previously been called.
+	POST:	Returns the current location.
+*)
+
+PROCEDURE INCLocation(Increment: CARDINAL);
+(*
+	PRE:	ResetLocation has previously been called.
+	POST:	IF CurrentLocation() + Increment <= MEMHIGH THEN
+		  The current location is incremented by the amount Increment.
+		ELSE
+		  An error is produced.
+		END
+*)
+
+PROCEDURE LocationShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END Location.
+

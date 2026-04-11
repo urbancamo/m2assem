@@ -1,0 +1,181 @@
+DEFINITION MODULE Listing;
+
+(*
+	MODULE: Listing		Version 1.0	(c) 1989 Mark Wickens
+	
+	Created: 28-11-89
+	
+	Creates the listing file.
+*)
+
+FROM ADM	IMPORT	Instruction;
+FROM MyStrings	IMPORT	String;
+
+CONST
+  MINPAGELENGTH		= 3;
+  MAXPAGELENGTH		= 255;
+  MINLINELENGTH		= 132;
+  MAXLINELENGTH		= 255;
+  DEFAULTPAGELENGTH	= 60;
+  DEFAULTLINELENGTH	= 132;
+  MAXTITLELENGTH	= MINLINELENGTH;
+
+(* Constructors. *)
+PROCEDURE AddLine(Address: LONGCARD; MCode: Instruction; MCLength: CARDINAL;
+						SourceLine: String);
+(*
+	PRE:	The Listing File has been opened.
+	POST:	Post-Listing-File := Pre-Listing-File + Address + Hex
+		Representation of the Machine Code generated + Source Line
+		which generated Machine Code.
+*)
+
+PROCEDURE AddError(ErrorMessage: ARRAY OF CHAR);
+(* Open array parameter — see WriteAString in Interface.def for the gm2
+   bug this works around. *)
+
+(*
+        PRE:    The Listing File has been opened.
+        POST:   Post-Listing-File := Pre-Listing-File + ErrorMessage + NewLine
+*)
+
+PROCEDURE StartListing(Filename: String);
+(*
+	PRE:	None.
+	POST:	The Listing-File is opened.  If there was a listing file
+		previously created with the same name, it is overwritten after
+		a warning has been produced.
+*)
+
+PROCEDURE StopListing;
+(*
+	PRE:	Pre-Listing-File exists.
+	POST:	Post-Listing-File := Pre-Listing-File + Symbol-Table IF
+		Included + Assembly-Statistics
+		Post-Listing-File is closed and therefore Listing-File no
+		longer exists.
+*)
+	
+PROCEDURE SetPageLength(NewLength: CARDINAL);
+(*
+	PRE:	None.
+	POST:	Post-Listing-File will have pages NewLength lines long.
+*)
+
+PROCEDURE SetLineLength(NewLength: CARDINAL);
+(*
+	PRE:	None.
+	POST:	Post-Listing-File will have lines NewLength characters long.
+*)
+
+PROCEDURE INCPage;
+(*
+	PRE:	Pre-Listing-File exists.
+	POST:	Post-Listing-File := Pre-Listing-File with the last page
+		finished and a new page started.
+*)
+
+PROCEDURE INCLine;
+(*
+	PRE:	Pre-Listing-File exists.
+	POST:	Post-Listing-File := Pre-Listing-File with a blank line
+		inserted in the current position.
+*)
+
+PROCEDURE SetTitle(NewTitle: String);
+(*
+	PRE:	None.
+	POST:	Post-Listing-File := Pre-Listing-File with the Title on the
+		second line of the page set to TitleString.
+*)
+
+PROCEDURE PurgeError;
+(*
+        PRE:    None.
+        POST:   Post-Listing-File := Pre-Listing-File.  If an error is pending
+                it is removed from the listing file.
+*)
+
+PROCEDURE Address(Include: BOOLEAN);
+(*
+	PRE:	None.
+	POST:	IF Include THEN Addresses will be included in Listing-File.
+		ELSE Addresses will be omitted from the listing file.
+*)
+
+PROCEDURE MachineCode(Include: BOOLEAN);
+(*
+	PRE:	None.
+	POST:	IF Include THEN Hex Representation of Machine Code will be
+		included in the Listing-File.
+		ELSE M/C will not be included.
+*)
+
+PROCEDURE SymbolTable(Include: BOOLEAN);
+(*
+	PRE:	None.
+	POST:	IF Include THEN A Table of all the Symbols defined during
+		Assembly will be dumped at the end of the listing file
+		ELSE No symbols will be dumped.
+*)
+
+(* Predicates. *)
+PROCEDURE CurrentlyListing(): BOOLEAN;
+(*
+        PRE:    None.
+        POST:   IF Pre-Listing-File exists then RETURNs TRUE otherwise FALSE
+*)
+
+PROCEDURE CurrentSourceLine(): CARDINAL;
+(*
+        PRE:    A previous call to StartListing has been made.
+        POST:   Returns the current source line being assembled.
+*)
+
+PROCEDURE CurrentLine(): CARDINAL;
+(*
+	PRE:	Pre-Listing-File exists.
+	POST:	The Current Line Number in the Listing-File relative to the
+		top of the page is returned.
+*)
+
+PROCEDURE CurrentPage(): CARDINAL;
+(*
+	PRE:	Pre-Listing-File exists.
+	POST:	The Current Page Number in the Listing-File relative to the
+		first page is returned.
+*)
+
+PROCEDURE CurrentPageLength(): CARDINAL;
+(*
+	PRE:	None.
+	POST:	The Current-Page-Length is returned.
+*)
+
+PROCEDURE CurrentLineLength(): CARDINAL;
+(*
+	PRE:	None.
+	POST:	The Current-Line-Length is returned.
+*)
+
+PROCEDURE MCAssemblyRate(): LONGINT;
+(*
+        PRE:    Previous calls to StartListing and StopListing have been made.
+        POST:   The LONGINT returned contains the assembly rate in lines/min
+                of the program assembled.
+*)
+
+PROCEDURE ListingShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END Listing.
+

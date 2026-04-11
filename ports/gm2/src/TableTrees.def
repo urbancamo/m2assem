@@ -1,0 +1,104 @@
+DEFINITION MODULE TableTrees;
+
+(*
+	MODULE TableTrees	Version 1.0	(c) 1989 Mark Wickens
+	
+	Created:	02-12-89
+
+	This library module implements a binary search tree.
+	Each node of the tree data of type TableType, and the tree does not
+	contain duplications.  It can handle any number of trees, the type of
+	which is exported opaquely to user programs.
+*)
+
+FROM TableExt	IMPORT	TableType;
+FROM MyStrings	IMPORT	String;
+
+(*
+	The type BST is used by user programs to define the head of a tree.
+*)
+TYPE
+  BST;	(*	Opaque export.	*)
+	
+PROCEDURE InitialiseATree(VAR Tree: BST);
+(*
+	Pre-conditions:		None.
+	Post-conditions:	The BST Tree is empty and ready for processing.
+*)
+
+PROCEDURE IsRoomInTree(): BOOLEAN;
+(*
+        PRE:    The BST is ready for processing.
+        POST:   Returns TRUE if there is room for another entry.
+*)
+
+PROCEDURE InsertInTree(VAR Tree: BST; DataItem: TableType);
+(*
+	Pre-conditions:		The BST Tree is ready for processing and
+				Key is not already in the BST Tree.
+	Post-conditions:	Key is inserted in the correct position
+				in the tree.
+*)
+
+PROCEDURE IsInTree(Tree: BST; Key: String): BOOLEAN;
+(*
+	Pre-conditions:		The BST Tree is ready for processing.
+	Post-conditions:	Post-Tree = Pre-Tree.
+				If Key is in Tree then returns TRUE else
+				returns FALSE.
+*)
+
+PROCEDURE DeleteFromTree(VAR Tree: BST; Key: String);
+(*
+	Pre-conditions:		The BST Tree is ready for processing and
+				Key is in the tree.
+	Post-conditions:	Post-Tree = Pre-Tree except the record
+				Key no longer appears in the BST Tree.
+*)
+
+PROCEDURE ElementsInTree(Tree: BST): CARDINAL;
+(*
+	Pre-conditions:		The BST Tree is ready for processing.
+	Post-conditions:	Post-Tree = Pre-Tree.
+				The value returned is the number of items in
+				the BST Tree.
+*)
+
+PROCEDURE RetrieveFromTree(Tree: BST; Key: String;
+						 VAR DataItem: TableType);
+(*
+	Pre-conditions:		The BST Tree is ready for processing, and Key
+				exists.
+	Post-conditions:	Post-Tree = Pre-Tree.
+				Key contains the data in the BST Tree
+				stored under the entry Key.
+*)
+
+PROCEDURE NextInOrderInTree(Tree: BST; VAR CurrentNext: String;
+						Key: String);
+(*
+	Pre-conditions:		The BST Tree is ready for processing.
+				If the first node in the tree is being
+				searched for, Key = FirstKeyInOrder &
+					  CurrentNext = FirstKeyInOrder.
+	Post-conditions:	Post-Tree = Pre-Tree.
+				CurrentNext will contain the next highest key
+				value in the tree greater than Key, if one
+				exist, otherwise CurrentNext is unchanged.
+*)
+
+PROCEDURE TableTreesShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END TableTrees.
+
+

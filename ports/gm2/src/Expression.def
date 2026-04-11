@@ -1,0 +1,66 @@
+DEFINITION MODULE Expression;
+
+(*
+	MODULE: Expression	Version 1.0	(c) 1989 Mark Wickens
+	
+        Created: 03-01-89
+	
+	Evaluates an expression according to the symbols in the symbol table
+	and constants defined.
+*)
+
+FROM MyStrings	IMPORT	String;
+FROM TableExt	IMPORT	SymbolStatus;
+
+TYPE
+  BaseType	= (Bin, Oct, Dec, Hex);
+
+PROCEDURE Evaluate(Input: String; VAR Result: LONGINT;
+						VAR ResultType: SymbolStatus);
+
+(*
+	PRE:	None.
+	POST:	If Input is a valid expression conforming to the syntax
+		described in the IEEE Assembly Language Draft Proposal it is
+		evaluated.  Symbols which appear in the expression are
+		retrieved from the assembler table.  Constants not proceeded
+		by a base are assumed to be in the default base.
+*)
+
+PROCEDURE CheckRegister(Operand: String; VAR Register: String): BOOLEAN;
+(*
+	PRE:	None.
+	POST:	If the Operand is a register it's capitilized form is returned
+		in register and the procedure returns TRUE.  If the operand
+		is not a register, the parameter Register will be empty and
+		the procedure returns false.
+*)
+
+PROCEDURE CurrentBase(): BaseType;
+
+(*
+	PRE:	None.
+	POST:	The current default base is returned.
+*)
+
+PROCEDURE ChangeBase(NewBase: BaseType);
+
+(*
+	PRE:	None.
+	POST:	The current default base is changed to NewBase.
+*)
+
+PROCEDURE ExpressionShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END Expression.
+

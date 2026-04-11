@@ -1,0 +1,106 @@
+DEFINITION MODULE TableExt;
+
+(*
+	Module: TableExt	Version 1.0	(c) 1989 Mark Wickens
+	
+	Created: 24-12-89
+	
+	This module serves two purposes.
+	
+	(1).  It contains all the data specifics so that any changes to the
+	record type stored within the table are contained in one module only.
+	
+	(2).  It extends the basic table operations to allow specific fields
+	of a table record to be specified as parameters in an insert procedure,
+	allowing the initial set-up of the table to be performed without
+	reference to variables.
+*)
+
+FROM ADM	IMPORT	Word;
+FROM MyStrings	IMPORT	String;
+FROM Interface	IMPORT	FileHandle;
+
+TYPE
+  EntryType	= (Command, Symbol);
+  SymbolStatus	= (Absolute, Relative, Register);
+
+  TableType = RECORD
+  		Key: String;
+  		CASE Kind: EntryType OF
+  		  Symbol:	Value: LONGINT;
+  		          	Status: SymbolStatus
+  		  |
+  		  Command: 	Type: CARDINAL;
+  		  	        Mask: Word;
+  		END
+  	    END;
+
+
+(* Extended Operations. *)
+
+PROCEDURE InsertCommand(Key: String; Mask: Word; Type: CARDINAL);
+(*
+        PRE:    Key is a string that is ready for processing.
+        POST:   Enables the insertion of a record into the hash table
+                which is of the type Command by specifying all the relevant
+                fields of the record TableType.
+*)
+
+PROCEDURE InsertSymbol(Key: String; Value: LONGINT; Status: SymbolStatus);
+(*
+        PRE:    Key is a string that is ready for processing.
+        POST:   Enables the insertion of a record into the hash table
+                which is of type Symbol by specifying all the relevant
+                fields of the record TableType.
+*)
+
+(* I/O Operations. *)
+
+PROCEDURE GetRec(Input: FileHandle; KeyToInput: String; VAR NewRec: TableType);
+(*
+        PRE:    Input is a valid FileHandle.
+                KeyToInput is a string that is ready for processing.
+        POST:   If a valid record of type TableType has been put in the file
+                Input it is retrieved and placed in NewRec.
+*)
+
+PROCEDURE PutRec(Output: FileHandle; Record: TableType);
+(*
+        PRE:    Output is a valid FileHandle.
+        POST:   The record Record is written to the file Output using an
+                internal format. This record can be read by the procedure
+                GetRec.
+*)
+
+(* Conversion Operations. *)
+
+PROCEDURE ConvertTo(Mask: String): Word;
+(*
+        PRE:    Mask is a string that is ready for processing.
+                LengthOfString(Mask) = WORDLENGTH (from ADM).
+        POST:   A type conversion is made from the input string to a valid
+                Word which is returned. The string mask must consist of a
+                sequence of '1' characters and '0' characters which represents
+                the corresponding bits in the word Word.
+*)
+
+PROCEDURE ConvertFrom(Mask: Word; VAR ConvString: String);
+(*
+        PRE:    None.
+        POST:   ConvString contains a string of '1' characters and '0'
+                characters corresponding to the bit pattern of the word Mask.
+*)
+
+PROCEDURE TableExtShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END TableExt.

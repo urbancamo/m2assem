@@ -1,0 +1,216 @@
+DEFINITION MODULE Interface;
+
+(*
+	MODULE:	Interface	Version 1.0	(c) 1990 Mark Wickens
+
+	Created: 01-01-90
+	Ported to GNU Modula-2: 2026
+
+	This module provides the interface for the meta-assembler to the
+	outside world.
+*)
+
+FROM MyStrings	IMPORT	String;
+IMPORT FIO;
+
+TYPE
+  File		= FIO.File;
+  FileHandle	= FIO.File;
+
+CONST
+  LongestFileName	= 255;
+  NULLFile		= MAX(CARDINAL);
+
+VAR
+  StdIn		: FileHandle;
+  StdOut	: FileHandle;
+  ErrOut	: FileHandle;
+
+
+(* File Operations. *)
+
+PROCEDURE FileExists(FileName: String): BOOLEAN;
+
+(*
+        PRE:    None.
+        POST:   If a file with FileName exists, RETURNs TRUE otherwise FALSE
+*)
+
+PROCEDURE CreateAFile(FileName: String): FileHandle;
+
+(*
+	PRE:	LengthOfString(FileName) <= LongestFileName.
+	POST:	The file FileName is created and F becomes a valid FileHandle
+	        If a file with filename FileName already exists a warning
+		exception is raised and the filehandle NULLFile is returned.
+*)
+
+PROCEDURE OpenAFile(FileName: String): FileHandle;
+
+(*
+	PRE:	LengthOfString(FileName) <= LongestFileName.
+	POST:	The existing file FileName is opened and its valid FileHandle
+		is returned.  If the file does not exist a warning exception is
+		raised and NULLFile is returned.
+*)
+
+PROCEDURE CloseAFile(F: FileHandle);
+
+(*
+	PRE:	F is a valid FileHandle.
+	POST:	The file F is closed.  If an error occurs while
+		closing the file, an exception is raised.
+*)
+
+PROCEDURE DeleteAFile(Filename: String);
+
+(*
+        PRE:    None.
+        POST:   IF FileExists(Filename) THEN it is deleted.
+*)
+
+PROCEDURE EndOfFile(): BOOLEAN;
+
+(*
+	PRE:	None.
+	POST:	Returns TRUE if the last read operation encountered the end
+		of file.
+*)
+
+PROCEDURE ReadAString(F: FileHandle; VAR S: String);
+
+(*
+	PRE:	S is a string that is ready for processing.
+	        F is a valid FileHandle.
+	POST:	S is a string of characters which have been read
+		via the current file F.
+*)
+
+PROCEDURE WriteAString(F: FileHandle; S: ARRAY OF CHAR);
+(* The S parameter takes an open ARRAY OF CHAR rather than the project's
+   `String` type because gm2 mishandles literal-to-fixed-array coercion for
+   ARRAY [1..N] OF CHAR value parameters — passing a string literal directly
+   through such a parameter shifts the content by one byte.  Open arrays
+   sidestep the bug, and any String variable still passes cleanly. *)
+
+(*
+	PRE:	S is a string that is ready for processing.
+	        F is a valid FileHandle.
+	POST:	The string S is written to the file F.
+*)
+
+PROCEDURE ReadAChar(F: FileHandle): CHAR;
+
+(*
+	PRE:	F is a valid FileHandle.
+	POST:	A single character is read from the input and returned.
+*)
+
+PROCEDURE WriteAChar(F: FileHandle; C: CHAR);
+
+(*
+	PRE:	F is a valid FileHandle.
+	POST:	A single character is written to the file F.
+*)
+
+PROCEDURE NextPrinting(F: FileHandle): CHAR;
+
+(*
+	PRE:	F is a valid FileHandle.
+	POST:	The next character which isn't a CR or NewLineCh is read from
+		the file F.
+*)
+
+PROCEDURE WriteALine(F: FileHandle);
+
+(*
+	PRE:	F is a valid FileHandle.
+	POST:	A newline and carraige return is sent to the file F.
+*)
+
+PROCEDURE ReadACard(F: FileHandle): CARDINAL;
+
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   A valid cardinal number is read from file F.
+*)
+
+PROCEDURE WriteACard(F: FileHandle; C: CARDINAL; Length: CARDINAL);
+
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   The cardinal number C is written to file F, padded out to
+                Length characters long with spaces.
+*)
+
+PROCEDURE ReadALongInt(F: FileHandle): LONGINT;
+
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   A long integer is read from the file F and returned.
+*)
+
+PROCEDURE WriteALongInt(F: FileHandle; L: LONGINT; Length: CARDINAL);
+
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   The long integer L is written to file F, padded out to
+                Length characters long with spaces.
+*)
+
+PROCEDURE ReadALongHex(F: FileHandle): LONGCARD;
+
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   A long cardinal is read from file F in hexadecimal format and
+                returned.
+*)
+
+PROCEDURE WriteALongHex(F: FileHandle; L: LONGCARD; Length: CARDINAL);
+
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   A long cardinal is written to file F in hexadecimal format and
+                padded out to Length characters long.
+*)
+
+
+(* Command Line Operations. *)
+
+PROCEDURE ReadArgument(Number: CARDINAL; VAR Parameter: String);
+
+(*
+	PRE:	Number >= 1 AND Number <= NumberOfArguments()
+		Parameter is ready for processing.
+	POST:	Parameter contains the string of printable characters in the
+		Number'th command line argument.
+*)
+
+PROCEDURE NumberOfArguments(): CARDINAL;
+
+(*
+	PRE:	None.
+	POST:	The number of command line arguments is returned.
+*)
+
+PROCEDURE GetTime(VAR Hours, Minutes, Seconds: CARDINAL);
+
+(*
+	PRE: 	None.
+	POST:   The current time is returned.
+*)
+
+PROCEDURE GetDate(VAR Year, Month, Day: CARDINAL);
+
+(*
+	PRE:	None.
+	POST:	The current date is returned.
+*)
+
+PROCEDURE InterfaceShutdown;
+(*
+        PRE:    None.
+        POST:   Any resources held by the module are released.
+*)
+
+END Interface.

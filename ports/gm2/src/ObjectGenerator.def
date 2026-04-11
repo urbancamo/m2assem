@@ -1,0 +1,68 @@
+DEFINITION MODULE ObjectGenerator;
+
+(*
+	MODULE: ObjectGenerator	Version 1.0	(c) 1989 Mark Wickens
+	
+	Created: 28-11-89
+	
+	Produces the object file in a format determined by calling module.
+*)
+
+FROM MyStrings		IMPORT	String;
+FROM ADM                IMPORT  Instruction;
+
+TYPE
+  ObjectFormat = (Generic, Motorola);
+
+(* Constructors. *)
+PROCEDURE StartObject(Filename: String);
+(*
+	PRE:	SetFormat is called.
+	POST:	The file Filename is created and subsequently used to output
+		the object code into.
+*)
+
+PROCEDURE StopObject;
+(*
+	PRE:	An object file has previously been opened with StartObject.
+	POST:	The file being used for object code is closed.
+*)
+
+PROCEDURE SetFormat(NewType: ObjectFormat);
+(*
+	PRE:	Any previous calls to StartObject have been followed with a
+		call to StopObject (i.e., there isn't an object code file
+		currently open.
+	POST:	The object code produced when StartObject is called will
+		be of NewType format.
+*)
+
+PROCEDURE AddCode(Address: LONGCARD; MCCode: Instruction; MCLength: CARDINAL);
+(*
+	PRE:	StartObject has been called and not followed by StopObject
+		(i.e., the object code file is open).
+	POST:	The object code is added to the object file in the format
+		specified by SetFormat.
+*)
+
+PROCEDURE ObjectOutput(Switch: BOOLEAN);
+(*
+        PRE:    StartObject has not been called.
+        POST:   When StartObject is called, it will have no effect if Switch
+                was set to FALSE (Default is TRUE)
+*)
+
+PROCEDURE ObjectGeneratorShutdown;
+(*
+        PRE:    None.
+        POST:   The following actions are taken:
+                1. Any memory allocated by the module is returned to the
+                   system.
+                2. Any files opened by the module are closed, flushing any
+                   buffers which still contain data.
+                3. Any other influence which the module might have on the
+                   system environment is reduced to a minimum.
+*)
+
+END ObjectGenerator.
+
