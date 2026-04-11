@@ -9,10 +9,18 @@ DEFINITION MODULE PseudoOps;
         i.e., all the assembly language-independent pseudo operations.
 *)
 
-FROM ADM        IMPORT  DecodedLine;
+FROM ADM        IMPORT  DecodedLine, Instruction;
 
 PROCEDURE AssemblePseudoOp(DecInstr: DecodedLine; PassNo, Type: CARDINAL;
-                           VAR Length: CARDINAL);
+                           VAR AI: Instruction; VAR Length: CARDINAL);
+(*
+        PRE:    None.
+        POST:   The pseudo-op identified by Type is assembled.  For code-
+                emitting pseudo-ops (e.g. DATA), the resulting words are
+                written into AI and Length is set to the number of words.
+                The caller is responsible for emitting AI via AddCode —
+                pseudo-ops no longer double-write.
+*)
 
 PROCEDURE PseudoOpsShutdown;
 (*

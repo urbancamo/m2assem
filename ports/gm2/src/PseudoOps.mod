@@ -24,9 +24,14 @@ FROM MyStrings            IMPORT  MakeSubstring, LengthOfString;
 FROM ObjectGenerator    IMPORT  ObjectOutput, AddCode;
 
 PROCEDURE AssemblePseudoOp(DecInstr: DecodedLine; PassNo, Type: CARDINAL;
-                           VAR Length: CARDINAL);
+                           VAR AI: Instruction; VAR Length: CARDINAL);
 (*
-        Performs the appropriate action on the peudo-op found.
+        Performs the appropriate action on the peudo-op found.  For
+        code-emitting pseudo-ops (DATA), the resulting words are written
+        into AI and Length is set to the number of words. The caller's
+        AddCode does the actual emission — this procedure no longer
+        writes to the object file directly (the 1990 code did, causing
+        a double-emit with the outer Assemble loop).
 *)
 
 TYPE
@@ -148,39 +153,30 @@ CONST
   VAR
     DATA: LONGINT;
     DATAType: SymbolStatus;
-    Data: Instruction;
-    Counter: CARDINAL;
 
   BEGIN
     Length := 0;
     IF PassNo = 2 THEN
       IF DecInstr.NoOfOperands = 1 THEN
         IF DecInstr.Operand[1].NoOfIndices = 0 THEN
-          IF PassNo = 2 THEN
-            Evaluate(DecInstr.Operand[1].Argument, DATA, DATAType);
-            FOR Counter := 1 TO 5 DO
-              Data[Counter] := Word{}
-            END
-          END;
+          Evaluate(DecInstr.Operand[1].Argument, DATA, DATAType);
+          (* Length below is counted in WORDS (16-bit units), matching
+             the rest of the assembler's location-counter convention.
+             The original 1990 code expressed Length in bytes here and
+             wrote the data via its own AddCode call to a local buffer,
+             so DATA.W emitted two zero words and double-wrote them.
+             Both fixed: we now write into the shared AI and let the
+             outer Assemble loop call AddCode. *)
           CASE DecInstr.Modifier OF
             'B': Length := 1;
-                 IF PassNo = 2 THEN
-                   Data[1] := LongIntToWord(DATA);
-                   AddCode(CurrentLocation(), Data, Length)
-                 END
+                 AI[1] := LongIntToWord(DATA)
           |
-            'W': Length := 2;
-                 IF PassNo = 2 THEN
-                   Data[1] := LongIntToWord(DATA);
-                   AddCode(CurrentLocation(), Data, Length)
-                 END
+            'W': Length := 1;
+                 AI[1] := LongIntToWord(DATA)
           |
-            'L': Length := 4;
-                 IF PassNo = 2 THEN
-                   (*MSW Data[1] := Word(INTEGER(DATA >> 16));*)
-                   Data[2] := LongIntToWord(DATA);
-                   AddCode(CurrentLocation(), Data, Length)
-                 END
+            'L': Length := 2;
+                 AI[1] := LongIntToWord(DATA DIV 65536);   (* high word *)
+                 AI[2] := LongIntToWord(DATA)              (* low  word *)
           END
         ELSE
           Raise(Code, Error, IndicesCountError)

@@ -150,6 +150,7 @@ PROCEDURE Assemble(DecInstr: DecodedLine; PassNo: CARDINAL;
 
 VAR
   CommandEntry	: TableType;
+  ClearIdx	: CARDINAL;
 
 
   PROCEDURE CalcEA	(
@@ -1385,6 +1386,16 @@ VAR
 
 
 BEGIN
+  (* Always reset Length and AI at entry — the original 1990 code left
+     them uninitialised when the line carried no command (blank line or
+     label-only), which caused the caller's copy to retain values from
+     the previous call and thereby re-emit the previous instruction's
+     bytes on every blank line. gm2 surfaces this via its "attempting
+     to access Length before it has been initialised" warning. *)
+  Length := 0;
+  FOR ClearIdx := 1 TO MAXWORDSPERINSTRUCTION DO
+    AI[ClearIdx] := Word{}
+  END;
   IF PassNo = 1 THEN
     IF NOT EmptyString(DecInstr.Label) THEN
       IF NOT(IsIn(DecInstr.Label)) THEN
@@ -1426,7 +1437,7 @@ BEGIN
         25:	Length :=  Type25()	|
         26:	Length :=  Type26()
       ELSE
-        AssemblePseudoOp(DecInstr, PassNo, CommandEntry.Type, Length)
+        AssemblePseudoOp(DecInstr, PassNo, CommandEntry.Type, AI, Length)
       END
     ELSE
       Raise(Code, Error, CommandError)

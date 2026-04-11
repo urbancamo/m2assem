@@ -12,7 +12,7 @@ Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
    9       3E9  D941                      LABEL3: ADDC .D1,.D4
   10       3EA  EB8C                      LABEL2: SHL.L #5,.D4
   11       3EB  4E4A                      LABEL1: BRK #10
-  12       3EC  4E4A                      
+  12       3EC                            
 
 
 Symbol Table Dump: 

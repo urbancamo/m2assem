@@ -1,0 +1,78 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   bubble.asm -- bubble sort of 5 16-bit words
+   3         0                            ;
+   4         0                            ;   Exercises: immediate, register direct, indirect, indirect with
+   5         0                            ;   displacement, label expressions, EQU, BASE, forward and backward
+   6         0                            ;   branches, DATA and BRK.
+   7         0                            ;
+   8         0                            ;   This is the IEEE Proposed Assembly Language Standard draft (1979)
+   9         0                            ;   form of 68000 assembly — see the PDF reports under doc/pdf/ for the
+  10         0                            ;   IEEE-to-Motorola mapping.
+  11         0                            ;
+  12         0                            ;   Labels are "Relative" symbols in m2assem and can't be used as
+  13         0                            ;   immediate operands (the assembler's Evaluate rejects any operand
+  14         0                            ;   whose type isn't Absolute for #imm forms).  So the array base
+  15         0                            ;   address is declared as an absolute EQU and the data is placed
+  16         0                            ;   there via a second ORG.
+  17         0                            ;
+  18         0                            
+  19         0                                    OBJECT  1
+  20         0                                    SYMBOL  1
+  21         0                                    BASE    D'10                    ; decimal throughout
+  22         0                            
+  23       3E8                                    ORG     1000                    ; code lives at 1000
+  24       3E8                            
+  25       3E8                            N       EQU     5                       ; array length
+  26       3E8                            ARRLOC  EQU     2000                    ; array sits at absolute 2000
+  27       3E8                            
+  28       3E8  207C 0000 07D0            Start:  LD.L    #ARRLOC,.A0             ; .A0 <- array base
+  29       3EB  3E3C 0004                         LD.W    #N-1,.D7                ; .D7 =  outer counter
+  30       3ED                            
+  31       3ED  2248                      Outer:  MOV.L   .A0,.A1                 ; .A1 <- reset inner pointer
+  32       3EE  3C07                              MOV.W   .D7,.D6                 ; .D6 =  inner counter
+  33       3EF                            
+  34       3EF  3011                      Inner:  MOV.W   @.A1,.D0                ; .D0 <- a[j]
+  35       3F0  3229 0002                         MOV.W   @.A1(2),.D1             ; .D1 <- a[j+1]
+  36       3F2  B340                              CMP.W   .D1,.D0                 ; compare a[j] vs a[j+1]
+  37       3F3  6F00 0003                         BLE     NoSwap                  ; skip if already ordered
+  38       3F5  3281                              MOV.W   .D1,@.A1                ; swap: a[j]   <- a[j+1]
+  39       3F6  3340 0002                         MOV.W   .D0,@.A1(2)             ;       a[j+1] <- saved a[j]
+  40       3F8                            
+  41       3F8  D3FC 0000 0002            NoSwap: ADD.L   #2,.A1                  ; advance one word
+  42       3FB  9C7C 0001                         SUB.W   #1,.D6                  ; inner--
+  43       3FD  6C00 FFF0                         BGE     Inner                   ; loop while >= 0
+  44       3FF                            
+  45       3FF  9E7C 0001                         SUB.W   #1,.D7                  ; outer--
+  46       401  6C00 FFEA                         BGE     Outer                   ; loop while >= 0
+  47       403                            
+  48       403  4E40                              BRK     #0                      ; halt
+  49       404                            
+  50       7D0                                    ORG     ARRLOC                  ; data lives at 2000
+  51       7D0                            
+  52       7D0  0005                              DATA.W  5
+  53       7D1  0003                              DATA.W  3
+  54       7D2  0008                              DATA.W  8
+  55       7D3  0001                              DATA.W  1
+  56       7D4  0009                              DATA.W  9
+  57       7D5                            
+Page:    2    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+  58       7D5                                    END
+
+
+Symbol Table Dump: 
+
+    2000  Abs  ARRLOC  
+       5  Abs  N  
+    1016  Rel  NoSwap  
+    1005  Rel  Outer  
+    1000  Rel  Start  
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+
