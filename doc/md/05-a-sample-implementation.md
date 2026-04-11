@@ -6,7 +6,10 @@ This section of the report details the design and implementation of a sample met
 
 The problem which, as defined at the start of the project, was 'to develop a meta-assembler with the following properties:
 
-* Portable. * Easy to use. * Non-restrictive. * General.'
+- Portable.
+- Easy to use.
+- Non-restrictive.
+- General.'
 
 For a more detailed description of these properties refer to section 4.2.
 
@@ -31,11 +34,13 @@ There would be little point in repeating the information in section 4. The main 
 
 One of the major decisions which must be taken when selecting a method of solving the meta-assembler problem is what form the assembler description/specification should take. There have been two possibilities suggested:
 
-1. Tables. The assembler description takes the form of one or more tables. 2. Languages. The assembler description takes the form of a program in a language which may be either macro- based or high level language-based.
+1. Tables. The assembler description takes the form of one or more tables.
+2. Languages. The assembler description takes the form of a program in a language which may be either macro- based or high level language-based.
 
 When looking at these two choices conceptually they can be summarised independently of the physical form used to represent them.
 
-1. Data-driven. 2. Algorithm-driven.
+1. Data-driven.
+2. Algorithm-driven.
 
 Both of these possibilities have their advantages and disadvantages. The data-driven approach is simpler and quicker to implement but is not very flexible while the algorithmic approach is very flexible but more complicated to implement. There is, however, a third choice which combines the benefits of both approaches while largely eliminating their weaknesses. This approach is 3. Data and Algorithm-Driven.
 
@@ -63,7 +68,9 @@ Once the outline design had been chosen, the choice of which language to program
 
 A number of factors affected the decision of which programming language to use when writing the sample implementation. These were (in order of priority):
 
-1. A language which was either familiar or easy to learn. 2. Available on a large range of computers (microcomputer development systems upwards) and be portable in nature. 3. Suitable for programming a large software project. Provision for decomposing a problem into separate, manageable pieces.
+1. A language which was either familiar or easy to learn.
+2. Available on a large range of computers (microcomputer development systems upwards) and be portable in nature.
+3. Suitable for programming a large software project. Provision for decomposing a problem into separate, manageable pieces.
 
 ```
      ALFA:       MOV          @BETA+1(R3),R2+
@@ -82,7 +89,11 @@ A number of factors affected the decision of which programming language to use w
 
 Figure 21. Examples of predefined function evaluations (assuming BETA has not yet been defined).
 
-4. Support in some way for the principles of Object Oriented Software Construction. 5. Facilities for low-level, machine-oriented manipulations. 6. Fast enough to produce a usable product. 7. Good development environment with extensive debugging facilities. 8. Be available on the computer which is to be used for the implementation.
+4. Support in some way for the principles of Object Oriented Software Construction.
+5. Facilities for low-level, machine-oriented manipulations.
+6. Fast enough to produce a usable product.
+7. Good development environment with extensive debugging facilities.
+8. Be available on the computer which is to be used for the implementation.
 
 ```
                                               Cross-assembler
@@ -115,13 +126,18 @@ Figure 21. Examples of predefined function evaluations (assuming BETA has not ye
 
 The languages which were considered against this criteria were:
 
-1. C. 2. C++. 3. Smalltalk V. 4. Modula-2. 5. Pascal.
+1. C.
+2. C++.
+3. Smalltalk V.
+4. Modula-2.
+5. Pascal.
 
 All of these languages are available for the IBM XT computer which was to be used. The language which was chosen was Modula-2 because it is the best at meeting all the requirements specified. C was ruled out because it does not have very good facilities for large program structuring, has no Object Oriented Programming (OOP) facilities and was not very familiar. C++ (an OOP extension of C) was ruled out because it is even more difficult to learn than C. Smalltalk V, although having an excellent development environment and providing good support for OOP, does not produce code which is practical (in terms of speed and size) for this sort of application. Pascal was ruled out because it provides no facilities for OOP or large program structuring. Modula-2 gave the following answers to the selection criteria:
 
-1. Modula-2 was a familiar language as it was the programming language chosen for the 'Programming and Programming Design' course in year 2 and for the 'Computer Systems' course in year 3. 2. Modula-2 development systems are available for virtually all well known computers, and it is small enough to be used on microcomputer development systems.
+1. Modula-2 was a familiar language as it was the programming language chosen for the 'Programming and Programming Design' course in year 2 and for the 'Computer Systems' course in year 3.
+2. Modula-2 development systems are available for virtually all well known computers, and it is small enough to be used on microcomputer development systems.
 
-Interpreter                                                            Analyser Procedure name Procedures                                                       Syntax analyser table Syntactic Intr. Information Function on the Procedures                                                           current line intermediate code                         Semantic Intr. Global Function information symbol table Data area: stack                     Define defloc                   Semantic analyser Figure 23. Information flow within XASM 3. Very good facilities are provided for decomposing large programs in manageable chunks via the 'MODULE' structure. 4. Although support for OOP in Modula-2 is limited, an OOP approach to the design process maps well onto implementations. 5. Good low-level facilities are provided via the bitset type and associated set operations. 6. Recent benchmarks place Modula-2 compilers at the top in terms of generated code efficiency. 7. The implementation of Modula-2 chosen, JPI Topspeed Modula-2, has an excellent integrated environment with extensive debugging facilities. 8. JPI Topspeed Modula-2 is available for the complete range of IBM-compatible computers.
+Interpreter Analyser Procedure name Procedures Syntax analyser table Syntactic Intr. Information Function on the Procedures current line intermediate code Semantic Intr. Global Function information symbol table Data area: stack Define defloc Semantic analyser Figure 23. Information flow within XASM 3. Very good facilities are provided for decomposing large programs in manageable chunks via the 'MODULE' structure. 4. Although support for OOP in Modula-2 is limited, an OOP approach to the design process maps well onto implementations. 5. Good low-level facilities are provided via the bitset type and associated set operations. 6. Recent benchmarks place Modula-2 compilers at the top in terms of generated code efficiency. 7. The implementation of Modula-2 chosen, JPI Topspeed Modula-2, has an excellent integrated environment with extensive debugging facilities. 8. JPI Topspeed Modula-2 is available for the complete range of IBM-compatible computers.
 
 ## 5.3. System Design
 
@@ -131,7 +147,16 @@ This phase of the software life cycle is concerned with the overall structure of
 
 A useful decomposition of a traditional two-pass assembler into a number of modules is given by Gorsline in his book 'Assembly and Assemblers'1. The module titles are:
 
-1. Input/output module. 2. Decoder from free-format module (lexical scanner). 3. Table entry/search module. 4. Location counter adjustment module. 5. Error handler module. 6. Assembler directive processor module. 7. Machine-code generator module. 8. Expression evaluation module. 9. Listing module. 10. Coordination (executive) module.
+1. Input/output module.
+2. Decoder from free-format module (lexical scanner).
+3. Table entry/search module.
+4. Location counter adjustment module.
+5. Error handler module.
+6. Assembler directive processor module.
+7. Machine-code generator module.
+8. Expression evaluation module.
+9. Listing module.
+10. Coordination (executive) module.
 
 The next task is to decide which of these modules can be assembler-independent. Trade-offs between generality and ease-of-use/ease-of-implementation will have to be made.
 
@@ -199,11 +224,20 @@ This module is therefore split into two separate modules:
 
 To summarise then, the set of main modules which make up the sample implementation are:
 
-1. ADM - Assembler definition module. 2. Exceptions - Error handler module. 3. Expression - Expression evaluator module. 4. Interface - Input/output module. 5. Lex - Free format decoder module. 6. Listing - Listing file generator module. 7. ObjectGenerator - Object code file generator module. 8. PseudoOps - Assembler directive processor module. 9. Table - Table entry/search module. 10. M2Assem - Coordination (executive) module.
+1. ADM - Assembler definition module.
+2. Exceptions - Error handler module.
+3. Expression - Expression evaluator module.
+4. Interface - Input/output module.
+5. Lex - Free format decoder module.
+6. Listing - Listing file generator module.
+7. ObjectGenerator - Object code file generator module.
+8. PseudoOps - Assembler directive processor module.
+9. Table - Table entry/search module.
+10. M2Assem - Coordination (executive) module.
 
 ### 5.3.2. A General Model for Assembly Languages
 
-As the decision had been taken that the lexical scanner module should be assembler-independent, a general model for assembly languages had to be developed as a specification of the syntax of any source language which could assembler                        assembly lang.                          assembler specification1                      source file                          specification2 YACC                               lexical                                LEX (UNIX tool)                           analyser                           (UNIX tool)
+As the decision had been taken that the lexical scanner module should be assembler-independent, a general model for assembly languages had to be developed as a specification of the syntax of any source language which could assembler assembly lang. assembler specification1 source file specification2 YACC lexical LEX (UNIX tool) analyser (UNIX tool)
 
 ```
                                                   parser
@@ -228,7 +262,7 @@ be input. Rather than develop a model for all assembly languages, five were chos
 
 It was found by examination that all of the assembly languages had the same general format for an assembly language statement:
 
-[label]           opcode            operand(s)             [comment] Similarly, assembler directives also conformed to a general format:
+[label] opcode operand(s) [comment] Similarly, assembler directives also conformed to a general format:
 
 ```
                     assembler              no of source             time            speed
@@ -267,7 +301,7 @@ It was found by examination that all of the assembly languages had the same gene
                               Figure 27. Assembly speed statistics.
 ```
 
-[label]             directive       argument(s)            [comment] The differences in the syntax of the languages came when examining the individual fields of a statement.
+[label] directive argument(s) [comment] The differences in the syntax of the languages came when examining the individual fields of a statement.
 
 Label Field.
 
@@ -293,13 +327,13 @@ Addressing Specifiers - expressions and constants are contained within addressin
 
 Examples of Addressing Modes for Operands.
 
-MC68000 - #constant            Dn    An    (An)     (An)+      -(An)     constant(An)          (constant,An) constant(An,index,constant.specifier) where n is a number from 0 to 7.
+MC68000 - #constant Dn An (An) (An)+ -(An) constant(An) (constant,An) constant(An,index,constant.specifier) where n is a number from 0 to 7.
 
-6502 - #constant              constant         (constant,X)            (constant),Y Z80 - (register)              constant         (register+constant)                (constant)
+6502 - #constant constant (constant,X) (constant),Y Z80 - (register) constant (register+constant) (constant)
 
-6800 - #constant              constant         X     (constant)
+6800 - #constant constant X (constant)
 
-80x86 - register             constant        [constant]          [register]          specifier[constant] Addressing mode modifiers are used within two of the assembly languages (68000 and 80x86) to specify or clarify the size of a particular operand. For each of these languages, defaults are assumed if these are omitted.
+80x86 - register constant [constant] [register] specifier[constant] Addressing mode modifiers are used within two of the assembly languages (68000 and 80x86) to specify or clarify the size of a particular operand. For each of these languages, defaults are assumed if these are omitted.
 
 Addressing Modes.
 
@@ -311,7 +345,8 @@ By initially basing a standardised set of addressing modes on the MC68000 syntax
 
 The work carried out in section 5.3.3. was done prior to receiving a report by W. Fisher entitled 'Microprocessor Assembly Language Draft Standard'25. In this report, a standardised model of assembly languages is created by following a number of guidelines. Using this method, it is possible to implement an assembly language for virtually any processor using a completely standardised syntax. This was obviously more desirable than the limited syntax which was developed in the previous section. It was therefore decided that the sample implementation to be developed should have a lexical scanner which would accept any assembly language program conforming to this IEEE standard. This means that the implementation will not be able to accept source programs written using a manufacturer's assembly language syntax without some modification (quite extensive in some cases). This limitation is not severe, however, when the use of meta-assemblers is put into context. Section 4.7.2. pointed out that there were two main areas for which meta-assemblers are generally developed:
 
-1. Educational establishments. 2. Small system developers.
+1. Educational establishments.
+2. Small system developers.
 
 For both of these areas, apart from the initial increase in activity due to converting existing software to the new syntax (which might be accomplished by a translation program automatically), the use of a generalised syntax is a productivity aid in that all programs developed have the same syntactic structure and the same set of directives (which are part of the defined standard). The operation of the meta-assembler will always be the same, so familiarity with it will increase instead of the decrease normally experienced when many dedicated assemblers are used within a short space of time.
 
@@ -319,9 +354,17 @@ Features of the Standard.
 
 The IEEE Standard covers the following areas of assembly languages:
 
-* Instruction Names.
+- Instruction Names.
 
-* Mnemonics. * Addressing Modes. * Operand Sequences. * Expression Evaluation. * Constants. * Labels. * Comments. * Assembler Directives. * Standard Instruction Sets.
+- Mnemonics.
+- Addressing Modes.
+- Operand Sequences.
+- Expression Evaluation.
+- Constants.
+- Labels.
+- Comments.
+- Assembler Directives.
+- Standard Instruction Sets.
 
 Instruction Names.
 
@@ -331,7 +374,11 @@ Instruction Mnemonics.
 
 A set of rules is given for the mnemonics of instructions which are not contained within the standard. These are:
 
-1. The first character of a mnemonic shall be the first letter of the action verb. 2. Addressing modes shall not be embedded in the mnemonic. 3. Operand designations shall not be embedded in the mnemonic. 4. Conditions shall be embedded in the mnemonic. 5. Operand type may be indicated, where appropriate, by the last character of a mnemonic, as shown below (the default operand type is word):
+1. The first character of a mnemonic shall be the first letter of the action verb.
+2. Addressing modes shall not be embedded in the mnemonic.
+3. Operand designations shall not be embedded in the mnemonic.
+4. Conditions shall be embedded in the mnemonic.
+5. Operand type may be indicated, where appropriate, by the last character of a mnemonic, as shown below (the default operand type is word):
 
 B: Byte. H: Halfword. L: Long (Double Word). D: Decimal. F: Floating Point. 1: Bit. 4: Nibble or Digit.
 
@@ -343,7 +390,7 @@ Addressing Modes.
 
 A set of addressing modes is defined in the standard. Addressing modes are specified by adding special characters to the operands. The following prefix and postfix characters are used:
 
-Mode                                    Symbol                        Example Absolute                                prefix /                      /addr Base page                               prefix !                      !addr Indirect                                prefix @                      @addr Relative                                prefix $                      $addr Immediate                               prefix #                      #value Index                                   enclosing                     addr(index) parenthesis () Register                                prefix .                      .addr Auto-pre-increment                      prefix +                      +addr Auto-post-increment                     postfix +                     addr+ Auto-pre-decrement                      prefix -                      -addr Auto-post-decrement                     postfix -                     addr- Indirect-pre-indexed                    prefix () @                   addr(index)@ Indirect-post-indexed                   prefix @,                     @addr(index) postfix ()
+Mode Symbol Example Absolute prefix / /addr Base page prefix ! !addr Indirect prefix @ @addr Relative prefix $ $addr Immediate prefix # #value Index enclosing addr(index) parenthesis () Register prefix . .addr Auto-pre-increment prefix + +addr Auto-post-increment postfix + addr+ Auto-pre-decrement prefix - -addr Auto-post-decrement postfix - addr- Indirect-pre-indexed prefix () @ addr(index)@ Indirect-post-indexed prefix @, @addr(index) postfix ()
 
 Operand Sequences.
 
@@ -381,7 +428,7 @@ Constants.
 
 All numeric constants shall be represented by an alphabetic character specifying the base followed by an apostrophe. The following characters are reserved for the specified base:
 
-Character           Base                Example B                   Binary              B'1001111 Q                   Octal               Q'117 D                   Decimal             D'79 H                   Hexadecimal         H'4F A default is assumed if no specifier is given. This can be changed using the BASE assembler directive.
+Character Base Example B Binary B'1001111 Q Octal Q'117 D Decimal D'79 H Hexadecimal H'4F A default is assumed if no specifier is given. This can be changed using the BASE assembler directive.
 
 Character strings shall be enclosed within quotation marks:
 
@@ -395,7 +442,7 @@ All labels shall begin with an alphabetic character in the first column on a lin
 
 Comments.
 
-Comments may appear after a statement on the same line, or on a separate line. Each comment shall start with a semi-colon. For example, ; This is a comment BZ       NEXT      ; Comment on same line Assembler Directives.
+Comments may appear after a statement on the same line, or on a separate line. Each comment shall start with a semi-colon. For example, ; This is a comment BZ NEXT ; Comment on same line Assembler Directives.
 
 The naming of assembler directives shall follow the rules given for instructions. If the following functions are implemented, the specified mnemonic shall be used.
 
@@ -423,7 +470,12 @@ The approach taken towards the detailed design of modules was to design them wit
 
 Frank and Hewitt's book entitled 'Software Engineering in Modula-2' quotes a number of claims which are typically made for Object Oriented Systems:
 
-* Increased comprehensibility. * Guaranteed data integrity. * Enable implementations to be easily changed. * Provide data independence. * Encourage independent development (of objects and collections of objects). * Reusability and extendability.
+- Increased comprehensibility.
+- Guaranteed data integrity.
+- Enable implementations to be easily changed.
+- Provide data independence.
+- Encourage independent development (of objects and collections of objects).
+- Reusability and extendability.
 
 It can be seen that this design philosophy is very suitable for the development of meta-assemblers which, in themselves, have to be very adaptable. It is the very fact that traditional dedicated assemblers are written by decomposition into functional modules rather than objects that leads to them being so unadaptable to other assembly languages.
 
@@ -445,7 +497,9 @@ Operations.
 
 Operations which can be performed on a data structure can be put into a number of classes.
 
-1. Constructors. A constructor operation for a given object is one which creates an instance of that object from its component parts. 2. Selectors. A selector operation for a given object is one which selects a specific component part of an instance of that object. 3. Exceptions. Erroneous conditions which arise out of the use/misuse of an object can be handled in one of two main ways:
+1. Constructors. A constructor operation for a given object is one which creates an instance of that object from its component parts.
+2. Selectors. A selector operation for a given object is one which selects a specific component part of an instance of that object.
+3. Exceptions. Erroneous conditions which arise out of the use/misuse of an object can be handled in one of two main ways:
 
 A predicate is provided which, when called, returns information about the state of an object.
 
@@ -459,7 +513,7 @@ Another important concept of OOP is module reusability. Depending on the type of
 
 The following sections describe the design of the individual modules which make up the meta-assembler. The modules were designed, implemented and tested in the following order:
 
-1. Strings.            | 2. Table.              |- These four modules were reused from previous 3. TableTrees. |            programming projects. 4. TableExt.           | 5. Exceptions. 6. Lex. 7. Expression. 8. Interface 9. Listing. 10. Object Generator. 11. ADM. 12. M2Assem. 13. PseudoOps.
+1. Strings. | 2. Table. |- These four modules were reused from previous 3. TableTrees. | programming projects. 4. TableExt. | 5. Exceptions. 6. Lex. 7. Expression. 8. Interface 9. Listing. 10. Object Generator. 11. ADM. 12. M2Assem. 13. PseudoOps.
 
 Three test programs were also developed in order to test these modules. The listings for the above modules and the test modules can be found in the appendix.
 
@@ -519,7 +573,7 @@ Two operations are provided within this module:
 
 ScanLine. This is the operation which performs the lexical scan. The string of characters supplied to this operation is examined one character at a time from the left hand column. Fields of the source line are identified and extracted as each character is read. Fields are identified by the comparison with termination and continuation characters. Continuation characters are those allowed in a field and termination characters mark the end of a field. The following list gives the appropriate termination and continuation characters for each field.
 
-Field                    Termination                          Continuation Label                    Colon, Whitespace                    Alphanumeric Command                  Whitespace, Fullstop                 Alphabetic Modifier                 Whitespace                           - Prefix                   -                                    PrefixSet Argument                 Whitespace, Open bracket             - Index                    Comma, Close bracket                 - Postfix                  -                                    PostfixSet Comment                  End of line                          - where PrefixSet = '/', '!', '@', '$', '#', '+' or '-'. PostfixSet = '+' or '-'.
+Field Termination Continuation Label Colon, Whitespace Alphanumeric Command Whitespace, Fullstop Alphabetic Modifier Whitespace - Prefix - PrefixSet Argument Whitespace, Open bracket - Index Comma, Close bracket - Postfix - PostfixSet Comment End of line - where PrefixSet = '/', '!', '@', '$', '#', '+' or '-'. PostfixSet = '+' or '-'.
 
 The operation only separates fields so, for example, it cannot check to see whether an expression is valid. Errors in the assembly language statement which can be detected are:
 
@@ -537,7 +591,7 @@ The purpose of the expression evaluator module is to evaluate expressions which 
 
 The Evaluate operation first determines whether there is an operand in front of the operator by checking whether the first character in the input string is a '.'. If there is an operand, it is read and checked against entries in the table. If an entry is not found, the operand is checked to see whether it is a valid constant. An exception is raised if it is not. The operator is then read and checked and then the second operand is read. An operation is then called which applies the appropriate operation on the two operands. The only operation which has one operand is the .NOT. operation. If the expression is valid a LONGINT value is returned, otherwise an exception is raised (this includes operand type errors and results which are out of range). The type of the value returned depends on the types of the values of the operands and errors may be produced if an operation is attempted on two operand with incompatible types. The table below shows the operations available and the operand types which are valid.
 
-Operation to perform                       A op A            A op R             R op A             R op R SHL,SHR                                       A                  #                  #                  # AND,OR,XOR,NOT                                A                  #                  #                  # *                                             A                  #                  #                  # /,//                                          A                  #                  #                  # +                                             A                  R                  R                  # -                                             A                  #                  R                  A Where:
+Operation to perform A op A A op R R op A R op R SHL,SHR A # # # AND,OR,XOR,NOT A # # # * A # # # /,// A # # # + A R R # - A # R A Where:
 
 'A' indicates an ABSOLUTE operand. 'R' indicates a RELATIVE operand. '#' indicates an invalid expression.
 
@@ -587,7 +641,10 @@ Page - The layout of a listing page is controlled by two operations: SetPageLeng
 
 Line - Any line in the listing (apart from the first four on a page) contains four fields:
 
-1. Line number, relative to the start of the listing file. 2. Address of the machine code instruction on that line (in hexadecimal format). Possible addresses range from 0 to 4GBytes. 3. Machine code. The machine code of the instruction on the line is given in hexadecimal form. The operation to write the machine code to the listing file is assembler-independent in that it adjusts itself to compensate for different word lengths and the maximum length of instructions. 4. The original assembly language statement follows the machine code field.
+1. Line number, relative to the start of the listing file.
+2. Address of the machine code instruction on that line (in hexadecimal format). Possible addresses range from 0 to 4GBytes.
+3. Machine code. The machine code of the instruction on the line is given in hexadecimal form. The operation to write the machine code to the listing file is assembler-independent in that it adjusts itself to compensate for different word lengths and the maximum length of instructions.
+4. The original assembly language statement follows the machine code field.
 
 At the end of the listing file, assembly statistics are given for assembly time and assembly rate. Depending on the state of an internal switch (modified by the SymbolTable operation) a symbol table dump may/may not be included. The main part of the symbol table dump is performed by two operations exported from the table module (see section 4.8.10.). Similar switches control the inclusion of addresses and machine code.
 
@@ -603,35 +660,35 @@ This module is very similar to the listing module in design and functionality. I
 
 ### 5.4.10. Table Handler Module (Table, TableTrees, TableExt)
 
-function                 f:
+function f:
 
 ```
                   l     =        f(k)
 ```
 
-The        performance                 of        the     implementation                is       determined                 by    the        choice     of     function f     and        the        method               of     handling          collisions.
+The performance of the implementation is determined by the choice of function f and the method of handling collisions.
 
-Hashing                Function.
+Hashing Function.
 
-A     good         hashing              function                will    produce             a       uniform            distribution           of     locations         in a     hash       table           given           a     random           set    of      keys.             There        have        been       many      suggestions for        the     implementation                       of       the     hashing            function.             The           purpose        of     the         hashing function         in      the       case           of     the      meta-assembler                    is     to     take      an     alphabetic          key (either the    mnemonic                  name            or      symbol          name)            and        return           an    address          within         the     array at    which           the        data        on        the       key     will        be     stored.             One        of    the        simplest        and     most effective          hashing              algorithm                 is     the         division              hashing          algorithm.              Characters         in the        key     are           multiplied              by       their       positions              in         the    string          and     added         together. The total is then taken modulo the table size to give the position in the table.
+A good hashing function will produce a uniform distribution of locations in a hash table given a random set of keys. There have been many suggestions for the implementation of the hashing function. The purpose of the hashing function in the case of the meta-assembler is to take an alphabetic key (either the mnemonic name or symbol name) and return an address within the array at which the data on the key will be stored. One of the simplest and most effective hashing algorithm is the division hashing algorithm. Characters in the key are multiplied by their positions in the string and added together. The total is then taken modulo the table size to give the position in the table.
 
-h(K) = K MOD M where K     is     the       key        to        be        hashed, h(K)        is     the        hashed                 key, M     is the size                 of the               table.
+h(K) = K MOD M where K is the key to be hashed, h(K) is the hashed key, M is the size of the table.
 
-Hashing                Collisions.
+Hashing Collisions.
 
-The        main        drawback              to        hash       tables        is    that          collisions             occur       where        two      or     more keys        'hash'          to        the        same           location         in       the            table.       Figure           30     shows         how       the performance              of       a     hash            table      is     drastically            reduced              when        it    becomes           more       than 80% full. There have been a number of proposals to the solution of this problem, some        of        which           are:
+The main drawback to hash tables is that collisions occur where two or more keys 'hash' to the same location in the table. Figure 30 shows how the performance of a hash table is drastically reduced when it becomes more than 80% full. There have been a number of proposals to the solution of this problem, some of which are:
 
-*     Linear          Probing.              When            a    collision         occurs,           one         of    the       colliding          data     elements
+- Linear Probing. When a collision occurs, one of the colliding data elements
 
 ![Hash table collisions vs load](figures/fig-30-hash-table-performance.png)
 
 *Figure 30. Affect of Loading on the Performance of a Hash Table*
 
-is    put    in    the      next     available      location     in    the   table.
+is put in the next available location in the table.
 
-* Nonlinear          Probing.        A   secondary hashing function is applied                    to   any key which collides         when       hashed       by   the     primary         function.
+- Nonlinear Probing. A secondary hashing function is applied to any key which collides when hashed by the primary function.
 
-* Bucket Hashing. Each location in the hash table can contain many data items. The       data     structure        which     provides         this    'bucket'       can   be:
+- Bucket Hashing. Each location in the hash table can contain many data items. The data structure which provides this 'bucket' can be:
 
 ```
       - Linked          list.
@@ -653,33 +710,33 @@ is    put    in    the      next     available      location     in    the   tab
                                    Search Tree 'Buckets'.
 ```
 
-The      method             selected         for        the        implementation                   is        bucket           hashing              because           it     is less     complicated             than        the           other    methods             and             can       be        dynamic            which           allows         a hash table of any size (which stops the performance of the table from dropping drastically). In terms of overall performance, it is better to                                                                          use a binary search tree     when           bucket            hashing               because       they           are         quicker              than           linked           lists        (see figure       29)        but     are        still        dynamic           (which             hash         tables            are         not).
+The method selected for the implementation is bucket hashing because it is less complicated than the other methods and can be dynamic which allows a hash table of any size (which stops the performance of the table from dropping drastically). In terms of overall performance, it is better to use a binary search tree when bucket hashing because they are quicker than linked lists (see figure 29) but are still dynamic (which hash tables are not).
 
-Figure       31      gives       the       big         O        performance            of       the       hashing             table          and     binary           search tree     buckets             combination.                  Performance                on          all     functions                is        good         except            the 3 report       function           where            performance               drops            to          O(N ).          This,           is      still         acceptable, however,          as     the     operation                 is    only      used         when            symbol              tables       are        being          dumped (i.e., at most once in an assembly run). The other possibility would be to report without        alphabetical               sorting          of     the     key         items         which              would       reduce            big       O      value.
+Figure 31 gives the big O performance of the hashing table and binary search tree buckets combination. Performance on all functions is good except the 3 report function where performance drops to O(N ). This, is still acceptable, however, as the operation is only used when symbol tables are being dumped (i.e., at most once in an assembly run). The other possibility would be to report without alphabetical sorting of the key items which would reduce big O value.
 
-The      three          modules            which            implement             the        hash         table             are:
+The three modules which implement the hash table are:
 
-Table.       This           module         implements               the       hash           table         as          an      abstract             state       machine. Operations             on      the        table        use        the     BST           (Binary            Search              Tree)          object           which         is implemented              by      the         TableTrees                 module.             All          operations                in        this        module             are completely              data         independent                 (except          that            the         key           must         be         a         string         of characters).
+Table. This module implements the hash table as an abstract state machine. Operations on the table use the BST (Binary Search Tree) object which is implemented by the TableTrees module. All operations in this module are completely data independent (except that the key must be a string of characters).
 
-TableTrees.             This     module                implements             a       BST           abstract            data         type          and        associated operations.             The      BST         is         exported           opaquely                 and           is     therefore              totally          secure.
+TableTrees. This module implements a BST abstract data type and associated operations. The BST is exported opaquely and is therefore totally secure.
 
-TableExt.            This       module             (Table           Extensions)                   contains              the        data         structure             which defines        the       data        to     be         stored       in     the         table            and       the        operations              on        this        data structure         which         are       data-dependent.                 As          two         complete              sets       of        data       are      required (one     for       instruction             mnemonics               and        assembler                 directives,            and           one        for     symbols) the    data        structure          used        is       a     variant      record.              These           allow        for          the    most         efficient storage       of        data.    The         data           to     be     stored            is:
+TableExt. This module (Table Extensions) contains the data structure which defines the data to be stored in the table and the operations on this data structure which are data-dependent. As two complete sets of data are required (one for instruction mnemonics and assembler directives, and one for symbols) the data structure used is a variant record. These allow for the most efficient storage of data. The data to be stored is:
 
-For      mnemonics               and          assembler                  directives: * Name            (Key). *     Type        (or       class). *     Machine           code         mask.
+For mnemonics and assembler directives: * Name (Key). * Type (or class). * Machine code mask.
 
-For          symbols: * Name             (Key). *     Value. *     Status        (Absolute              or     Relative).
+For symbols: * Name (Key). * Value. * Status (Absolute or Relative).
 
-This         module          provides           two         operations,           InsertCommand                          and            InsertSymbol                 which allow for the convenient insertion of either commands or symbols into the table. The      advantage             of     using            these       operations               is     that         a        data            structure         does        not need         to     be        constructed              to        use     them.          They           construct                      the     appropriate             data structure          and         then         use           the     data          structure-independent                                 operation          Insert        (in the     Table           module)        to       enter           them     into       the          table.        Operations                    are    also       supplied to     write       and        read        the     data          structure         from           and      to        a        file,          although       these       are not     used        by        the    meta-assembler.                    The       other          two      operations                    provided           allow       the conversion of a                    machine        instruction mask from and to                                           a        readable         format (again, these        are        not        used).
+This module provides two operations, InsertCommand and InsertSymbol which allow for the convenient insertion of either commands or symbols into the table. The advantage of using these operations is that a data structure does not need to be constructed to use them. They construct the appropriate data structure and then use the data structure-independent operation Insert (in the Table module) to enter them into the table. Operations are also supplied to write and read the data structure from and to a file, although these are not used by the meta-assembler. The other two operations provided allow the conversion of a machine instruction mask from and to a readable format (again, these are not used).
 
 ### 5.4.11. Assembler Definition Module (ADM)
 
-The      purpose              of     the        assembler               definition           module             is            to        encompass              all     the assembler               dependent           data            structures,             parameters                 and                algorithms.             The         two parts        of     the        ADM,             the         definition            and        implementation                            modules,          serve        two purposes.
+The purpose of the assembler definition module is to encompass all the assembler dependent data structures, parameters and algorithms. The two parts of the ADM, the definition and implementation modules, serve two purposes.
 
-Definition              Module.
+Definition Module.
 
-This     module           describes             the        assembler         to     the      rest         of    the               modules          via     a    number of      parameters              (Modula-2                  constants).            These           are:
+This module describes the assembler to the rest of the modules via a number of parameters (Modula-2 constants). These are:
 
-WORDLENGTH.                         The     wordlength                 describes          the      length               of        a     basic      machine            code instruction         unit       in     terms           of    the        number        of      bits      required.                      Although       the       decision as      to        what        constitutes             a         word       in       any          processor                   is        somewhat            subjective, virtually         all    processors             have         an    easily         identifiable             word              length.          Figure       32        gives a     number            of     processors                 and      their        associated             word                  length.
+WORDLENGTH. The wordlength describes the length of a basic machine code instruction unit in terms of the number of bits required. Although the decision as to what constitutes a word in any processor is somewhat subjective, virtually all processors have an easily identifiable word length. Figure 32 gives a number of processors and their associated word length.
 
 ```
                                            Processor                     Wordlength
@@ -692,33 +749,35 @@ WORDLENGTH.                         The     wordlength                 describes
                            Figure 32. Wordlengths of Various Processors.
 ```
 
-MAXINDICES.                 This    constant        describes       the       maximum number                     of    indices      allowable in     an      operand.
+MAXINDICES. This constant describes the maximum number of indices allowable in an operand.
 
-MAXOPERANDS.                      This      constant       describes              the     maximum            number           of     operands allowable           in     an      assembly         language         statement.
+MAXOPERANDS. This constant describes the maximum number of operands allowable in an assembly language statement.
 
-MAXWORDSPERINSTRUCTION.                                   This      constant            describes      the       number        of        machine words        in      the        longest      machine        instruction.
+MAXWORDSPERINSTRUCTION. This constant describes the number of machine words in the longest machine instruction.
 
-MEMLOW,                   MEMHIGH.              These      two      constants             describe         the        range        which        the processor           can    address.       Depending         on      whether             the     assembler        is     specific         to     one computer,           this    can     also        describe    the      maximum                  memory       physically          possible          on that         computer.
+MEMLOW, MEMHIGH. These two constants describe the range which the processor can address. Depending on whether the assembler is specific to one computer, this can also describe the maximum memory physically possible on that computer.
 
-NOOFREGISTERS. This constant is used to define an array which must be filled with     the        character      string        representations         of       all     the     registers       that     can       be       used in     the     assembly           language        being    described.             The         array,   ValidRegisters,              is        filled within       the     main        body      of     the     ADM       implementation                module.
+NOOFREGISTERS. This constant is used to define an array which must be filled with the character string representations of all the registers that can be used in the assembly language being described. The array, ValidRegisters, is filled within the main body of the ADM implementation module.
 
-Data        structures       to     describe        a     machine         word,           instruction,       all       valid        addressing modes,         an        operand     element         and    a       decoded             line     are   included           in       the        ADM definition           module         for         convenience.
+Data structures to describe a machine word, instruction, all valid addressing modes, an operand element and a decoded line are included in the ADM definition module for convenience.
 
-Implementation                  Module.
+Implementation Module.
 
-The      ADM         implementation              module     describes             two         operations     which        together            form the        algorithmic               part        of     the       specification                  for     a         processor.
+The ADM implementation module describes two operations which together form the algorithmic part of the specification for a processor.
 
-InsertOpcodesInTable.                            This         operation,            as        its        name                suggests,            inserts            all      the assembler           opcodes               into        the     opcode/symbol                   table.          This            operation             is     called           from the        coordination               (M2Assem)                  module.         The             operation                   uses        the        InsertCommand operation          exported                by     the        TableExt           module              to        insert           opcode            manes             into       the table        with            their         associated            instruction             mask            and             type.            The            type        of       the instruction             is     dependent               on     the       layout           of       the         instruction                formed            when            using the     opcode           and         is     chosen          by    the      programmer.                   It        is        used        within          the       Assemble operation           to         select           the         appropriate          algorithm                    to         assembler               the           instruction.
+InsertOpcodesInTable. This operation, as its name suggests, inserts all the assembler opcodes into the opcode/symbol table. This operation is called from the coordination (M2Assem) module. The operation uses the InsertCommand operation exported by the TableExt module to insert opcode manes into the table with their associated instruction mask and type. The type of the instruction is dependent on the layout of the instruction formed when using the opcode and is chosen by the programmer. It is used within the Assemble operation to select the appropriate algorithm to assembler the instruction.
 
-Assemble. This operation forms the main part of the ADM implementation module and        implements                the        code        generator          of        a       traditional                  dedicated             assembler.               The operation           has         an          overall          structure          which               is        assembler-independent.                               This        is shown        in     pseudo-code                   in    figure       33.       Each           Type            operation              assembles                 a     different format        of        machine             instruction.            As     was           shown            in            section           4.5.,          the       regularity of     a     processors               instruction             set       determines                the         number                of     instruction                formats (and       therefore            Type            operations)          which           are         required.               It     follow              that       the        length and        complexity            of        the        Assemble          instruction               depends                to     a        great       extent          on       the regularity          of         the          instruction           set      of        the          processor                   being         described.
+Assemble. This operation forms the main part of the ADM implementation module and implements the code generator of a traditional dedicated assembler. The operation has an overall structure which is assembler-independent. This is shown in pseudo-code in figure 33. Each Type operation assembles a different format of machine instruction. As was shown in section 4.5., the regularity of a processors instruction set determines the number of instruction formats (and therefore Type operations) which are required. It follow that the length and complexity of the Assemble instruction depends to a great extent on the regularity of the instruction set of the processor being described.
 
-The        Assemble             operation,              and       therefore          each              Type             operation,             is        supplied           with two          parameters:
+The Assemble operation, and therefore each Type operation, is supplied with two parameters:
 
-1.      The        data          structure              containing             the           decoded               assembly                language                statement which        is        produced            by     the      ScanLine            operation                in         the     lexical            scanner           module (Lex). 2.     The        current        pass            number          (each     Type               operation                 used        will       be         called           twice, once        for        each          pass).
+1. The data structure containing the decoded assembly language statement which is produced by the ScanLine operation in the lexical scanner module (Lex).
+2. The current pass number (each Type operation used will be called twice, once for each pass).
 
-The        Assemble             operation               must        produce           two           data           items:
+The Assemble operation must produce two data items:
 
-1.      The         machine                 code        instruction             corresponding                           to      the         decoded                assembly language                statement                input. 2.     The        length         of         the        above        instruction.
+1. The machine code instruction corresponding to the decoded assembly language statement input.
+2. The length of the above instruction.
 
 ```modula-2
                                        operation Assemble
@@ -752,120 +811,138 @@ The        Assemble             operation               must        produce     
                                                  Operation.
 ```
 
-The    task      which       the        Type        operations            must    perform          is    dependent             on     which     pass the    meta-assembler                  is        currently          on.
+The task which the Type operations must perform is dependent on which pass the meta-assembler is currently on.
 
-In    pass      one    the        sole        task       is    to     determine            the    length       of        the     machine       code instruction.       Depending                on     the        processor        being        assembled          for,       this      may       simply involve        returning          the         appropriate           value        (in       which        case        pass        one       operation become         trivial).     However,              with        some       processors         the        instruction        is       not    constant and    depends         on        the        data     length         (modifier)         and       operands.          In     this       case,    more work      is      done       which            sometimes             involves           analysing         operands.
+In pass one the sole task is to determine the length of the machine code instruction. Depending on the processor being assembled for, this may simply involve returning the appropriate value (in which case pass one operation become trivial). However, with some processors the instruction is not constant and depends on the data length (modifier) and operands. In this case, more work is done which sometimes involves analysing operands.
 
-In    pass      two,       the    Type           operations          perform         the     translation        of        decoded         assembly language         statement             into        machine          language           instruction.         This          process         generally requires          four           steps        (which           may       be        in        different          orders          or      with           some       steps unnecessary).
+In pass two, the Type operations perform the translation of decoded assembly language statement into machine language instruction. This process generally requires four steps (which may be in different orders or with some steps unnecessary).
 
-1.    The         addressing                 mode         of     each         of       the       operands            in    the         assembly              language statement              must             be     determined            (using             the       ScanOperand                    operation              exported by     the            lexical            scanner). 2.    The        number            of        operands          and      the        correct         addressing             modes         must           be    checked. If    there            is     an         error       an     exception              must        be         raised          with         a        suitable     error message. 3.    Each         operand               and        index       must          be        evaluated           (using         the        Evaluate               operation exported           by         the        Expression          module)               or       alternatively            checked               to     see    whether it     is         the         appropriate                register        (using             the        CheckRegister                       operation,         also exported           from            Expression).             If      an        expression             is     not       in         the        required        range or     a     register              is        not    of     the      correct             type      an      exception              should           be     raised. 4.    Finally,          the        machine              code    instruction              should        be       assembled.             This           may       involve the        conversion                   of     operands            into         the          appropriate             format                required.
+1. The addressing mode of each of the operands in the assembly language statement must be determined (using the ScanOperand operation exported by the lexical scanner).
+2. The number of operands and the correct addressing modes must be checked. If there is an error an exception must be raised with a suitable error message.
+3. Each operand and index must be evaluated (using the Evaluate operation exported by the Expression module) or alternatively checked to see whether it is the appropriate register (using the CheckRegister operation, also exported from Expression). If an expression is not in the required range or a register is not of the correct type an exception should be raised.
+4. Finally, the machine code instruction should be assembled. This may involve the conversion of operands into the appropriate format required.
 
-Once        the        machine                code        instruction          has           been        assembled,              it     can            be     returned together          with           its         length.          Control         then           passes         back          to     the            calling         module (M2Assem               in        this        case)       for     assembly               to       continue.
+Once the machine code instruction has been assembled, it can be returned together with its length. Control then passes back to the calling module (M2Assem in this case) for assembly to continue.
 
-In order to test this design an ADM                                                 was developed for the Motorola MC68000 processor.             A         description             of      this     design              follows.
+In order to test this design an ADM was developed for the Motorola MC68000 processor. A description of this design follows.
 
 ### 5.4.12. ADM for the Motorola MC68000
 
-The       first task             required           in    producing an                  ADM         for        the    MC68000                   was     to      provide values           for         the         processor              parameters.
+The first task required in producing an ADM for the MC68000 was to provide values for the processor parameters.
 
 WORDLENGTH = 16 MAXINDICES = 2 MAXOPERANDS = 2 MAXWORDSPERINSTRUCTION = 5 MEMLOW = 0 MEMHIGH = 1000 X 1024 (1 MByte)
 
-NOOFREGISTERS = 17 The      next          task,       turning        to     the     implementation                 module,            was        to      define           all     the possible          registers.         This        was     done      by      making              assignments              to      the     ValidRegisters array        in        the       module        body.
+NOOFREGISTERS = 17 The next task, turning to the implementation module, was to define all the possible registers. This was done by making assignments to the ValidRegisters array in the module body.
 
 ValidRegisters[1] := "D0"; : : ValidRegisters[8] := "D7"; ValidRegisters[9] := "A0"; : : ValidRegisters[16] := "A7"; ValidRegisters[17] := "SP"
 
-The       InsertOpcodesInTable                           operation         then           needed             to        be       filled           with          the appropriate                InsertCommand                operations.        The           problem            is     that       the      IEEE            defined opcode set does not match one for one the Motorola defined opcode set, meaning that    one           IEEE        opcode         can    map      onto      several            Motorola            opcodes.          The         solution         is to     have            a        number      of         pseudo-Type          operations                which            select       the         appropriate instruction            format        by        examining         the      addressing             modes            of     operands.              Figure          34 shows        all       the       IEEE      standard        mnemonics,            the          appropriate          opcode           mask,         the         type of     the        opcode          and      the     corresponding               Motorola          opcode            mnemonic(s).                  Note         that the     instruction              types,     as    well     as    the      standard             18,     include          an      extra       eight        which correspond                 to     IEEE         standard         opcodes         which            map         onto            several        formats             of instruction.               The     InsertCommand                operations           were            then        written           from         this         table.
+The InsertOpcodesInTable operation then needed to be filled with the appropriate InsertCommand operations. The problem is that the IEEE defined opcode set does not match one for one the Motorola defined opcode set, meaning that one IEEE opcode can map onto several Motorola opcodes. The solution is to have a number of pseudo-Type operations which select the appropriate instruction format by examining the addressing modes of operands. Figure 34 shows all the IEEE standard mnemonics, the appropriate opcode mask, the type of the opcode and the corresponding Motorola opcode mnemonic(s). Note that the instruction types, as well as the standard 18, include an extra eight which correspond to IEEE standard opcodes which map onto several formats of instruction. The InsertCommand operations were then written from this table.
 
-The      other             mapping        which         took     place         was        from        the        IEEE         standard           addressing modes to the appropriate Motorola addressing modes. This can be seen in figure 35.
+The other mapping which took place was from the IEEE standard addressing modes to the appropriate Motorola addressing modes. This can be seen in figure 35.
 
-An      operation,               RegisterType,            was     is      used           to    determine               whether         a        register         is a     data        or       address        register.      Another          operation            allows        the        addition           of     a      binary word at any position in another word. Many of the Motorola instruction formats include           a    field       for     a      register      and       an     effective            address           (see        figure        6).         Two IEEE           Machine Code Mask STD            MSB            LSB          Class    Motorola Mnemonic       15             0                     Mnemonic ADD            1101000000000000            19       ADD,ADDA,ADDQ,ADDI ADDD           1100000100000000            6        ABCD ADDC           1101000100000000            5        ADDX SUB            1001000000000000            19       SUB,SUBA,SUBQ,SUBI SUBD           1000000100000000            6        SBCD SUBC           1001000100000000            5        SUBX MULU           1100000011000000            3        MULU MUL            1100000111000000            3        MULS DIVU           1000000011000000            3        DIVU DIV            1000000111000000            3        DIVS CMP            1011000000000000            19       CMP,CMPA,CMPI,CMPM NEG            0100010000000000            13       NEG NEGC           0100000000000000            13       NEGX NEGD           0100100000000000            15       NBCD EXT            0100100000000000            17       EXT DBR            0101000011001000            12       DBRA,DBF DBE            0101011111001000            12       DBEQ DBNE           0101011011001000            12       DBNE DBC            0101010111001000            12       DBCS DBNC           0101010011001000            12       DBCC DBP            0101101011001000            12       DBPL DBN            0101101111001000            12       DBMI DBNV           0101100111001000            12       DBVS DBGT           0101111011001000            12       DBGT DBGE           0101110011001000            12       DBGE DBLT           0101110111001000            12       DBLT DBLE           0101111111001000            12       DBLE DBH            0101001011001000            12       DBHI DBNH           0101001111001000            12       DBLS AND            1100000000000000            19       AND,ANDI OR             1000000000000000            19       OR,ORI XOR            1011000000000000            19       EOR,EORI NOT            0100011000000000            13       NOT SHR            1110000000001000            21       LSR SHL            1110000100001000            21       LSL SHRA           1110000000000000            21       ASR SHLA           1110000100000000            21       ASL ROR            1110000000011000            21       ROR ROL            1110000100011000            21       ROL RORC           1110000000010000            21       ROXR ROLC           1110000100010000            21       ROXL TEST           0100101000000000            13       TST TEST1          0000000100000000            22       BTST TESTSET        0000000111000000            22       BSET TESTCLR        0000000110000000            22       BCLR TESTNOT        0000000101000000            22       BCHG Figure 34. IEEE Standard Opcodes with Motorola Equivalents (1 of 2).
+An operation, RegisterType, was is used to determine whether a register is a data or address register. Another operation allows the addition of a binary word at any position in another word. Many of the Motorola instruction formats include a field for a register and an effective address (see figure 6). Two IEEE Machine Code Mask STD MSB LSB Class Motorola Mnemonic 15 0 Mnemonic ADD 1101000000000000 19 ADD,ADDA,ADDQ,ADDI ADDD 1100000100000000 6 ABCD ADDC 1101000100000000 5 ADDX SUB 1001000000000000 19 SUB,SUBA,SUBQ,SUBI SUBD 1000000100000000 6 SBCD SUBC 1001000100000000 5 SUBX MULU 1100000011000000 3 MULU MUL 1100000111000000 3 MULS DIVU 1000000011000000 3 DIVU DIV 1000000111000000 3 DIVS CMP 1011000000000000 19 CMP,CMPA,CMPI,CMPM NEG 0100010000000000 13 NEG NEGC 0100000000000000 13 NEGX NEGD 0100100000000000 15 NBCD EXT 0100100000000000 17 EXT DBR 0101000011001000 12 DBRA,DBF DBE 0101011111001000 12 DBEQ DBNE 0101011011001000 12 DBNE DBC 0101010111001000 12 DBCS DBNC 0101010011001000 12 DBCC DBP 0101101011001000 12 DBPL DBN 0101101111001000 12 DBMI DBNV 0101100111001000 12 DBVS DBGT 0101111011001000 12 DBGT DBGE 0101110011001000 12 DBGE DBLT 0101110111001000 12 DBLT DBLE 0101111111001000 12 DBLE DBH 0101001011001000 12 DBHI DBNH 0101001111001000 12 DBLS AND 1100000000000000 19 AND,ANDI OR 1000000000000000 19 OR,ORI XOR 1011000000000000 19 EOR,EORI NOT 0100011000000000 13 NOT SHR 1110000000001000 21 LSR SHL 1110000100001000 21 LSL SHRA 1110000000000000 21 ASR SHLA 1110000100000000 21 ASL ROR 1110000000011000 21 ROR ROL 1110000100011000 21 ROL RORC 1110000000010000 21 ROXR ROLC 1110000100010000 21 ROXL TEST 0100101000000000 13 TST TEST1 0000000100000000 22 BTST TESTSET 0000000111000000 22 BSET TESTCLR 0000000110000000 22 BCLR TESTNOT 0000000101000000 22 BCHG Figure 34. IEEE Standard Opcodes with Motorola Equivalents (1 of 2).
 
-CHK            0100000110000000            3        CHK LD             0000000000000000            23       LEA,MOVE,MOVEA, MOVEP,MOVEQ LDM            0100110010000000            14       MOVEM ST             0000000000000000            23       MOVE,MOVEP STM            0100100010000000            14       MOVEM MOV            0000000000000000            23       MOVE,MOVEM,MOVEP, MOVEA,MOVEQ XCH            1100000100000000            24       EXG,SWAP CLR            0100001000000000            13       CLR SET            0101000011000000            10       ST SETE           0101011111000000            10       SEQ SETNE          0101011011000000            10       SNE SETC           0101010111000000            10       SCS SETNC          0101010011000000            10       SCC SETP           0101101011000000            10       SPL SETN           0101101111000000            10       SMI SETV           0101100111000000            10       SVS SETNV          0101100011000000            10       SVC SETGT          0101111011000000            10       SGT SETGE          0101110011000000            10       SGE SETLT          0101110111000000            10       SLT SETLE          0101111111000000            10       SLE SETH           0101001011000000            10       SHI SETNH          0101001111000000            10       SLS BR             0110000000000000            25       BRA,JMP BE             0110011100000000            11       BEQ BNE            0110011000000000            11       BNE BC             0110010100000000            11       BCS BNC            0110010000000000            11       BCC BP             0110101000000000            11       BPL BV             0110100100000000            11       BVS BNV            0110100000000000            11       BVC BGT            0110111000000000            11       BGT BGE            0110110000000000            11       BGE BLT            0110110100000000            11       BLT BLE            0110111100000000            11       BLE BH             0110001000000000            11       BHI BNH            0110001100000000            11       BLS CALL           0110000100000000            25       BSR,JSR RET            0100111001110101            18       RTS RETR           0100111001110111            18       RTR RETE           0100111001110011            18       RTE NOP            0100111001110001            18       NOP PUSH           0100100001000000            26       LINK,PEA,MOVE POP            0100000111000000            26       UNLK,MOVE WAIT           0100111001110010            18       STOP BRK            0100111001000000            16       TRAP BRKV           0100111001110110            18       TRAPV RESET          0100111001110000            18       RESET Figure 34. IEEE Standard Opcodes with Motorola Equivalents (2 of 2).
+CHK 0100000110000000 3 CHK LD 0000000000000000 23 LEA,MOVE,MOVEA, MOVEP,MOVEQ LDM 0100110010000000 14 MOVEM ST 0000000000000000 23 MOVE,MOVEP STM 0100100010000000 14 MOVEM MOV 0000000000000000 23 MOVE,MOVEM,MOVEP, MOVEA,MOVEQ XCH 1100000100000000 24 EXG,SWAP CLR 0100001000000000 13 CLR SET 0101000011000000 10 ST SETE 0101011111000000 10 SEQ SETNE 0101011011000000 10 SNE SETC 0101010111000000 10 SCS SETNC 0101010011000000 10 SCC SETP 0101101011000000 10 SPL SETN 0101101111000000 10 SMI SETV 0101100111000000 10 SVS SETNV 0101100011000000 10 SVC SETGT 0101111011000000 10 SGT SETGE 0101110011000000 10 SGE SETLT 0101110111000000 10 SLT SETLE 0101111111000000 10 SLE SETH 0101001011000000 10 SHI SETNH 0101001111000000 10 SLS BR 0110000000000000 25 BRA,JMP BE 0110011100000000 11 BEQ BNE 0110011000000000 11 BNE BC 0110010100000000 11 BCS BNC 0110010000000000 11 BCC BP 0110101000000000 11 BPL BV 0110100100000000 11 BVS BNV 0110100000000000 11 BVC BGT 0110111000000000 11 BGT BGE 0110110000000000 11 BGE BLT 0110110100000000 11 BLT BLE 0110111100000000 11 BLE BH 0110001000000000 11 BHI BNH 0110001100000000 11 BLS CALL 0110000100000000 25 BSR,JSR RET 0100111001110101 18 RTS RETR 0100111001110111 18 RTR RETE 0100111001110011 18 RTE NOP 0100111001110001 18 NOP PUSH 0100100001000000 26 LINK,PEA,MOVE POP 0100000111000000 26 UNLK,MOVE WAIT 0100111001110010 18 STOP BRK 0100111001000000 16 TRAP BRKV 0100111001110110 18 TRAPV RESET 0100111001110000 18 RESET Figure 34. IEEE Standard Opcodes with Motorola Equivalents (2 of 2).
 
 Addressing Mode Equivalents:
 
-Motorola Format                                                                       IEEE Format Register Direct                                                                       Direct Dn,An                                                                                 .Dn,.An Address Register Indirect                                                             Indirect (An)                                                                                  @.An Addr. Reg. Indirect with Post-increment                                               Auto-post-increment (An)+                                                                                 .An+ Addr. Reg. Indirect with Pre-decrement                                                Auto-pre-decrement -(An)                                                                                 -.An Addr. Reg. Indirect with Displacement                                                 Indirect-post-indexed d16(An) or (d16,An)                                                                   @.An(d16)
+Motorola Format IEEE Format Register Direct Direct Dn,An .Dn,.An Address Register Indirect Indirect (An) @.An Addr. Reg. Indirect with Post-increment Auto-post-increment (An)+ .An+ Addr. Reg. Indirect with Pre-decrement Auto-pre-decrement -(An) -.An Addr. Reg. Indirect with Displacement Indirect-post-indexed d16(An) or (d16,An) @.An(d16)
 
-Addr. Reg. Indirect with Index                                                        Indirect-post-indexed d8(An,Xn.W) or (d8,An,Xn.W)                                                           @.An(d8,.Xn) d8(An,Xn.L) or (d8,An,Xn.L)
+Addr. Reg. Indirect with Index Indirect-post-indexed d8(An,Xn.W) or (d8,An,Xn.W) @.An(d8,.Xn) d8(An,Xn.L) or (d8,An,Xn.L)
 
-Absolute Long Address                                                                 Absolute xxx.L                                                                                 /xxx Absolute Short Address                                                                Absolute xxx.W                                                                                 /xxx Program Counter with Displacement                                                     Indirect-post-indexed d16(PC) or (d16,PC)                                                                   @*(d16)
+Absolute Long Address Absolute xxx.L /xxx Absolute Short Address Absolute xxx.W /xxx Program Counter with Displacement Indirect-post-indexed d16(PC) or (d16,PC) @*(d16)
 
-Program Counter with Index                                                            Auto-post-index d8(PC,Xn.W) or (d8,PC,Xn.W)                                                           @*(d8,.Xn) d8(PC,Xn.L) or (d8,PC,Xn.L)
+Program Counter with Index Auto-post-index d8(PC,Xn.W) or (d8,PC,Xn.W) @*(d8,.Xn) d8(PC,Xn.L) or (d8,PC,Xn.L)
 
-Immediate Data                                                                        Immediate #xxx or #<data>                                                                       #xxx or #<data> Figure 35. IEEE Addressing Modes and their Motorola Equivalents.
+Immediate Data Immediate #xxx or #<data> #xxx or #<data> Figure 35. IEEE Addressing Modes and their Motorola Equivalents.
 
-operations     were        therefore    provided    to     add       a     register      and   an    effective        address at    any    point    within      a     machine    instruction            word.
+operations were therefore provided to add a register and an effective address at any point within a machine instruction word.
 
-The    MC68000        is    one   of    the   processors     for         which     the   calculation       of   the    length of    an    instruction      is   not    always    determined            by      its   opcode.      Pass    one       of   the assembler      is    therefore         more    complicated       in        some        Type    operations.
+The MC68000 is one of the processors for which the calculation of the length of an instruction is not always determined by its opcode. Pass one of the assembler is therefore more complicated in some Type operations.
 
-For      those        instructions               whose           length              is      not         always          one      word,           the     length        is determined         by         the        effective           address                 field.        Depending              on      the        addressing           mode, an    instruction         can            be       from          one         to        five         words            long.        The     CalcEA               operation determines         the         length            of       these          instruction                    on      pass        one        and         assembles           the effective        address            field         on        pass         two.
+For those instructions whose length is not always one word, the length is determined by the effective address field. Depending on the addressing mode, an instruction can be from one to five words long. The CalcEA operation determines the length of these instruction on pass one and assembles the effective address field on pass two.
 
-The      checking             for         the          correct           addressing                      mode,           number         of         operands           and number      of        indices            is      done       within            each            Type             operation,         where           necessary.          The command          modifier            is         also      checked             to          determine                whether        an     assembly             language statement        is      to      operate               on       byte,            word          or         longword             quantities.
+The checking for the correct addressing mode, number of operands and number of indices is done within each Type operation, where necessary. The command modifier is also checked to determine whether an assembly language statement is to operate on byte, word or longword quantities.
 
-The      pseudo-Type                operations               use        the           ScanOperand                     operation          to        determine           the addressing            modes              of       operands              which                 in         turn         determines             which            Motorola instruction        format           to        choose.           Calls       to         other         Type           operations          occur        within          these operations.
+The pseudo-Type operations use the ScanOperand operation to determine the addressing modes of operands which in turn determines which Motorola instruction format to choose. Calls to other Type operations occur within these operations.
 
-The    complete          listing of               the       example              ADM               for       the    MC68000             is    included          in     the appendix.
+The complete listing of the example ADM for the MC68000 is included in the appendix.
 
 ### 5.4.13. Coordination Module (M2Assem)
 
-The      coordination               module             drives           the           rest         of        the      meta-assembler                modules.           Its structure     is      very      similar              to     that       of        a        dedicated             two-pass         assembler.             The     module contains     two        operations,                  PassOne            and           PassTwo                  which      control        each        pass       of     the meta-assembler.           The            module            opens         and           closes            all    the      files    used        during          assembly (input     source        program,                 output          listing             and          object          code      files)          by     calls      to      the appropriate           operations                in        the         Interface,              Listing              and      ObjectGenerator                   modules. The      command              line        format            which           operates                the         meta-assembler               is     very        simple:
+The coordination module drives the rest of the meta-assembler modules. Its structure is very similar to that of a dedicated two-pass assembler. The module contains two operations, PassOne and PassTwo which control each pass of the meta-assembler. The module opens and closes all the files used during assembly (input source program, output listing and object code files) by calls to the appropriate operations in the Interface, Listing and ObjectGenerator modules. The command line format which operates the meta-assembler is very simple:
 
-M2Assem            <filename> The filename in the input file does not contain any extension. Default extensions are   added        to     this           file     name           to     obtain             the       complete             names         of        each    file:
+M2Assem <filename> The filename in the input file does not contain any extension. Default extensions are added to this file name to obtain the complete names of each file:
 
-<filename>.asm                            input assembly language program.
+<filename>.asm input assembly language program.
 
-<filename>.obj                            output object code file. <filename>.lst                            output listing file.
+<filename>.obj output object code file. <filename>.lst output listing file.
 
 ### 5.4.14. Assembler Directives Module (PseudoOps)
 
-This          module                implements               the          assembler-independent                             assembler              directives described           in     section          5.3.3.          The      directives            have         associated           Type          values         above 1000. When the Assemble operation                                         in the          ADM         cannot       match the type                    to one of     its     Type        operations             it     calls      an        operation          in     the     PseudoOps              module             called AssemblePseudoOp                         which         performs       the          same     function          as       Assemble,                except      that it     selects           between           the         possible          assembler              directives.
+This module implements the assembler-independent assembler directives described in section 5.3.3. The directives have associated Type values above 1000. When the Assemble operation in the ADM cannot match the type to one of its Type operations it calls an operation in the PseudoOps module called AssemblePseudoOp which performs the same function as Assemble, except that it selects between the possible assembler directives.
 
 ## 5.5. Implementation
 
-Following                the         object            oriented           development                   philosophy,                modules                where implemented               individually                (as     far        as        possible).           The       order         in         which          actual implementation                 of    modules            took        place       was        determined             to        some      extent         by      the way      in     which          modules           coupled          with        each     other.         For     instance,         it     was         necessary to     implement           the       Strings,           Exceptions            and     Table           handling          modules            first     so     that testing        of        other       modules            could        take          place        when        they        were         developed.
+Following the object oriented development philosophy, modules where implemented individually (as far as possible). The order in which actual implementation of modules took place was determined to some extent by the way in which modules coupled with each other. For instance, it was necessary to implement the Strings, Exceptions and Table handling modules first so that testing of other modules could take place when they were developed.
 
 ## 5.6. Testing
 
-There         were       two        levels       of     testing      that          were     carried         out        during        the        development of      the         meta-assembler:
+There were two levels of testing that were carried out during the development of the meta-assembler:
 
-1.     Individual              Module            Testing. 2.     Module             Integration             Testing.
+1. Individual Module Testing.
+2. Module Integration Testing.
 
-The      first       level          of    testing           was     carried          out        after     the      implementation                   of     each module         to    ensure          that        the     module          behaved           as    expected.             In    order         to      carry    out this      testing          three          test         modules        were           developed.
+The first level of testing was carried out after the implementation of each module to ensure that the module behaved as expected. In order to carry out this testing three test modules were developed.
 
-1.    TestStrings.           This        module               was        used           to          test        the     operations              exported       from         the Strings        module             to         ensure              that        they              were          functionally                 correct. 2.     TestLex.           This      module               was           used        to          test        the         functionality             of      the   ScanLine operation           exported             from            the          lexical             scanner                module. 3.     TestTable.            This        module                was          originally                  developed              to        test      the     three       table handling            modules:            Table,               TableTrees                   and             TableExt.             However,            because           the modules         needed            the            table        facilities                 in       order           to     be        tested         properly,          this module         was        developed               further          to       incorporate                   tests        for      other       modules       as         they were         developed.           The            TestLex              module's                 features            were         incorporated             into        this module         later       on          so        that        a     DecodedLine                        structure              could         be      obtained.
+1. TestStrings. This module was used to test the operations exported from the Strings module to ensure that they were functionally correct.
+2. TestLex. This module was used to test the functionality of the ScanLine operation exported from the lexical scanner module.
+3. TestTable. This module was originally developed to test the three table handling modules: Table, TableTrees and TableExt. However, because the modules needed the table facilities in order to be tested properly, this module was developed further to incorporate tests for other modules as they were developed. The TestLex module's features were incorporated into this module later on so that a DecodedLine structure could be obtained.
 
-The       module           presents           the         tester            with           a        menu           of        possible            operations:
+The module presents the tester with a menu of possible operations:
 
-1.    A     new       symbol            or     opcode              can        be       added               to     the        table. 2.    A      symbol         or     command                 can          be        retrieved                from          the       table. 3.    A      symbol         or     command                 can         be      deleted               from          the        table. 4.     An       assembly            language               statement                can             be          assembled.             This        must        previously have         been      decoded               by         the        lexical               scanner. 5.    The       contents           of        the       table           can        be       printed               out      in       order. 6.     The         number        of      entries              in       each        hash              location            can        be      displayed. 7.     An     assembly             language              statement                can           be         entered           and       then       decoded        by         the lexical         scanner. 8.    An      expression            can           be     entered              (which            may             contain        previously             defined      labels) and       evaluated              by          the         expression                  evaluator. 9.     The         default       base         of         constants                can          be        changed. 10.    A      listing       file       can        be     generated                by         entering an                  assembly language                    statement, its equivalent             machine               code         and the                number of                   times this            is to        be    repeated.
+1. A new symbol or opcode can be added to the table.
+2. A symbol or command can be retrieved from the table.
+3. A symbol or command can be deleted from the table.
+4. An assembly language statement can be assembled. This must previously have been decoded by the lexical scanner.
+5. The contents of the table can be printed out in order.
+6. The number of entries in each hash location can be displayed.
+7. An assembly language statement can be entered and then decoded by the lexical scanner.
+8. An expression can be entered (which may contain previously defined labels) and evaluated by the expression evaluator.
+9. The default base of constants can be changed.
+10. A listing file can be generated by entering an assembly language statement, its equivalent machine code and the number of times this is to be repeated.
 
-This        last     test        module             therefore               performs                  both            individual          module           testing         and to     some          extent        integration                 testing.                The           real         integration               testing        could           only begin        after        the      implementation                       of         the          coordination                   module,            M2Assem.            It     is interesting          to     note        that        this       was           one         of         the         last     modules            to     be     implemented.
+This last test module therefore performs both individual module testing and to some extent integration testing. The real integration testing could only begin after the implementation of the coordination module, M2Assem. It is interesting to note that this was one of the last modules to be implemented.
 
-Testing        of     individual              modules                  using        the             three         test        programs            actively      involved the       following             test         principles:
+Testing of individual modules using the three test programs actively involved the following test principles:
 
-Internal             Testing.
+Internal Testing.
 
-This      is    a    process           of        comparing            the     design        of     modules           and         the    way         in    which the     code         implements                   the     design.
+This is a process of comparing the design of modules and the way in which the code implements the design.
 
-Complexity analysis                    - Examine                 complex areas               of     code        to    determine           whether           they are     necessary            or     the           result        of      bad        design.
+Complexity analysis - Examine complex areas of code to determine whether they are necessary or the result of bad design.
 
-Structure           analysis           -     Are          all        parts     of      the         code        called            from         all     possible conditions?            Are        there           any      unnecessary               conditions           which            are         never         executed? Do      program           structures               have         a     single        entry        and      exit        point?
+Structure analysis - Are all parts of the code called from all possible conditions? Are there any unnecessary conditions which are never executed? Do program structures have a single entry and exit point?
 
-Internal        testing       was           to      some            extent     not     so        important           as     the        program           design and     implementation                     was          written        by      the      same           person.         However,               when         using unsuitable           methods                 of         implementation                 it        allowed             the         identification             and correction           of       these           areas.
+Internal testing was to some extent not so important as the program design and implementation was written by the same person. However, when using unsuitable methods of implementation it allowed the identification and correction of these areas.
 
-External             Testing.
+External Testing.
 
-This      is    involved          in        testing        the       implementation               by    regarding           it     as     a     box       which should         produce        the          correct        output         when        given         suitable          input.       The         test       process can       be        summarised:
+This is involved in testing the implementation by regarding it as a box which should produce the correct output when given suitable input. The test process can be summarised:
 
-1.     Identify        test       data            for     the        system         from         the    specification. 2.     Specify         the        expected              results        for     each         test       case. 3.     Run       the        program               and      record           actual      results. 4.     Compare            expected                and      actual           results.
+1. Identify test data for the system from the specification.
+2. Specify the expected results for each test case.
+3. Run the program and record actual results.
+4. Compare expected and actual results.
 
-The     design         of     the          test     data        determined           how         well     the        implementation                 could    be tested.        The        following                principles           were         used.
+The design of the test data determined how well the implementation could be tested. The following principles were used.
 
-Equivalence                   Partitioning.
+Equivalence Partitioning.
 
-'The   object         of        equivalence     partitioning          is    to     identify    from      the     logic     of     the specification         (program          design)       the        categories         into      which      input         values     are grouped'.
+'The object of equivalence partitioning is to identify from the logic of the specification (program design) the categories into which input values are grouped'.
 
-Boundary         Case            Analysis.
+Boundary Case Analysis.
 
-'An    extension           of     equivalence        partitioning          which     concentrates        on      the     edges     of the    class'.
+'An extension of equivalence partitioning which concentrates on the edges of the class'.
 
-The    testing    both           at   individual     and        integration       levels   went       well.    The      integration testing did highlight some                    areas of the            design which,           although not wrong,               could definitely       be        improved          (see     Conclusion).
+The testing both at individual and integration levels went well. The integration testing did highlight some areas of the design which, although not wrong, could definitely be improved (see Conclusion).

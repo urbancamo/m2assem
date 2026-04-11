@@ -12,7 +12,7 @@ Books:
 
 5. Graham, Robert M. Principles of System Programming. New York: John Wiley & Sons, 1975, 49-80.
 
-6.   Leventhal,   Lance   A.   Z80   Assembly    Language   Programming.   Berkeley, California: Adam Osborne & Associates, 1979.
+6. Leventhal, Lance A. Z80 Assembly Language Programming. Berkeley, California: Adam Osborne & Associates, 1979.
 
 7. Motorola. MC68000 8-/16-/32-Bit Microprocessors Programmer's Reference Manual, fifth edition. Portsmouth: Grosvenor Press, 1988.
 
@@ -36,7 +36,7 @@ Articles:
 
 16. Tiberghien, J., Teaymans, J. A Cross-Assembler Suitable For Most Of The 8-Bit Micros. Euromicro-Newsletter (France), 1977, Vol 3, Part 2, 80-83.
 
-17.   Fujita,    S.,    Yoshida,    K.   A   General      Purpose   Cross-Assembler   for Microprocessors. Euromicro-Newsletter (France), 1977, Vol 3, Part 4, 88-89.
+17. Fujita, S., Yoshida, K. A General Purpose Cross-Assembler for Microprocessors. Euromicro-Newsletter (France), 1977, Vol 3, Part 4, 88-89.
 
 18. Leibson, Steven H. Software Tools to Handle All Microprocessor Traffic. EDN, 8 June 1989, 89-97.
 
@@ -48,7 +48,7 @@ Articles:
 
 22. Wilburn, D.L., Schleimer, S. Step Development Tools: METASTEP Language System. Communications of the ACM, 1985, Vol 12, 157-164.
 
-23. Anacona, M. A High Level Language Based System for Cross-Assembler Definition.     Software - Practice & Experience, December 1985, Vol 15, 1159- 1184.
+23. Anacona, M. A High Level Language Based System for Cross-Assembler Definition. Software - Practice & Experience, December 1985, Vol 15, 1159- 1184.
 
 24. Skordalakis, E. Meta-Assemblers. IEEE Micro, April 1983, 6-16.
 
@@ -58,7 +58,7 @@ Articles:
 
 27. Kott, R.K., Ambroziak, K. The Cross-Assembler Universality Versus the Standardization of Microcomputer Assembly Languages. Euro-Micro 81, 1981, 209-217.
 
-28. Anacona, M., Clematis, A., Dodero, G., Pino, A. Experiences with the use of   a   Universal   Cross-Assembler       Based   on    the   IEEE   Proposed   Standard. MICROSYSTEMS: Architecture, Integration & Use, 1982, 55-64.
+28. Anacona, M., Clematis, A., Dodero, G., Pino, A. Experiences with the use of a Universal Cross-Assembler Based on the IEEE Proposed Standard. MICROSYSTEMS: Architecture, Integration & Use, 1982, 55-64.
 
 29. Anderson, Brian R. Modula-2: A 68000 Cross-Assembler - Part 1. Dr Dobb's Journal of Software Tools, April 1986, Vol 11, Issue 4, 52-56, 76-81.
 

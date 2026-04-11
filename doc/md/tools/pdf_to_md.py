@@ -309,6 +309,73 @@ def looks_like_code_block(lines: list[str]) -> bool:
     return any(tok in joined for tok in ("PROCEDURE", "BEGIN", "END ", ":=", "MODULE", "CASE", "IF ", "VAR", "CONST"))
 
 
+def collapse_whitespace(text: str) -> str:
+    """Collapse runs of 2+ whitespace characters into a single space.
+    PageMaker 3 typeset the report with variable inter-word spacing
+    that survives `pdftotext -layout`, so paragraph prose often has
+    wide gaps between words.  This is safe for prose; code blocks
+    don't go through this step."""
+    return re.sub(r"[ \t]{2,}", " ", text)
+
+
+def split_numbered_list(text: str) -> list[str] | None:
+    """
+    If `text` is a run-together numbered list like
+    "1. Lexical Analysis. 2. Syntax Analysis. 3. Semantic Analysis."
+    return a list of Markdown list-item lines.  Otherwise return None.
+
+    Accepts any starting integer (not just 1) so numbered-list
+    continuations from an earlier paragraph also split correctly.
+    The numbers must be strictly ascending by one for the match to
+    succeed — any other numeric pattern (a section reference like
+    "section 4.5.2", a citation like "use15") stays intact.
+    """
+    if not re.match(r"^\d+\.\s+[A-Z]", text):
+        return None
+    # The split lookahead doesn't require an uppercase letter after
+    # "N. " because some list items start with lowercase keywords
+    # ("5. if, while and case statements ...").  The "must start
+    # with uppercase" constraint only applies to the whole paragraph.
+    parts = re.split(r"(?<=[.!?])\s+(?=\d+\.\s+\S)", text)
+    if len(parts) < 2:
+        return None
+    numbers: list[int] = []
+    for part in parts:
+        m = re.match(r"^(\d+)\.\s", part)
+        if not m:
+            return None
+        numbers.append(int(m.group(1)))
+    start = numbers[0]
+    if numbers != list(range(start, start + len(numbers))):
+        return None
+    items = []
+    for part in parts:
+        m = re.match(r"^(\d+)\.\s+(.*)$", part, re.DOTALL)
+        assert m is not None
+        items.append(f"{m.group(1)}. {collapse_whitespace(m.group(2)).strip()}")
+    return items
+
+
+def split_bullet_list(text: str) -> list[str] | None:
+    """
+    Split a run-together bullet list like "* Foo. * Bar. * Baz." into
+    one Markdown bullet per line.  Returns None if the text doesn't
+    look like one.
+    """
+    if not text.startswith("*"):
+        return None
+    parts = re.split(r"(?<=[.!?])\s+(?=\*\s+[A-Z])", text)
+    if len(parts) < 2:
+        return None
+    items = []
+    for part in parts:
+        m = re.match(r"^\*\s+(.*)$", part, re.DOTALL)
+        if m is None:
+            return None
+        items.append(f"- {collapse_whitespace(m.group(1)).strip()}")
+    return items
+
+
 def paragraphify(body: list[str]) -> list[str]:
     """
     Walk body lines and emit a list of Markdown fragments:
@@ -333,7 +400,17 @@ def paragraphify(body: list[str]) -> list[str]:
     def flush_para() -> None:
         nonlocal buf, have_paragraph_context
         if buf:
-            out.append(" ".join(s.strip() for s in buf))
+            paragraph = " ".join(s.strip() for s in buf)
+            paragraph = collapse_whitespace(paragraph)
+            items = split_numbered_list(paragraph) or split_bullet_list(paragraph)
+            if items:
+                out.extend(items)
+            else:
+                # Single-bullet lines (common after wrapped bullet
+                # continuation) should start with `- ` not `*`.
+                if paragraph.startswith("* ") and re.match(r"^\*\s+[A-Z]", paragraph):
+                    paragraph = "- " + paragraph[2:].lstrip()
+                out.append(paragraph)
             out.append("")
             buf = []
         have_paragraph_context = False

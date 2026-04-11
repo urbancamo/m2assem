@@ -106,7 +106,7 @@ As was stated before, assembly languages relate directly in the way in which the
 
 An assembly language program for virtually every processor can be broken down into two main structures. The first is an overall structure which contains a mix of assembly language dependant and independent features. The second is the most general structure the assembly language line or statement. The statement can have one or more fields which are separated either by whitespace or specially designated characters. One or more of these lines form an assembly program. The general structure of one of these lines is:
 
-[LABEL]        OPERATION          OPERANDS          [COMMENT] where optional fields are indicated with square brackets []. The optional label field is a symbolic name chosen by the programmer to represent the current memory location of a command. It could be used to identify the target of a branch instruction, the location of a data container or a procedure name. The label usually starts with an alphabetic character and can be followed by alphabetic characters, numeric characters or special characters such as the underscore (_). The label is separated from the rest of the statement by either whitespace or a colon. The significant length of the label varies between assembler implementations but is typically 8 to 30 characters long.
+[LABEL] OPERATION OPERANDS [COMMENT] where optional fields are indicated with square brackets []. The optional label field is a symbolic name chosen by the programmer to represent the current memory location of a command. It could be used to identify the target of a branch instruction, the location of a data container or a procedure name. The label usually starts with an alphabetic character and can be followed by alphabetic characters, numeric characters or special characters such as the underscore (_). The label is separated from the rest of the statement by either whitespace or a colon. The significant length of the label varies between assembler implementations but is typically 8 to 30 characters long.
 
 ```
      Language Level                           No of language state-                             Genera-
@@ -123,7 +123,12 @@ The operation code is generally a short mnemonic name describing either a valid 
 
 Assembler Independent - These are directives which are included in virtually all dedicated assemblers. The directives, although having varying formats, perform similar or identical functions. These include:
 
-* Output listing control. * Expression equates. * Data block reservation/assignment. * Assignment of code origin. * End of input file marker. * Expression evaluation default base.
+- Output listing control.
+- Expression equates.
+- Data block reservation/assignment.
+- Assignment of code origin.
+- End of input file marker.
+- Expression evaluation default base.
 
 Assembler Dependant - These are directives which refer to assembler features which match requirements in the object code to be produced. The object code being produced in turn depends on both the target processor and the operating system being used. Generally, assembler dependent directives are concerned with the correct structuring of code into blocks or procedures. The variability of assembler dependent directives is not limited to target processors, therefore, but also to different target operating systems.
 
@@ -224,19 +229,25 @@ The purpose of an assembler is to translate a source program in assembly languag
 
 Watson14 identifies two broad sub-tasks which must be performed by a compiler.
 
-1. The analysis of the source program. 2. The synthesis of the object program.
+1. The analysis of the source program.
+2. The synthesis of the object program.
 
 In the case of an assembler, the source program is written in the assembly language of the target processor and the object program is written in the machine language of the target processor.
 
 The analysis task can be broken down into three phases:
 
-1. Lexical Analysis. 2. Syntax Analysis. 3. Semantic Analysis.
+1. Lexical Analysis.
+2. Syntax Analysis.
+3. Semantic Analysis.
 
 The synthesis task is usually considered as a single code-generation phase (see figure 9).
 
 The interface between the phases of an assembler can vary between different implementations. Each phase could, for instance, be a separate program transforming an input file into an output file. Such an assembler would be a four-pass assembler since four passes are made over various versions of the source program. Four-pass assemblers are not very common, however, because they are extremely inefficient. A much more efficient way of providing the interface between phases is via data structures containing tokens. A token is a basic syntactic component of the input language of which four were identified in section 4.4.2. These are:
 
-1. Label. 2. Operation. 3. Operand(s). 4. Comment.
+1. Label.
+2. Operation.
+3. Operand(s).
+4. Comment.
 
 These could be passed either individually or in groups between the phases of an assembler. The most convenient grouping is that of an assembly language statement. In this way, two-pass and one-pass assemblers are possible which avoid the need to read and write several versions of the source program.
 
@@ -248,15 +259,15 @@ The task of the lexical analyser is to read characters from the source program a
 
 In an assembler this task becomes fairly trivial because of the small number of syntactic components used and the rigid structure which is imposed on them. The lexical analyser takes the free-format source program and extracts tokens by ignoring all whitespace (space and tab characters) and comments (these are not needed by subsequent phases).
 
-The output from the lexical analyser could take a number of forms. It might produce pointers to the start of each of the tokens in the source program. For example, the statement 15    14    13     12      11      10       9      8      7   Example Instructions 1      OP   SIZE         OPERAND                    OPERAND          MOVE 2      OPCODE       REG            MOD              OPERAND          ADD, AND, CMP, SUB 3      OPCODE       REG             OP              OPERAND          CHK, DIVS, LEA, MULS 4      OPCODE       REG            MOD             OP         REG    MOVEP 5      OPCODE       REG              SIZE          OP         REG    ASL, ASR, ROL, ROR 6      OPCODE       REG                   OPCODE              REG    ABCD, EXG, SBCD 7      OPCODE       REG                     8-BIT CONSTANT           MOVEQ 8      OPCODE       COUNT            SIZE          OP         REG    ASL, ASR, ROL, ROR 9      OPCODE        DATA            SIZE           OPERAND          ADDQ, SUBQ 10      OPCODE       CONDITION          OP           OPERAND          Scc 11      OPCODE       CONDITION                  DISPLACEMENT Bcc 12      OPCODE       CONDITION             OPCODE              REG    DBcc 13            OPCODE                  SIZE           OPERAND          ADDI, CMPI, NEG, TST 14              OPCODE                               OPERAND 15                 OPCODE                            OPERAND          JMP, JSR, NBCD, PEA 16                       OPCODE                            VECTOR     TRAP 17                       OPCODE                                REG    EXT, LINK, SWAP, UNLINK 18                                OPCODE                              NOP, RESET, RTS, TRAPV OPCODE determines instruction OPERAND determines data operated on REG selects a register SIZE chooses byte, word, long MOD determines if OPERAND is source or destination, and length COUNT, DATA are constants in the range 1-8 CONDITION specifies one of 16 possible conditions to test DISPLACEMENT is signed offset for branches VECTOR specifies where to trap
+The output from the lexical analyser could take a number of forms. It might produce pointers to the start of each of the tokens in the source program. For example, the statement 15 14 13 12 11 10 9 8 7 Example Instructions 1 OP SIZE OPERAND OPERAND MOVE 2 OPCODE REG MOD OPERAND ADD, AND, CMP, SUB 3 OPCODE REG OP OPERAND CHK, DIVS, LEA, MULS 4 OPCODE REG MOD OP REG MOVEP 5 OPCODE REG SIZE OP REG ASL, ASR, ROL, ROR 6 OPCODE REG OPCODE REG ABCD, EXG, SBCD 7 OPCODE REG 8-BIT CONSTANT MOVEQ 8 OPCODE COUNT SIZE OP REG ASL, ASR, ROL, ROR 9 OPCODE DATA SIZE OPERAND ADDQ, SUBQ 10 OPCODE CONDITION OP OPERAND Scc 11 OPCODE CONDITION DISPLACEMENT Bcc 12 OPCODE CONDITION OPCODE REG DBcc 13 OPCODE SIZE OPERAND ADDI, CMPI, NEG, TST 14 OPCODE OPERAND 15 OPCODE OPERAND JMP, JSR, NBCD, PEA 16 OPCODE VECTOR TRAP 17 OPCODE REG EXT, LINK, SWAP, UNLINK 18 OPCODE NOP, RESET, RTS, TRAPV OPCODE determines instruction OPERAND determines data operated on REG selects a register SIZE chooses byte, word, long MOD determines if OPERAND is source or destination, and length COUNT, DATA are constants in the range 1-8 CONDITION specifies one of 16 possible conditions to test DISPLACEMENT is signed offset for branches VECTOR specifies where to trap
 
 ![68000 instruction format bit fields](figures/fig-06-instruction-formats.png)
 
 *Figure 6. Instruction formats used on the MC68000 (first word only)*
 
-Start:              MOVE                 D0, D3              ;comment ^                   ^                    ^ Label               Operation            Operands would produce three pointers to the start of the label, operation and operand fields. These could be CARDINAL numbers representing the position in the source line or could be POINTERs TO CHAR.
+Start: MOVE D0, D3 ;comment ^ ^ ^ Label Operation Operands would produce three pointers to the start of the label, operation and operand fields. These could be CARDINAL numbers representing the position in the source line or could be POINTERs TO CHAR.
 
-Another method of expressing the output of the lexical analyser could be to fill a data structure with copies of the fields in the source program line. Given a declaration of a RECORD structure TYPE String          = ARRAY [1..30] OF CHAR;
+Another method of expressing the output of the lexical analyser could be to fill a data structure with copies of the fields in the source program line. Given a declaration of a RECORD structure TYPE String = ARRAY [1..30] OF CHAR;
 
 ```
     ADDQ        0       1    0      1          DATA          0      SIZE            MODE               REG
@@ -278,13 +289,15 @@ VAR CurrentLine : LexOutput;
 
 the following assignments would be made by the lexical analyser:
 
-CurrentLine.Label                  := "Start"; CurrentLine.Operation := "MOVE"; CurrentLine.Operands               := "D0, D3";
+CurrentLine.Label := "Start"; CurrentLine.Operation := "MOVE"; CurrentLine.Operands := "D0, D3";
 
 The advantage of the first method is that duplication of data is avoided but subsequent phases in the assembly process will have to determine where tokens end. The second method provides tokens as separate entities but sacrifices memory to do so.
 
 Errors produced by the lexical analyser relate to the way in which tokens are formed. They might include:
 
-* Label starts with a non-alphabetic character. * Operation contains non-alphabetic characters. * Unexpected end of line.
+- Label starts with a non-alphabetic character.
+- Operation contains non-alphabetic characters.
+- Unexpected end of line.
 
 ### 4.6.2. Syntax Analysis
 
@@ -316,14 +329,16 @@ In an assembler, the semantic analyser performs a number of tasks.
 
 Errors produced might include:
 
-* Invalid expression. * The wrong use of labels. * Bad addressing modes.
+- Invalid expression.
+- The wrong use of labels.
+- Bad addressing modes.
 
 ```
              lexical                  syntax                 semantic                  code
              analysis                analysis                analysis               generation
 ```
 
-source                                                                                         object program                                                                                       program Figure 9. Phases of the Assembly Process The output of the semantic analyser of an assembler could take the form of a more detailed structure similar to the one produced by the lexical analyser, with fields for 1. Operation mask (if appropriate). 2. Operation type (assembler directive or machine instruction). 3. Operand values. 4. Operand types (in terms of addressing modes).
+source object program program Figure 9. Phases of the Assembly Process The output of the semantic analyser of an assembler could take the form of a more detailed structure similar to the one produced by the lexical analyser, with fields for 1. Operation mask (if appropriate). 2. Operation type (assembler directive or machine instruction). 3. Operand values. 4. Operand types (in terms of addressing modes).
 
 ### 4.6.4. Code Generation
 
@@ -349,15 +364,18 @@ The assembler will begin by defining the symbol Start and inserting it in a symb
 
 If the problem is regarded conceptually from the point of view expressed in the previous section (i.e., assembly by phases) then the phases of lexical analysis, syntax analysis and semantic analysis are repeated twice during assembly. All the phases are needed during the first pass because a preliminary analysis of the operation and operands in a statement is required in order to determine the instruction length. This is needed in order to increment the ILC by the correct amount. The output from the first pass of the assembler is a symbol table. Logically, this should be in addition to a data structure containing all the assembly language statements in a decoded form (similar to the output of the syntax analyser in section 4.6.2.). However, the overhead in maintaining two files of data is usually considered greater that the extra time necessary to perform all these stages again in the second pass. No intermediate file is generated between passes, therefore, and the second pass re-reads the source file but with the values of all symbols in it defined.
 
-Figure 11 gives a procedural example of what the first pass of a two-pass assembler could look like. Apart from the symbols defined as labels for statements, most assemblers allow the explicit definition of symbols using an assembler directive. So, for example, the statement BufferSize                EQU      256 tells the assembler to store the symbol BufferSize in the symbol table with value 256.
+Figure 11 gives a procedural example of what the first pass of a two-pass assembler could look like. Apart from the symbols defined as labels for statements, most assemblers allow the explicit definition of symbols using an assembler directive. So, for example, the statement BufferSize EQU 256 tells the assembler to store the symbol BufferSize in the symbol table with value 256.
 
-The Instruction Location Counter managed by the assembler can usually be referred to in the source program via a special symbol, a common example being the asterisk character. The value of the ILC can be explicitly modified in the source program by using an origin directive. The statement ORG          2000 sets the value of the ILC to 2000. This allows programs and parts of programs to be located anywhere in memory.
+The Instruction Location Counter managed by the assembler can usually be referred to in the source program via a special symbol, a common example being the asterisk character. The value of the ILC can be explicitly modified in the source program by using an origin directive. The statement ORG 2000 sets the value of the ILC to 2000. This allows programs and parts of programs to be located anywhere in memory.
 
 The second pass of the assembler performs the complete set of phases described previously to translate the source program into the object program, with the source program being accompanied by a complete symbol table. Figure 12 gives a similar procedural view of the second pass.
 
 The semantic analyser makes use of an opcode table which contains details about all the machine language instructions available on the target processor. Details include:
 
-1. The mnemonic name of the instruction. 2. The basic length of the instruction (which may be modified by the size of the operands on some processors). 3. A basic mask containing all the bits set by the instruction opcode on its own. 4. The class of instruction. This corresponds to one of the possible formats which the instruction can take (see section 4.5.2.).
+1. The mnemonic name of the instruction.
+2. The basic length of the instruction (which may be modified by the size of the operands on some processors).
+3. A basic mask containing all the bits set by the instruction opcode on its own.
+4. The class of instruction. This corresponds to one of the possible formats which the instruction can take (see section 4.5.2.).
 
 When operands have been evaluated with an expression evaluator (which uses the symbol table where necessary) they can be added to the opcode mask by an instruction-format-specific routine selected with the class of opcode indicated above.
 
@@ -385,9 +403,14 @@ The re-interest which was expressed by software developers in the concept of the
 
 The CASS-8 assembler was developed to solve problems in the first environment above. It is a table-driven assembler in that the relationship between the assembly and machine languages of a processor is described as a set of tables. This is input into the meta-assembler in the form of a separate file to the program to be assembled. This assembler specification contains the following information for each machine language instruction.
 
-1. The mnemonic of the instruction. 2. The operation code of the machine language instruction (opcode bit-mask) corresponding to the mnemonic above. 3. The type of operands which are legal for this instruction. 4. The number of machine cycles required for execution of the instruction. 5. A flag indicating whether the instruction gives rise to a branch condition. 6. An optional descriptive comment.
+1. The mnemonic of the instruction.
+2. The operation code of the machine language instruction (opcode bit-mask) corresponding to the mnemonic above.
+3. The type of operands which are legal for this instruction.
+4. The number of machine cycles required for execution of the instruction.
+5. A flag indicating whether the instruction gives rise to a branch condition.
+6. An optional descriptive comment.
 
-As the second field is only one byte in size, only 8-bit processors can be assembled to. The source language is an adaptation of any manufacturer's assembly language in that the operation code must contain the instruction's concerned register (if applicable) and the addressing mode to be applied. This significantly reduces the amount of lexical analysis required because the addressing mode of any instruction is instantly known when the assembler mnemonic is retrieved from the opcode table. All the assembler dependent features are therefore described using data (as opposed to algorithms). This tends to lead to an easier implementation but also to inflexibility in the variety of processors whose machine and assembly languages can be translated. This is reflected in the fact that only 8- Line Label                     Opcode         Operands 1               Start                  CMP       #10,D0 2                                      BNE       NotEqual 3                                      CLR       D0 4                                      BRA.S     Continue Figure 10. The 5               NotEqual ADD                #15,D1 forward reference 6               Continue RTS problem.
+As the second field is only one byte in size, only 8-bit processors can be assembled to. The source language is an adaptation of any manufacturer's assembly language in that the operation code must contain the instruction's concerned register (if applicable) and the addressing mode to be applied. This significantly reduces the amount of lexical analysis required because the addressing mode of any instruction is instantly known when the assembler mnemonic is retrieved from the opcode table. All the assembler dependent features are therefore described using data (as opposed to algorithms). This tends to lead to an easier implementation but also to inflexibility in the variety of processors whose machine and assembly languages can be translated. This is reflected in the fact that only 8- Line Label Opcode Operands 1 Start CMP #10,D0 2 BNE NotEqual 3 CLR D0 4 BRA.S Continue Figure 10. The 5 NotEqual ADD #15,D1 forward reference 6 Continue RTS problem.
 
 bit processors are catered for and even then some are not applicable. This is because of the strict structuring imposed on the object code generated, which must be of the form of a 1 byte opcode followed by a 0, 1 or 2 byte operand. Eight bit processors which do not conform to this format of object code include the Signetics 2650 and Zilog Z80.
 
@@ -407,13 +430,13 @@ The implementation which was written was an experimental version of the full UOP
 
 CONST size = 8; EndStatement = 99;
 
-VAR ILC, class, length, value: INTEGER; MoreInput                : BOOLEAN; literal, symbol, opcode : ARRAY [1..size] OF CHAR; line                     : ARRAY [1..80] OF CHAR;
+VAR ILC, class, length, value: INTEGER; MoreInput : BOOLEAN; literal, symbol, opcode : ARRAY [1..size] OF CHAR; line : ARRAY [1..80] OF CHAR;
 
-BEGIN ILC := 0;                             (* Initialize Instruction Location Counter *) MoreInput := TRUE;                    (* Set to FALSE at END directive or EOF    *) InitializeTables;                     (* Call a procedure to set up tables       *)
+BEGIN ILC := 0; (* Initialize Instruction Location Counter *) MoreInput := TRUE; (* Set to FALSE at END directive or EOF *) InitializeTables; (* Call a procedure to set up tables *)
 
-WHILE MoreInput DO                      (* Loop executed once per line             *) ReadNextStatement(line);              (* Go get some input                       *) SaveLineForPassTwo(line);             (* Save the line                           *)
+WHILE MoreInput DO (* Loop executed once per line *) ReadNextStatement(line); (* Go get some input *) SaveLineForPassTwo(line); (* Save the line *)
 
-IF LineIsNotComment(line) THEN        (* Is it a comment?                        *) CheckForSymbol(line, symbol);       (* Is there a symbol?                      *) IF symbol[1] <> ‘’ THEN             (* If column 1 blank, no symbol            *) EnterNewSymbol(symbol, ILC) END; LookForLiteral(line, literal);      (* Literal present?                        *) IF literal[1] <> ‘’ THEN            (* Blank means no literal present          *) EnterLiteral(literal) END;
+IF LineIsNotComment(line) THEN (* Is it a comment? *) CheckForSymbol(line, symbol); (* Is there a symbol? *) IF symbol[1] <> ‘’ THEN (* If column 1 blank, no symbol *) EnterNewSymbol(symbol, ILC) END; LookForLiteral(line, literal); (* Literal present? *) IF literal[1] <> ‘’ THEN (* Blank means no literal present *) EnterLiteral(literal) END;
 
 ```modula-2
      (* Now determine the opcode class. -1 used to signal illegal opcode. *)
@@ -465,13 +488,16 @@ XMETA is a fundamentally different meta-assembler from those discussed so far. T
 
 XMETA is extensively documented by its authors in two reports:
 
-1. A High Level Language Based System for Cross-Assembler Definition23. 2. Experiences with the use of a Universal Cross-Assembler based on the IEEE Proposed Standard28.
+1. A High Level Language Based System for Cross-Assembler Definition23.
+2. Experiences with the use of a Universal Cross-Assembler based on the IEEE Proposed Standard28.
 
 The first report deals with the structure and operation of XMETA, while the second concentrates more on its ability to assemble programs written using the IEEE Assembly Language Standard (more details of which can be found in section 5.3.3.).
 
 The author of the first report and one of the designers of XMETA, M. Anacona, goes into some depths about the possible methods which can be used to obtain a cross-assembler system (other than a table-driven approach). Among these are:
 
-1. The use of Translator Writing Systems (TWSs). 2. The use of High-Level Languages (HLLs). 3. The use of Meta-Assemblers (Ferguson's definition).
+1. The use of Translator Writing Systems (TWSs).
+2. The use of High-Level Languages (HLLs).
+3. The use of Meta-Assemblers (Ferguson's definition).
 
 Each of these possible approaches provide solutions to parts of the problem, but none provide a completely satisfactory answer.
 
@@ -548,7 +574,10 @@ Translator Writing Systems also provide a systematic method of development and s
 
 Anacona chooses the concept of meta-assemblers for his implementation, however, because of a number of factors.
 
-1. Encapsulation of most of the details common to all assemblers, thus helping the implementor in several cumbersome problems. 2. Definition of (part of) the syntax and the semantics of the object language by accessing attributes through predefined functions, in an immediate, easy-to-use way. 3. Automatic definition and retrieval of macro libraries, each containing the definition for a particular cross- assembler. 4. Detailed control over code generation.
+1. Encapsulation of most of the details common to all assemblers, thus helping the implementor in several cumbersome problems.
+2. Definition of (part of) the syntax and the semantics of the object language by accessing attributes through predefined functions, in an immediate, easy-to-use way.
+3. Automatic definition and retrieval of macro libraries, each containing the definition for a particular cross- assembler.
+4. Detailed control over code generation.
 
 Previous implementations of meta-assemblers have been macro-based. This lead to a rigidity in the input syntax description, inefficiency, large memory requirements and an almost complete lack of portability between macro- libraries (assembler definitions). The greatest limitation of the implementations from the users point of view, however, was the choice of macros for assembler specifications: they have a cumbersome, non-standardised, unreadable and hard-to-understand syntax. While this was the level of language complexity around the time of Ferguson's report, no evolution had been made to reflect the developments made in high-level language design.
 
@@ -570,13 +599,20 @@ Figure 19 shows the XMETA assembly process. It can be seen that it is an adaptiv
 
 The language chosen for the first implementation of XMETA was kept to a minimum for the following reasons:
 
-1. To select, at first, just what was considered indispensable, in order to implement extensions only when adequate feedback had been received. 2. So that the resulting implementation was kept as small as possible, easy-to-use and executable on microcomputer systems.
+1. To select, at first, just what was considered indispensable, in order to implement extensions only when adequate feedback had been received.
+2. So that the resulting implementation was kept as small as possible, easy-to-use and executable on microcomputer systems.
 
 Features of the Pascal dialect used include:
 
-1. Procedures and functions with associated parameters. 2. Integers which can be structured using one-dimensional arrays.
+1. Procedures and functions with associated parameters.
+2. Integers which can be structured using one-dimensional arrays.
 
-3. Character strings used in output instructions. 4. Numerical values specified in base 2, 8, 10 or 16. 5. if, while and case statements with structured goto's being performed using the exit statement. 6. Recursive procedure definition and calls. 7. A 'main program' which is executed at the start of the assembly process and allows the definition and initialisation of assembly variables. 8. Block structure and scope rules in block nesting.
+3. Character strings used in output instructions.
+4. Numerical values specified in base 2, 8, 10 or 16.
+5. if, while and case statements with structured goto's being performed using the exit statement.
+6. Recursive procedure definition and calls.
+7. A 'main program' which is executed at the start of the assembly process and allows the definition and initialisation of assembly variables.
+8. Block structure and scope rules in block nesting.
 
 Figure 20 shows the XMETA predefined functions which allow access to the assembly language source statement, which must conform to the IEEE standard25. The function Symbol returns a character string corresponding to the identifier requested, while all other functions return integer values. Arg, Xf1 and Xf2 return the results of expression evaluation while Pref1-Pref3 and Post return an integer representing the ASCII value of the single prefix/postfix character. A predefined value of nul is returned when the requested syntactic item does not exist.
 
@@ -590,11 +626,12 @@ The XMETA system is split into two Pascal programs each about 1200 lines long. O
 
 The second program, XASM, performs the assembly process. There are three main sections to this program:
 
-1. A syntax analyser which analyses assembly source statements (see section 4.6.2.). 2. A semantics analyser which analyses the 'basic' semantics and encodes them into attributes (see section 4.6.3.).
+1. A syntax analyser which analyses assembly source statements (see section 4.6.2.).
+2. A semantics analyser which analyses the 'basic' semantics and encodes them into attributes (see section 4.6.3.).
 
 3. An interpreter of the intermediate code corresponding to the assembler definition (this is the code generator - see section 4.6.4.).
 
-The syntax and semantic analysers generate data structures from which the predefined procedures described above can be evaluated. The intermediate code which is interpreted can only access the results of the syntax and semantic processor identification                number of instructions 6800                     197 1           NOP          01           0            2            No Operation 2           TAP          06           0            2            CCR = A 3           TPA          07           0            2            A = CCR 4           INX          08           0            4            X = X + 1 5           DEX          09           0            4            X = X - 1 6           CLV          OA           0            2            V = 0 7           SEV          0B           0            2            V = 1 meaningless mnemonic opera- operand execution comment sequence             tion   type     time number              code Figure 14. Sample part of CASS-8 Assembler Description File.
+The syntax and semantic analysers generate data structures from which the predefined procedures described above can be evaluated. The intermediate code which is interpreted can only access the results of the syntax and semantic processor identification number of instructions 6800 197 1 NOP 01 0 2 No Operation 2 TAP 06 0 2 CCR = A 3 TPA 07 0 2 A = CCR 4 INX 08 0 4 X = X + 1 5 DEX 09 0 4 X = X - 1 6 CLV OA 0 2 V = 0 7 SEV 0B 0 2 V = 1 meaningless mnemonic opera- operand execution comment sequence tion type time number code Figure 14. Sample part of CASS-8 Assembler Description File.
 
 analysis via these predefined procedures. Other semantic structures (such as allocation counters, flags, etc.) are kept within the interpreter's global data area. Figure 22 shows the flow of control within the complete XMETA system.
 
@@ -626,7 +663,7 @@ Implemented processors : TMS1000, M6800, I8048, TMS9900, MC68000 and Z8000.
 
 Supported host computers: PDP11/03, /23, /40, VAX11/780, PDT11/150, MINIMINC and microprocessor development systems.
 
-The ease with which assembler definitions can be written is proportional to the experience gained using the system. An experienced XMETA programmer can code an assembler definition for a new processor in a few hours, most of which is spent reading documentation. The amount of debugging and testing time depends greatly on the Sort              Microprocessor Name 4 bit             4004, 4040, uCOM4, uCOM41, PPS-4 8 bit             8008, 8080, M6800, MB8861, F-8, PPS-8, SCAMP, Z-80, COSMAC (CDP 1801/02)
+The ease with which assembler definitions can be written is proportional to the experience gained using the system. An experienced XMETA programmer can code an assembler definition for a new processor in a few hours, most of which is spent reading documentation. The amount of debugging and testing time depends greatly on the Sort Microprocessor Name 4 bit 4004, 4040, uCOM4, uCOM41, PPS-4 8 bit 8008, 8080, M6800, MB8861, F-8, PPS-8, SCAMP, Z-80, COSMAC (CDP 1801/02)
 
 ```
              12 bit            TLCS-12, TLCS-12A, IM6100
@@ -663,13 +700,20 @@ The preprocessor presents the user with a number of forms which together are use
 
 The preprocessor groups the assembler description into a number of sections:
 
-1. Code arrangement. 2. General syntax. 3. Constant syntax. 4. Registers/flags. 5. Addressing modes. 6. Instructions. 7. Pseudo operations (assembler directives).
+1. Code arrangement.
+2. General syntax.
+3. Constant syntax.
+4. Registers/flags.
+5. Addressing modes.
+6. Instructions.
+7. Pseudo operations (assembler directives).
 
 Figure 25 shows the form for the Code Arrangement section. Some forms, such as this one, simply consist of fields which must be entered with the correct information. The Addressing Modes form, on the other hand, requires more detailed information in the form of simple equations.
 
 Instructions are entered into the preprocessor one at a time and no preliminary grouping is necessary. For each instruction, the following information is required:
 
-1. Mnemonic. 2. Machine code instruction bit mask.
+1. Mnemonic.
+2. Machine code instruction bit mask.
 
 ```
                    0        Contains the value of the maximum user’s allotted
@@ -725,7 +769,11 @@ Instructions are entered into the preprocessor one at a time and no preliminary 
                  Figure 18. Format of the assembler definition file.
 ```
 
-3. Operation of instruction: Byte/Word/Long. 4. Number of operands. 5. Operand types. 6. Instruction length. 7. Instruction format.
+3. Operation of instruction: Byte/Word/Long.
+4. Number of operands.
+5. Operand types.
+6. Instruction length.
+7. Instruction format.
 
 ASSEMBLER.
 
@@ -739,9 +787,15 @@ The latest report to be published on meta-assemblers (to my knowledge) is writte
 
 By defining syntax rules at the source program stage (i.e., compile-time dedication) a much more flexible syntax can be obtained, enabling the production of assemblers which can accept the same source programs as a dedicated assembler. Two development tools, YACC and LEX, are used to simplify the generation of lexical and syntax analysers. Included with the 'modules' which contain the lexical and syntax analysers are other modules which can be placed into two broad categories. These are 'assembler-dependent' and 'assembler-independent' modules. To make up a complete assembler the following modules are required:
 
-1. Main overall control module - independent. 2. Lexical analyser - dependent (on the assembly language). 3. Syntax analyser - dependent (on the assembly language). 4. Symbol table manipulation module - independent.
+1. Main overall control module - independent.
+2. Lexical analyser - dependent (on the assembly language).
+3. Syntax analyser - dependent (on the assembly language).
+4. Symbol table manipulation module - independent.
 
-5. Error handling module - independent. 6. Instruction set module - dependent. 7. Directive handling functions module - dependent. 8. Coding module - independent.
+5. Error handling module - independent.
+6. Instruction set module - dependent.
+7. Directive handling functions module - dependent.
+8. Coding module - independent.
 
 The lexical and syntax analysers are dependent on the assembly language structure of the source program. It is possible with this system to write two assemblers for the same processor with different assembly languages by changing just the analyser modules and equally possible to use the same assembly language for two different processors (if this is physically possible).
 
