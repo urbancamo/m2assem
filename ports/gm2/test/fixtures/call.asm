@@ -1,16 +1,16 @@
 ;
 ;   call.asm -- CALL/RET, STM/LDM, XCH, ST, PUSH/POP, BR
 ;
-;   Adds coverage for CALL (via absolute JSR), STM (MOVEM src,ea),
-;   LDM (MOVEM ea,dst), XCH (EXG/SWAP), ST, PUSH and POP.  BR is also
-;   exercised here since it shares Type 25 routing with CALL.
+;   Covers BR (via bare label), CALL (via bare label AND via /abs),
+;   STM (MOVEM src,ea), LDM (MOVEM ea,dst), XCH (EXG/SWAP), ST, PUSH
+;   and POP, and all three return variants.
 ;
-;   Subroutine addresses are declared via EQU so they land in the
-;   "Absolute" status class and can be referenced through the `/addr`
-;   effective-address form.  Labels placed with "Rel" status can't be
-;   used as CALL/BR targets because Type 25 routes non-immediate
-;   operands to Type 15 (JMP/JSR), whose CalcEA requires an Absolute
-;   type.
+;   The bare-label form of BR / CALL was broken in the 1990 code:
+;   Type 25 routed non-immediate operands to Type 15 (JMP/JSR), whose
+;   CalcEA requires an Absolute-typed operand, but labels are Relative.
+;   The port fixed this by routing Dir / Rel operands to Type 11 — the
+;   same Bcc encoder the conditional variants use — and leaving Abs /
+;   Ind operands to Type 15.  This fixture exercises both paths.
 ;
 
         OBJECT  1
@@ -24,9 +24,11 @@ RMASK   EQU     15                      ; mask D0-D3
         ORG     1024
 
 Main:
-        BR      /SUBLOC                 ; BRA / JMP absolute
-        CALL    /SUBLOC                 ; BSR / JSR absolute
+        BR      Start                   ; BRA bare-label (Type 11)
+        CALL    Start                   ; BSR bare-label (Type 11)
+        CALL    /SUBLOC                 ; JSR absolute   (Type 15)
 
+Start:
         ;  XCH — EXG (data-reg form) and SWAP (single-operand Type 17).
         ;  Type 24 (XCH) falls through to Type 6, which only accepts
         ;  .B as a modifier, so we have to write XCH.B even though
@@ -56,6 +58,6 @@ Main:
 
         ORG     SUBLOC
         RET                             ; RTS
-        RETR                            ; RTR  (covered here too)
+        RETR                            ; RTR
         RETE                            ; RTE
         END

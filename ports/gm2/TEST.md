@@ -253,14 +253,14 @@ Address-register PUSH/POP (which 68000 encodes differently, using
 `-(SP)` / `(SP)+` with a MOVEA destination) is not implemented —
 you can use explicit `MOV.L .An,-.SP` and `MOV.L .SP+,.An` instead.
 
-### 6. `BR` and `CALL` with a bare label don't work
+### 6. `BR` and `CALL` with a bare label don't work (fixed)
 
 **Found writing `branches.asm`.** Tried to write `BR L00` as the
 unconditional branch at the top of a chain of conditional branches.
 Got "Argument must be a register" — which seemed utterly unrelated
 until I traced the dispatch.
 
-`BR` and `CALL` are both Type 25. Type 25's logic is:
+`BR` and `CALL` are both Type 25. Type 25's logic was:
 
 ```modula-2
 ScanOperand(DecInstr.Operand[1], AddrMode);
@@ -273,35 +273,49 @@ END
 ```
 
 For `BR L00`, the bare label parses as "Direct" addressing mode (no
-prefix character), which isn't Immediate, so we fall into the JMP
-path. `Type15()` calls `CalcEA`, which for Direct mode checks that
-the argument is a register name (`.Dn`/`.An`). `L00` isn't a register,
-so `RegisterError` — hence the "Argument must be a register" message.
+prefix character), which isn't Immediate, so we fell into the JMP
+path. `Type15()` called `CalcEA`, which for Direct mode checks that
+the argument is a register name (`.Dn`/`.An`). `L00` wasn't a
+register, so `RegisterError` — hence the "Argument must be a
+register" message.
 
-Even worse, the `Type11` path isn't reachable with a useful operand
-either. `Type11` expects `Rel` or `Dir` mode, but Type 25 only reaches
-it for `Imm`, which Type 11 then rejects with `AddrModeError`.
+Even worse, the `Type11` path wasn't reachable with a useful operand
+either. `Type11` expects `Rel` or `Dir` mode, but Type 25 only
+reached it for `Imm`, which `Type11` then rejected with
+`AddrModeError`.
 
-Both paths are broken for the obvious use case of "branch to a label
+Both paths were broken for the obvious use case of "branch to a label
 defined in the source".
 
-The workaround in `call.asm` is to declare subroutine entry points as
-absolute `EQU` constants and use the `/addr` effective-address form:
+**Fixed** by flipping the routing logic: Dir and Rel operands go to
+`Type11` (the same Bcc encoder the conditional variants use), and
+everything else — Abs, Ind, and so on — goes to `Type15` for the
+absolute JMP/JSR encoding:
+
+```modula-2
+ScanOperand(DecInstr.Operand[1], AddrMode);
+IF (AddrMode = Dir) OR (AddrMode = Rel) THEN
+  RETURN Type11()        -- PC-relative BRA/BSR via Bcc encoder
+ELSE
+  RETURN Type15()        -- absolute JMP/JSR
+END
+```
+
+`Type11` already handled PC-relative branch-to-label encoding for
+the conditional variants, and the opcode mask already in `AI[1]`
+from `CommandEntry.Mask` determines which instruction gets emitted.
+So `BR label` now encodes as 68000 `BRA.W` with the right
+displacement without any further changes.  `call.asm` was
+simplified to use bare-label forms alongside the `/addr` absolute
+form, exercising both the Type 11 and Type 15 dispatch paths.
+
+Verified output:
 
 ```
-SUBLOC  EQU     2048            ; absolute entry of subroutine
-
-Main:   BR      /SUBLOC         ; BRA / JMP absolute
-        CALL    /SUBLOC         ; BSR / JSR absolute
-        ...
-        ORG     SUBLOC          ; place subroutine at the EQU'd address
-        RET
+BR Start         ->  6000 0005       (BRA.W  +5)
+CALL Start       ->  6100 0003       (BSR.W  +3)
+CALL /SUBLOC     ->  6139 0000 0800  (JSR $800.L)
 ```
-
-That forces `AddrMode = Abs`, which routes through Type 15's CalcEA
-successfully. The real fix would be in Type 25: route Dir/Rel
-operands to `Type11` and only send other modes to `Type15`, then
-teach `Type11` to emit relative displacements for label targets.
 
 ### 7. `XCH` only accepts the `.B` modifier
 

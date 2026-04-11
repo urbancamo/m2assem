@@ -2,44 +2,48 @@ Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
 
 
    1         0                            ;
-   2         0                            ;   branches.asm -- every Type 11 Bcc
+   2         0                            ;   branches.asm -- every Type 11 Bcc and BR (Type 25)
    3         0                            ;
    4         0                            ;   Adds coverage for BE, BNE, BC, BNC, BP, BN, BV, BNV, BGT, BLT,
    5         0                            ;   BH, BNH.  (BGE and BLE are already covered by bubble.asm.)
-   6         0                            ;   BR and CALL (Type 25) are covered separately in call.asm because
-   7         0                            ;   their addressing-mode routing is quite different.
-   8         0                            ;
-   9         0                            ;   Each branch targets the next label, producing a tiny chain of
-  10         0                            ;   branches each 2 bytes apart.  We don't care whether each condition
-  11         0                            ;   is actually taken at runtime — the test is that the assembler
-  12         0                            ;   accepts every mnemonic with a bare-label (Direct) operand.
-  13         0                            ;
-  14         0                            
-  15         0                                    OBJECT  1
-  16         0                                    SYMBOL  1
-  17         0                                    BASE    D'10
-  18         0                            
-  19       400                                    ORG     1024
-  20       400                            
-  21       400  303C 000A                         LD.W    #10,.D0
-  22       402  323C 0005                         LD.W    #5,.D1
-  23       404  B340                              CMP.W   .D1,.D0         ; set flags
-  24       405                            
-  25       405  6700 0000                         BE      L01             ; ==
-  26       407  6600 0000                 L01:    BNE     L02             ; !=
-  27       409  6500 0000                 L02:    BC      L03             ; carry
-  28       40B  6400 0000                 L03:    BNC     L04             ; no carry
-  29       40D  6A00 0000                 L04:    BP      L05             ; plus
-  30       40F  6B00 0000                 L05:    BN      L06             ; minus
-  31       411  6900 0000                 L06:    BV      L07             ; overflow
-  32       413  6800 0000                 L07:    BNV     L08             ; no overflow
-  33       415  6E00 0000                 L08:    BGT     L09             ; >
-  34       417  6D00 0000                 L09:    BLT     L10             ; <
-  35       419  6200 0000                 L10:    BH      L11             ; higher (unsigned >)
-  36       41B  6300 0000                 L11:    BNH     L12             ; not higher (unsigned <=)
-  37       41D  4E40                      L12:    BRK     #0
-  38       41E                            
-  39       41E                                    END
+   6         0                            ;   BR is also exercised here with a bare-label operand, which the
+   7         0                            ;   port fixed by routing Type 25's Dir/Rel path through Type 11
+   8         0                            ;   (the same Bcc encoder the conditional variants use) — the 1990
+   9         0                            ;   code had it going to Type 15 (JMP) which required an Absolute
+  10         0                            ;   operand type, so "BR Label" was broken.
+  11         0                            ;
+  12         0                            ;   Each branch targets the next label, producing a tiny chain of
+  13         0                            ;   branches each 2 bytes apart.  We don't care whether each condition
+  14         0                            ;   is actually taken at runtime — the test is that the assembler
+  15         0                            ;   accepts every mnemonic with a bare-label (Direct) operand.
+  16         0                            ;
+  17         0                            
+  18         0                                    OBJECT  1
+  19         0                                    SYMBOL  1
+  20         0                                    BASE    D'10
+  21         0                            
+  22       400                                    ORG     1024
+  23       400                            
+  24       400  303C 000A                         LD.W    #10,.D0
+  25       402  323C 0005                         LD.W    #5,.D1
+  26       404  B340                              CMP.W   .D1,.D0         ; set flags
+  27       405                            
+  28       405  6000 0000                         BR      L01             ; unconditional (was broken in 1990)
+  29       407  6700 0000                 L01:    BE      L02             ; ==
+  30       409  6600 0000                 L02:    BNE     L03             ; !=
+  31       40B  6500 0000                 L03:    BC      L04             ; carry
+  32       40D  6400 0000                 L04:    BNC     L05             ; no carry
+  33       40F  6A00 0000                 L05:    BP      L06             ; plus
+  34       411  6B00 0000                 L06:    BN      L07             ; minus
+  35       413  6900 0000                 L07:    BV      L08             ; overflow
+  36       415  6800 0000                 L08:    BNV     L09             ; no overflow
+  37       417  6E00 0000                 L09:    BGT     L10             ; >
+  38       419  6D00 0000                 L10:    BLT     L11             ; <
+  39       41B  6200 0000                 L11:    BH      L12             ; higher (unsigned >)
+  40       41D  6300 0000                 L12:    BNH     L13             ; not higher (unsigned <=)
+  41       41F  4E40                      L13:    BRK     #0
+  42       420                            
+  43       420                                    END
 
 
 Symbol Table Dump: 
@@ -56,6 +60,7 @@ Symbol Table Dump:
     1049  Rel  L10  
     1051  Rel  L11  
     1053  Rel  L12  
+    1055  Rel  L13  
 
 Assembly Statistics: 
 Assembly Time: <ELAPSED>

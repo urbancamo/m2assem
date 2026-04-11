@@ -1,10 +1,13 @@
 ;
-;   branches.asm -- every Type 11 Bcc
+;   branches.asm -- every Type 11 Bcc and BR (Type 25)
 ;
 ;   Adds coverage for BE, BNE, BC, BNC, BP, BN, BV, BNV, BGT, BLT,
 ;   BH, BNH.  (BGE and BLE are already covered by bubble.asm.)
-;   BR and CALL (Type 25) are covered separately in call.asm because
-;   their addressing-mode routing is quite different.
+;   BR is also exercised here with a bare-label operand, which the
+;   port fixed by routing Type 25's Dir/Rel path through Type 11
+;   (the same Bcc encoder the conditional variants use) — the 1990
+;   code had it going to Type 15 (JMP) which required an Absolute
+;   operand type, so "BR Label" was broken.
 ;
 ;   Each branch targets the next label, producing a tiny chain of
 ;   branches each 2 bytes apart.  We don't care whether each condition
@@ -22,18 +25,19 @@
         LD.W    #5,.D1
         CMP.W   .D1,.D0         ; set flags
 
-        BE      L01             ; ==
-L01:    BNE     L02             ; !=
-L02:    BC      L03             ; carry
-L03:    BNC     L04             ; no carry
-L04:    BP      L05             ; plus
-L05:    BN      L06             ; minus
-L06:    BV      L07             ; overflow
-L07:    BNV     L08             ; no overflow
-L08:    BGT     L09             ; >
-L09:    BLT     L10             ; <
-L10:    BH      L11             ; higher (unsigned >)
-L11:    BNH     L12             ; not higher (unsigned <=)
-L12:    BRK     #0
+        BR      L01             ; unconditional (was broken in 1990)
+L01:    BE      L02             ; ==
+L02:    BNE     L03             ; !=
+L03:    BC      L04             ; carry
+L04:    BNC     L05             ; no carry
+L05:    BP      L06             ; plus
+L06:    BN      L07             ; minus
+L07:    BV      L08             ; overflow
+L08:    BNV     L09             ; no overflow
+L09:    BGT     L10             ; >
+L10:    BLT     L11             ; <
+L11:    BH      L12             ; higher (unsigned >)
+L12:    BNH     L13             ; not higher (unsigned <=)
+L13:    BRK     #0
 
         END

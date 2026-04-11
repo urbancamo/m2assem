@@ -1357,8 +1357,23 @@ VAR
   PROCEDURE Type25(): CARDINAL;
   (*
         Format: VARIABLE
-        Assembles: CALL by selecting between motorola equivalents of
-                   BSR and JSR.
+        Assembles: BR / CALL by selecting between motorola equivalents
+                   of BRA / BSR (PC-relative) and JMP / JSR (absolute).
+
+        The 1990 code had the routing inverted — it sent Imm operands
+        to Type11 (Bcc PC-relative encoder) and everything else to
+        Type15 (JMP/JSR effective-address encoder).  That meant a
+        bare-label target like "BR Loop" — which parses as Direct
+        addressing mode — ended up in the JMP path, whose CalcEA
+        requires an Absolute-typed operand.  Labels are Relative, so
+        JMP's CalcEA rejected them with "Argument must be a register"
+        (CalcEA's Dir branch actually wants .Dn/.An).  BR / CALL to a
+        bare label was therefore completely broken.
+
+        Fixed by routing Dir and Rel operands to Type11 (which already
+        handles PC-relative branch-to-label encoding for the Bcc
+        family) and leaving Abs / Ind / other EA modes to Type15 for
+        the absolute JMP / JSR encoding.
   *)
 
   VAR
@@ -1367,10 +1382,12 @@ VAR
   BEGIN
     IF DecInstr.NoOfOperands = 1 THEN
       ScanOperand(DecInstr.Operand[1], AddrMode);
-      IF AddrMode = Imm THEN
-        (* Must be a BSR instruction. *)
+      IF (AddrMode = Dir) OR (AddrMode = Rel) THEN
+        (* Bare label (or $label) -- emit PC-relative BRA/BSR via
+           Type11, using the BR / CALL mask already in AI[1]. *)
         RETURN Type11()
       ELSE
+        (* Absolute, indirect, etc. -- emit JMP/JSR via Type15. *)
         RETURN Type15()
       END
     ELSE

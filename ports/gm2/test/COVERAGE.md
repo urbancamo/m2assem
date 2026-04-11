@@ -36,6 +36,14 @@ the fixture rather than fixed:
   `MOVE.L Dn,-(SP)` / `MOVE.L (SP)+,Dn`.  Tested by `call.asm` for
   both `.D0` and `.D7` to verify the register number lands in the
   correct bit position for source (PUSH) and destination (POP).
+- **BR / CALL with a bare label** — formerly broken because Type 25
+  routed non-immediate operands to Type 15 (JMP/JSR), whose CalcEA
+  requires an Absolute-typed operand, but labels are Relative.  The
+  port flips the routing so Dir/Rel operands go through Type 11
+  (the same Bcc encoder the conditional variants use), leaving
+  Abs/Ind to Type 15 for the absolute form.  `branches.asm` now
+  uses `BR label` at the top of its chain; `call.asm` uses
+  `CALL label` alongside `CALL /abs` to exercise both paths.
 
 ## Fixtures
 
