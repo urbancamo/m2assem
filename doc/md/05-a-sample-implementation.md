@@ -1,3 +1,5 @@
+[← Chapter 4. Meta-Assemblers](04-meta-assemblers.md) | [↑ Contents](README.md) | [Chapter 6. Conclusion →](06-conclusion.md)
+
 # Chapter 5. A Sample Implementation
 
 This section of the report details the design and implementation of a sample meta-assembler system.
@@ -913,3 +915,7 @@ Boundary Case Analysis.
 'An extension of equivalence partitioning which concentrates on the edges of the class'.
 
 The testing both at individual and integration levels went well. The integration testing did highlight some areas of the design which, although not wrong, could definitely be improved (see Conclusion).
+
+---
+
+[← Chapter 4. Meta-Assemblers](04-meta-assemblers.md) | [↑ Contents](README.md) | [Chapter 6. Conclusion →](06-conclusion.md)

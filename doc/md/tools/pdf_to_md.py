@@ -1009,10 +1009,36 @@ def build_readme(chapters: list[Chapter]) -> str:
     return "\n".join(lines)
 
 
-def write_chapter(ch: Chapter) -> Path:
+def _nav_bar(prev: Chapter | None, nxt: Chapter | None) -> str:
+    """Build a single-line Markdown nav bar of the form
+    `← Previous | ↑ Contents | Next →`, with dashes in place of
+    either arrow link when the edge chapter is missing."""
+    left = (
+        f"[← Chapter {prev.number}. {prev.title}]({prev.slug}.md)"
+        if prev is not None else "—"
+    )
+    up = "[↑ Contents](README.md)"
+    right = (
+        f"[Chapter {nxt.number}. {nxt.title} →]({nxt.slug}.md)"
+        if nxt is not None else "—"
+    )
+    return f"{left} | {up} | {right}"
+
+
+def write_chapter(
+    ch: Chapter,
+    prev: Chapter | None = None,
+    nxt: Chapter | None = None,
+) -> Path:
     path = MD_DIR / f"{ch.slug}.md"
-    lines = [f"# Chapter {ch.number}. {ch.title}", ""]
+    nav = _nav_bar(prev, nxt)
+    lines: list[str] = [nav, "", f"# Chapter {ch.number}. {ch.title}", ""]
     lines.extend(ch.body)
+    # Make sure the body ends with a blank line before the trailing
+    # nav bar so the bar isn't fused to the last paragraph.
+    while lines and not lines[-1].strip():
+        lines.pop()
+    lines.extend(["", "---", "", nav])
     path.write_text("\n".join(lines).rstrip() + "\n")
     return path
 
@@ -1639,8 +1665,11 @@ def main() -> int:
         ch.body = cleanup_body(ch.body, emitted=emitted)
 
     (MD_DIR / "README.md").write_text(build_readme(chapters))
-    for ch in chapters:
-        path = write_chapter(ch)
+    ordered = sorted(chapters, key=lambda c: c.number)
+    for idx, ch in enumerate(ordered):
+        prev = ordered[idx - 1] if idx > 0 else None
+        nxt = ordered[idx + 1] if idx + 1 < len(ordered) else None
+        path = write_chapter(ch, prev=prev, nxt=nxt)
         print(f"wrote {path.relative_to(ROOT)}")
 
     return 0

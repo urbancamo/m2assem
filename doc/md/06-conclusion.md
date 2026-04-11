@@ -1,3 +1,5 @@
+[← Chapter 5. A Sample Implementation](05-a-sample-implementation.md) | [↑ Contents](README.md) | [Chapter 7. Bibliography →](07-bibliography.md)
+
 # Chapter 6. Conclusion
 
 
@@ -69,3 +71,7 @@ This section contains suggestions for future developments which would require la
 3. The IEEE standard was not necessarily the best standardised processor description method to use. Several methods have been implemented which address some of the problems caused by the IEEE standard. These include the fact that large lexical scanners are needed and that some aspects (such as paged addressing systems) are omitted. The reader is referred to references 27 and 28 for more information.
 
 4. Assembler facilities could be improved to make the meta-assembler more powerful. These would include macro facilities and block structuring of code. This would bring the syntax of the assembly language more in line with those of modern dedicated assemblers.
+
+---
+
+[← Chapter 5. A Sample Implementation](05-a-sample-implementation.md) | [↑ Contents](README.md) | [Chapter 7. Bibliography →](07-bibliography.md)

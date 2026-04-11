@@ -1,3 +1,5 @@
+[← Chapter 2. Abstract](02-abstract.md) | [↑ Contents](README.md) | [Chapter 4. Meta-Assemblers →](04-meta-assemblers.md)
+
 # Chapter 3. Introduction
 
 This report details the work carried out for a final year project. This project was undertaken throughout the third year of the BSc Honours Combined Studies Course at The Hatfield Polytechnic.
@@ -21,3 +23,7 @@ There were two primary objectives in conducting this project. These were:
 2. To attempt a sample implementation of a meta-assembler, to gain a grasp of the problems and possible solutions to the meta-assembly concept.
 
 The project report structure therefore reflects these two objectives. Section 4 is concerned with meta-assemblers and Section 5 is concerned with the sample implementation. Section 6 concludes the work carried out during the project and speculates on the future for meta-assemblers.
+
+---
+
+[← Chapter 2. Abstract](02-abstract.md) | [↑ Contents](README.md) | [Chapter 4. Meta-Assemblers →](04-meta-assemblers.md)

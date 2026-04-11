@@ -1,3 +1,5 @@
+[← Chapter 6. Conclusion](06-conclusion.md) | [↑ Contents](README.md) | [Chapter 8. Appendix →](08-appendix.md)
+
 # Chapter 7. Bibliography
 
 Books:
@@ -67,3 +69,7 @@ Articles:
 31. Anderson, Brian R. Modula-2: A 68000 Cross-Assembler - Part 3. Dr Dobb's Journal of Software Tools, June 1986, Vol 11, Issue 6, 46-62.
 
 32. Chui, Peter P. K., Fu, Sammy T.K. A Generative Approach to Universal Cross Assembler Design. SIPLAN Notices, January 1990, Vol 25, No 1, 43-51.
+
+---
+
+[← Chapter 6. Conclusion](06-conclusion.md) | [↑ Contents](README.md) | [Chapter 8. Appendix →](08-appendix.md)

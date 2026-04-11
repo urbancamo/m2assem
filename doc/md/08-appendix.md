@@ -1,3 +1,5 @@
+[← Chapter 7. Bibliography](07-bibliography.md) | [↑ Contents](README.md) | —
+
 # Chapter 8. Appendix
 
 The original report shipped with a printed appendix containing every
@@ -82,3 +84,7 @@ The gm2 port exercises this file as the primary regression test;
 see [`ports/gm2/test/fixtures/bubble.asm`](../../ports/gm2/test/fixtures/bubble.asm)
 and friends for further programs that were written specifically to
 probe the assembler's instruction set coverage.
+
+---
+
+[← Chapter 7. Bibliography](07-bibliography.md) | [↑ Contents](README.md) | —

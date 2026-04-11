@@ -1,3 +1,5 @@
+[← Chapter 3. Introduction](03-introduction.md) | [↑ Contents](README.md) | [Chapter 5. A Sample Implementation →](05-a-sample-implementation.md)
+
 # Chapter 4. Meta-Assemblers
 
 
@@ -738,3 +740,7 @@ Two primitive assemblers have been implemented by the authors of the report for 
 *Figure 27. Assembly speed statistics*
 
 Implementation time for a new assembler is quoted as about 20 to 30 days which is considerably longer than other implementations discussed earlier (although it is still substantially less than the time required to write a dedicated assembler).
+
+---
+
+[← Chapter 3. Introduction](03-introduction.md) | [↑ Contents](README.md) | [Chapter 5. A Sample Implementation →](05-a-sample-implementation.md)
