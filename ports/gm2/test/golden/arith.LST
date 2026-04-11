@@ -1,0 +1,79 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   arith.asm -- remaining arithmetic opcodes
+   3         0                            ;
+   4         0                            ;   Adds coverage for ADDD (ABCD), SUBD (SBCD), SUBC (SUBX), MUL
+   5         0                            ;   (MULS), MULU, DIV (DIVS), DIVU, NEG, NEGC (NEGX), NEGD (NBCD),
+   6         0                            ;   EXT, CHK, NOT, CLR and TEST (TST).
+   7         0                            ;
+   8         0                            
+   9         0                                    OBJECT  1
+  10         0                                    SYMBOL  1
+  11         0                                    BASE    D'10
+  12         0                            
+  13       400                                    ORG     1024
+  14       400                            
+  15       400  203C 0000 0064                    LD.L    #100,.D0
+  16       403  223C 0000 0007                    LD.L    #7,.D1
+  17       406  343C 00C8                         LD.W    #200,.D2
+  18       408  363C 0008                         LD.W    #8,.D3
+  19       40A                            
+  20       40A                                    ;  Multiplication (signed and unsigned) — 16x16 → 32
+  21       40A  C5C3                              MUL.W   .D3,.D2                 ; signed multiply
+  22       40B  C4C3                              MULU.W  .D3,.D2                 ; unsigned multiply
+  23       40C                            
+  24       40C                                    ;  Division (signed and unsigned) — 32/16 → 16:16
+  25       40C  283C 0000 03E8                    LD.L    #1000,.D4
+  26       40F  3A3C 0007                         LD.W    #7,.D5
+  27       411  89C5                              DIV.W   .D5,.D4                 ; signed divide
+  28       412  283C 0000 03E8                    LD.L    #1000,.D4
+  29       415  3A3C 0007                         LD.W    #7,.D5
+  30       417  88C5                              DIVU.W  .D5,.D4                 ; unsigned divide
+  31       418                            
+  32       418                                    ;  Decimal arithmetic (ABCD / SBCD)
+  33       418  C101                              ADDD.B  .D1,.D0                 ; packed BCD add with X
+  34       419  8101                              SUBD.B  .D1,.D0                 ; packed BCD subtract with X
+  35       41A                            
+  36       41A                                    ;  Extended subtract with borrow (68000 SUBX)
+  37       41A  9181                              SUBC.L  .D1,.D0
+  38       41B                            
+  39       41B                                    ;  Negation variants
+  40       41B  4480                              NEG.L   .D0                     ; two's complement negate
+  41       41C  4080                              NEGC.L  .D0                     ; negate with extend (NEGX)
+  42       41D  4800                              NEGD.B  .D0                     ; BCD negate (NBCD)
+  43       41E                            
+  44       41E                                    ;  Sign extension.  The modifier is the SOURCE width in
+  45       41E                                    ;  m2assem, so EXT.B is 68000 EXT.W (byte→word) and EXT.W
+  46       41E                                    ;  is 68000 EXT.L (word→long).
+  47       41E  4880                              EXT.B   .D0
+  48       41F  48C0                              EXT.W   .D0
+  49       420                            
+  50       420                                    ;  Check against bounds (raises TRAP 6 if .D0 < 0 or > .D1)
+  51       420  4181                              CHK.W   .D1,.D0
+  52       421                            
+  53       421                                    ;  Bitwise NOT
+  54       421  4680                              NOT.L   .D0
+  55       422                            
+  56       422                                    ;  Clear register to zero
+  57       422  4280                              CLR.L   .D0
+Page:    2    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+  58       423                            
+  59       423                                    ;  Test (compare against zero)
+  60       423  4A80                              TEST.L  .D0
+  61       424                            
+  62       424  4E40                              BRK     #0
+  63       425                            
+  64       425                                    END
+
+
+Symbol Table Dump: 
+
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

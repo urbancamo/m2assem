@@ -1,0 +1,49 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+Demo
+
+   1         0                            ;
+   2         0                            ;   pseudo.asm -- remaining pseudo-ops
+   3         0                            ;
+   4         0                            ;   Adds coverage for DATA.B, RES, TITLE and PAGE.
+   5         0                            ;
+   6         0                            
+   7         0                                    OBJECT  1
+   8         0                                    SYMBOL  1
+   9         0                                    BASE    D'10
+  10         0                            
+  11         0                                    TITLE   Demo
+  12         0                            
+  13       400                                    ORG     1024
+  14       400                            
+  15       400  4E71                              NOP
+  16       401                            
+Page:    2    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+Demo
+
+  17       401                                    PAGE                            ; page break in listing
+  18       401                            
+  19       401  4E71                              NOP
+  20       402                            
+  21       402  4E40                              BRK     #0
+  22       403                            
+  23       800                                    ORG     2048
+  24       800                            
+  25       800  0001                              DATA.B  1
+  26       801  0002                              DATA.B  2
+  27       802  0003                              DATA.B  3
+  28       803  0004                              DATA.B  4
+  29       804                            
+  30       814                                    RES     16                      ; reserve 16 words
+  31       814                            
+  32       814  0009                              DATA.B  9
+  33       815                            
+  34       815                                    END
+
+
+Symbol Table Dump: 
+
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

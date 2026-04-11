@@ -1,0 +1,37 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   system.asm -- Type 18 system-control and return instructions
+   3         0                            ;
+   4         0                            ;   Adds coverage for WAIT (STOP), BRKV (TRAPV), RESET, RET (RTS),
+   5         0                            ;   RETR (RTR) and RETE (RTE).  NOP is already covered by sample.asm.
+   6         0                            ;
+   7         0                            ;   These are all no-operand Type 18 opcodes.  The test just needs the
+   8         0                            ;   assembler to accept each mnemonic.
+   9         0                            ;
+  10         0                            
+  11         0                                    OBJECT  1
+  12         0                                    SYMBOL  1
+  13         0                                    BASE    D'10
+  14         0                            
+  15       400                                    ORG     1024
+  16       400                            
+  17       400  4E72                              WAIT                            ; STOP — halt / wait for interrupt
+  18       401  4E76                              BRKV                            ; TRAPV — trap if overflow
+  19       402  4E70                              RESET                           ; external reset
+  20       403  4E75                              RET                             ; RTS
+  21       404  4E77                              RETR                            ; RTR
+  22       405  4E73                              RETE                            ; RTE
+  23       406  4E40                              BRK     #0
+  24       407                            
+  25       407                                    END
+
+
+Symbol Table Dump: 
+
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

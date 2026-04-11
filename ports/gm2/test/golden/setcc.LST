@@ -1,0 +1,51 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   setcc.asm -- every Type 10 Scc instruction
+   3         0                            ;
+   4         0                            ;   Adds coverage for SET (always), SETE, SETNE, SETC, SETNC, SETP,
+   5         0                            ;   SETN, SETV, SETNV, SETGT, SETGE, SETLT, SETLE, SETH, SETNH.
+   6         0                            ;
+   7         0                            ;   The 68000 Scc family sets a byte to $FF if the condition holds
+   8         0                            ;   and $00 otherwise.  Each line below sets a single data register.
+   9         0                            ;
+  10         0                            
+  11         0                                    OBJECT  1
+  12         0                                    SYMBOL  1
+  13         0                                    BASE    D'10
+  14         0                            
+  15       400                                    ORG     1024
+  16       400                            
+  17       400  303C 0001                         LD.W    #1,.D0
+  18       402  323C 0001                         LD.W    #1,.D1
+  19       404  B340                              CMP.W   .D1,.D0                 ; flags for the Scc below
+  20       405                            
+  21       405  50C2                              SET     .D2                     ; always true
+  22       406  57C2                              SETE    .D2                     ; equal
+  23       407  56C2                              SETNE   .D2                     ; not equal
+  24       408  55C2                              SETC    .D2                     ; carry
+  25       409  54C2                              SETNC   .D2                     ; no carry
+  26       40A  5AC2                              SETP    .D2                     ; plus
+  27       40B  5BC2                              SETN    .D2                     ; minus / negative
+  28       40C  59C2                              SETV    .D2                     ; overflow
+  29       40D  58C2                              SETNV   .D2                     ; no overflow
+  30       40E  5EC2                              SETGT   .D2                     ; signed >
+  31       40F  5CC2                              SETGE   .D2                     ; signed >=
+  32       410  5DC2                              SETLT   .D2                     ; signed <
+  33       411  5FC2                              SETLE   .D2                     ; signed <=
+  34       412  52C2                              SETH    .D2                     ; unsigned > (higher)
+  35       413  53C2                              SETNH   .D2                     ; unsigned <= (not higher)
+  36       414                            
+  37       414  4E40                              BRK     #0
+  38       415                            
+  39       415                                    END
+
+
+Symbol Table Dump: 
+
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

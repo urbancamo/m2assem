@@ -45,6 +45,15 @@ CASES=(
   "sample:$SRC_DIR/demo/sample.asm"
   "bubble:$FIXTURE_DIR/bubble.asm"
   "math:$FIXTURE_DIR/math.asm"
+  "branches:$FIXTURE_DIR/branches.asm"
+  "dbcc:$FIXTURE_DIR/dbcc.asm"
+  "shifts:$FIXTURE_DIR/shifts.asm"
+  "setcc:$FIXTURE_DIR/setcc.asm"
+  "arith:$FIXTURE_DIR/arith.asm"
+  "bits:$FIXTURE_DIR/bits.asm"
+  "system:$FIXTURE_DIR/system.asm"
+  "pseudo:$FIXTURE_DIR/pseudo.asm"
+  "call:$FIXTURE_DIR/call.asm"
 )
 
 fail() { printf '%s\n' "$*" >&2; exit 1; }

@@ -1,0 +1,66 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   dbcc.asm -- every Type 12 DBcc
+   3         0                            ;
+   4         0                            ;   Adds coverage for DBE, DBNE, DBC, DBNC, DBP, DBN, DBV, DBNV, DBGT,
+   5         0                            ;   DBGE, DBLT, DBLE, DBH, DBNH.  (DBR is already covered by math.asm.)
+   6         0                            ;
+   7         0                            ;   Each DBcc is a single iteration loop — the operand pattern is
+   8         0                            ;   (counter-register, target-label).  The semantic effect isn't
+   9         0                            ;   interesting for this test; we just want every mnemonic to parse
+  10         0                            ;   and encode.
+  11         0                            ;
+  12         0                            
+  13         0                                    OBJECT  1
+  14         0                                    SYMBOL  1
+  15         0                                    BASE    D'10
+  16         0                            
+  17       400                                    ORG     1024
+  18       400                            
+  19       400  303C 0001                         LD.W    #1,.D0
+  20       402  323C 0001                         LD.W    #1,.D1
+  21       404  B340                              CMP.W   .D1,.D0         ; set flags
+  22       405                            
+  23       405  57C8 FFFE                 T01:    DBE     .D0,T01
+  24       407  56C8 FFFE                 T02:    DBNE    .D0,T02
+  25       409  55C8 FFFE                 T03:    DBC     .D0,T03
+  26       40B  54C8 FFFE                 T04:    DBNC    .D0,T04
+  27       40D  5AC8 FFFE                 T05:    DBP     .D0,T05
+  28       40F  5BC8 FFFE                 T06:    DBN     .D0,T06
+  29       411  59C8 FFFE                 T07:    DBV     .D0,T07
+  30       413  58C8 FFFE                 T08:    DBNV    .D0,T08
+  31       415  5EC8 FFFE                 T09:    DBGT    .D0,T09
+  32       417  5CC8 FFFE                 T10:    DBGE    .D0,T10
+  33       419  5DC8 FFFE                 T11:    DBLT    .D0,T11
+  34       41B  5FC8 FFFE                 T12:    DBLE    .D0,T12
+  35       41D  52C8 FFFE                 T13:    DBH    .D0,T13
+  36       41F  51C8 FFFE                 T14:    DBNH    .D0,T14
+  37       421                            
+  38       421  4E40                              BRK     #0
+  39       422                            
+  40       422                                    END
+
+
+Symbol Table Dump: 
+
+    1029  Rel  T01  
+    1031  Rel  T02  
+    1033  Rel  T03  
+    1035  Rel  T04  
+    1037  Rel  T05  
+    1039  Rel  T06  
+    1041  Rel  T07  
+    1043  Rel  T08  
+    1045  Rel  T09  
+    1047  Rel  T10  
+    1049  Rel  T11  
+    1051  Rel  T12  
+    1053  Rel  T13  
+    1055  Rel  T14  
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

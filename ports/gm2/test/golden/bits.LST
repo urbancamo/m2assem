@@ -1,0 +1,43 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   bits.asm -- Type 22 bit-manipulation instructions
+   3         0                            ;
+   4         0                            ;   Adds coverage for TESTSET (BSET), TESTCLR (BCLR) and TESTNOT
+   5         0                            ;   (BCHG).
+   6         0                            ;
+   7         0                            ;   TEST1 (BTST) is NOT covered here because the 1990 Lex module only
+   8         0                            ;   reads alphabetic characters for command names (ExtractCommand
+   9         0                            ;   loops while CurrentChar IN AlphabetSet), so any mnemonic with a
+  10         0                            ;   digit — TEST1 is the only one in the opcode table — can't be
+  11         0                            ;   parsed at all.  The opcode is registered in InsertOpcodesInTable
+  12         0                            ;   but unreachable from a source file; this is a latent bug in the
+  13         0                            ;   1990 lexer.
+  14         0                            ;
+  15         0                            
+  16         0                                    OBJECT  1
+  17         0                                    SYMBOL  1
+  18         0                                    BASE    D'10
+  19         0                            
+  20       400                                    ORG     1024
+  21       400                            
+  22       400  203C 0000 0005                    LD.L    #5,.D0                  ; bit number
+  23       403  223C 0000 0000                    LD.L    #0,.D1                  ; target word
+  24       406                            
+  25       406  03C0                              TESTSET .D0,.D1                 ; BSET — test and set
+  26       407  0380                              TESTCLR .D0,.D1                 ; BCLR — test and clear
+  27       408  0340                              TESTNOT .D0,.D1                 ; BCHG — test and change
+  28       409                            
+  29       409  4E40                              BRK     #0
+  30       40A                            
+  31       40A                                    END
+
+
+Symbol Table Dump: 
+
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

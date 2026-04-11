@@ -1,0 +1,60 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   shifts.asm -- remaining Type 21 shift / rotate instructions
+   3         0                            ;
+   4         0                            ;   Adds coverage for SHR, SHLA, ROR, ROL, RORC, ROLC.
+   5         0                            ;   (SHL and SHRA are already covered by sample.asm and math.asm.)
+   6         0                            ;
+   7         0                            ;   Each instruction shifts/rotates a register by an immediate count
+   8         0                            ;   and writes the result to a results buffer.
+   9         0                            ;
+  10         0                            
+  11         0                                    OBJECT  1
+  12         0                                    SYMBOL  1
+  13         0                                    BASE    D'10
+  14         0                            
+  15         0                            RESLOC  EQU     8192
+  16         0                            
+  17       400                                    ORG     1024
+  18       400                            
+  19       400  207C 0000 2000                    LD.L    #RESLOC,.A0
+  20       403                            
+  21       403  203C 0000 00FF                    LD.L    #255,.D0                ; 0x000000FF
+  22       406  E488                              SHR.L   #2,.D0                  ; LSR: logical shift right
+  23       407  2080                              MOV.L   .D0,@.A0
+  24       408                            
+  25       408  203C 0000 00FF                    LD.L    #255,.D0
+  26       40B  E580                              SHLA.L  #2,.D0                  ; ASL: arith shift left
+  27       40C  2140 0004                         MOV.L   .D0,@.A0(4)
+  28       40E                            
+  29       40E  203C 0000 00FF                    LD.L    #255,.D0
+  30       411  E898                              ROR.L   #4,.D0                  ; rotate right
+  31       412  2140 0008                         MOV.L   .D0,@.A0(8)
+  32       414                            
+  33       414  203C 0000 00FF                    LD.L    #255,.D0
+  34       417  E998                              ROL.L   #4,.D0                  ; rotate left
+  35       418  2140 000C                         MOV.L   .D0,@.A0(12)
+  36       41A                            
+  37       41A  203C 0000 00FF                    LD.L    #255,.D0
+  38       41D  E890                              RORC.L  #4,.D0                  ; ROXR: rotate right through carry
+  39       41E  2140 0010                         MOV.L   .D0,@.A0(16)
+  40       420                            
+  41       420  203C 0000 00FF                    LD.L    #255,.D0
+  42       423  E990                              ROLC.L  #4,.D0                  ; ROXL: rotate left through carry
+  43       424  2140 0014                         MOV.L   .D0,@.A0(20)
+  44       426                            
+  45       426  4E40                              BRK     #0
+  46       427                            
+  47       427                                    END
+
+
+Symbol Table Dump: 
+
+    8192  Abs  RESLOC  
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+
