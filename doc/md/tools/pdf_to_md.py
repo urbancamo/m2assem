@@ -76,14 +76,11 @@ APPENDIX_SECTION_RE = re.compile(
 # Line looks like a figure caption: "Figure 6. ..."
 FIGURE_RE = re.compile(r"^\s*Figure\s+(\d+)\.\s+(.*)$")
 
-# Figures we've rendered as PNG under doc/md/figures/, keyed by the
-# "Figure N" number in the source PDF.
-FIGURE_IMAGES = {
-    "6":  ("figures/fig-06-instruction-formats.png",
-           "68000 instruction format bit fields"),
-    "30": ("figures/fig-30-hash-table-performance.png",
-           "Hash table collisions vs load"),
-}
+# Figures rendered as PNG under doc/md/figures/, keyed by the
+# "Figure N" number in the source PDF.  Populated by discover_figures()
+# at runtime: every figure gets a whole-page render from the PDF the
+# caption was found in.
+FIGURE_IMAGES: dict[str, tuple[str, str]] = {}
 
 
 @dataclass
@@ -485,6 +482,292 @@ def slugify(number: str, title: str) -> str:
     return f"{n}-{t}"
 
 
+# Diagram-residue heuristics.  PageMaker 3 drew each figure as absolute-
+# positioned text boxes which pdftotext captures as lines of short
+# uppercase labels, often wrapped inside an indented code fence by
+# paragraphify().  We strip those fences — and any surrounding orphan
+# italic "Figure N. <fragment>" line emitted before paragraphify had
+# the full caption — once we've already got the figure as a PNG.
+ORPHAN_FIG_CAPTION_RE = re.compile(r"^\*Figure\s+\d+\.\s+.*\*$")
+IMAGE_LINE_RE = re.compile(r"^!\[Figures?\s+(\d+)\b[^\]]*\]\(([^)]+)\)$")
+FIG_MENTION_RE = re.compile(r"\b[Ff]igure\s+(\d+)\b")
+
+
+def _is_diagram_residue(block: list[str]) -> bool:
+    """True if `block` (the body of a fenced code block) is PageMaker
+    diagram residue rather than genuine source code or a table.
+
+    Diagnostics:
+      - short (few lines, few tokens)
+      - no Modula-2 / 68000 syntax (`:=`, `PROCEDURE`, …)
+      - either all-caps labels ("OBJECT", "CODE"), or short
+        capitalised caption fragments ("Classification.",
+        "Assembler Operation")
+    """
+    if not block:
+        return False
+    body = [l for l in block if l.strip()]
+    if not body:
+        return False
+    if len(body) > 12:
+        return False
+    joined = "\n".join(body)
+    code_tokens = (
+        "PROCEDURE", "BEGIN", "END ", ":=", "MODULE", "IF ", "VAR",
+        "CONST", "RECORD", "ARRAY", "LOOP", "WHILE", "CASE", "FOR ",
+        ";", "(*", "*)", "RETURN",
+    )
+    if any(tok in joined for tok in code_tokens):
+        return False
+    text = " ".join(l.strip() for l in body)
+    # Short caption / label fragments — pure ASCII words, no
+    # prose flow (<= 8 words, no comma-separated clauses).
+    words = text.split()
+    if len(words) <= 8 and not re.search(r",|\band\b|\bthe\b|\bis\b", text):
+        return True
+    # Longer blocks: treat as residue only if at least 55% of
+    # tokens are ALL-CAPS.
+    alpha = re.findall(r"[A-Za-z][A-Za-z0-9_.]*", joined)
+    if not alpha:
+        return False
+    allcaps = sum(1 for w in alpha if w.isupper())
+    if allcaps / len(alpha) < 0.55:
+        return False
+    lowercase_long = sum(1 for w in alpha if len(w) >= 5 and w.islower())
+    if lowercase_long >= 3:
+        return False
+    return True
+
+
+def _is_orphan_caption(line: str) -> bool:
+    """Match stray italic caption lines like `*Figure 1. Meta-Assembler*`
+    that the walker emitted from a single caption-text line but which
+    are truncated mid-phrase because of PageMaker line breaks.  We drop
+    them because the corresponding `![Figure N — …](…)` image already
+    carries the full caption in its alt text."""
+    if not ORPHAN_FIG_CAPTION_RE.match(line):
+        return False
+    return True
+
+
+def cleanup_body(body: list[str], emitted: set[str] | None = None) -> list[str]:
+    """
+    Post-process a chapter body after paragraphify() to sharpen
+    figure handling:
+
+      1. Drop orphan italic `*Figure N. …*` lines — the image's alt
+         text already carries the full caption.
+      2. Drop indented code fences whose content is diagram residue
+         (short runs of uppercase labels left over from PageMaker's
+         absolute-positioned text boxes).
+      3. Inject `![Figure N — caption](path)` for any figure that has
+         an image in FIGURE_IMAGES but never appeared as an explicit
+         caption line — this covers cases where a figure shares a
+         layout line with the previous figure's diagram content and
+         FIGURE_RE therefore failed to match.  The image is inserted
+         after the first paragraph that mentions the figure.
+      4. Collapse consecutive image lines that point at the same PNG
+         (pages with multiple figures share one render).
+
+    Returns the rewritten body.
+    """
+    # Step 1 + 2: fence-walk drop pass.  Track whether the most
+    # recent non-blank line was a figure image — short code blocks
+    # that appear right after an image are almost always diagram
+    # residue, even if their content looks slightly prose-ish
+    # because layout artefacts interleaved adjacent text.
+    out: list[str] = []
+    i = 0
+    near_image_window = 0
+    while i < len(body):
+        line = body[i]
+        if _is_orphan_caption(line):
+            i += 1
+            if i < len(body) and not body[i].strip():
+                i += 1
+            continue
+        if line.startswith("```"):
+            j = i + 1
+            while j < len(body) and not body[j].startswith("```"):
+                j += 1
+            block = body[i + 1 : j]
+            looks_residue = _is_diagram_residue(block)
+            # Near-image heuristic: any short block (<= 6 non-blank
+            # lines, <= 400 chars) that immediately follows an image
+            # is residue even if it doesn't trip the stricter
+            # all-caps check.
+            if not looks_residue and near_image_window > 0:
+                nonblank = [l for l in block if l.strip()]
+                total = sum(len(l) for l in nonblank)
+                if nonblank and len(nonblank) <= 6 and total <= 400:
+                    joined = "\n".join(nonblank)
+                    if not any(tok in joined for tok in (
+                        "PROCEDURE", "BEGIN", "END ", ":=", "MODULE",
+                        "RECORD", "CONST ", "VAR ", "IF ",
+                    )):
+                        looks_residue = True
+            if looks_residue:
+                i = j + 1
+                if i < len(body) and not body[i].strip():
+                    i += 1
+                continue
+            out.extend(body[i : j + 1])
+            i = j + 1
+            near_image_window = 0
+            continue
+        if IMAGE_LINE_RE.match(line):
+            near_image_window = 2
+        elif line.strip():
+            near_image_window = max(0, near_image_window - 1)
+        out.append(line)
+        i += 1
+
+    # Step 3: find figures that have a PNG but no image line in `out`.
+    # Skip figures already emitted in a previous chapter so cross-chapter
+    # "see figure N" mentions don't re-inject images the reader already
+    # saw earlier.
+    if emitted is None:
+        emitted = set()
+    # Also strip any image lines for figures already emitted in a
+    # previous chapter — they'd be duplicate images for a reference
+    # that sits in a later chapter's prose.
+    out_filtered: list[str] = []
+    skip_count = 0
+    for idx, line in enumerate(out):
+        if skip_count > 0:
+            skip_count -= 1
+            continue
+        m = IMAGE_LINE_RE.match(line)
+        if m and m.group(1) in emitted:
+            # Drop image + optional blank + italic caption + blank.
+            skip = 0
+            if idx + 1 < len(out) and not out[idx + 1].strip():
+                skip += 1
+            if idx + 1 + skip < len(out) and out[idx + 1 + skip].startswith("*Figure"):
+                skip += 1
+                if idx + 1 + skip < len(out) and not out[idx + 1 + skip].strip():
+                    skip += 1
+            skip_count = skip
+            continue
+        out_filtered.append(line)
+    out = out_filtered
+
+    have_image: set[str] = set()
+    for line in out:
+        m = IMAGE_LINE_RE.match(line)
+        if m:
+            have_image.add(m.group(1))
+    missing = [
+        n for n in FIGURE_IMAGES
+        if n not in have_image
+        and n not in emitted
+        and any(f"figure {n}" in l.lower() or f"Figure {n}" in l for l in out)
+    ]
+    for num in missing:
+        # Only inject if its PNG is on a page we already show — if
+        # the PNG path matches an existing image line, that page is
+        # already in the chapter and this figure is covered by a
+        # shared render.  Find the first paragraph mentioning the
+        # figure and insert after it.
+        path, alt = FIGURE_IMAGES[num]
+        caption = alt.split(" — ", 1)[1] if " — " in alt else alt
+        mention_re = re.compile(rf"\b[Ff]igure\s+{num}\b")
+        for idx, line in enumerate(out):
+            if mention_re.search(line) and not line.startswith("!["):
+                # Insert after the paragraph (which is this single line
+                # since paragraphify already joined wraps).
+                insert_at = idx + 1
+                # Skip the trailing blank.
+                if insert_at < len(out) and not out[insert_at].strip():
+                    insert_at += 1
+                injection = [
+                    f"![{alt}]({path})",
+                    "",
+                    f"*Figure {num}. {caption}*",
+                    "",
+                ]
+                out = out[:insert_at] + injection + out[insert_at:]
+                break
+
+    # Step 4: global dedup of image lines that point at the same PNG.
+    # Pages with multiple figures share a single render, so after
+    # injecting missing figures we can end up with two separated image
+    # lines that reference the same file.  Keep only the first one but
+    # give it a combined caption listing all figure numbers it covers.
+    seen_paths: dict[str, int] = {}      # path -> index of first image
+    combined_nums: dict[int, list[str]] = {}   # first-idx -> [figure nums]
+    to_drop: set[int] = set()
+    for idx, line in enumerate(out):
+        m = IMAGE_LINE_RE.match(line)
+        if not m:
+            continue
+        path = m.group(2)
+        num = m.group(1)
+        if path in seen_paths:
+            first = seen_paths[path]
+            if num not in combined_nums[first]:
+                combined_nums[first].append(num)
+            # Drop this image line plus its italic caption and the
+            # surrounding blank lines.
+            to_drop.add(idx)
+            if idx + 1 < len(out) and not out[idx + 1].strip():
+                to_drop.add(idx + 1)
+            if idx + 2 < len(out) and out[idx + 2].startswith("*Figure"):
+                to_drop.add(idx + 2)
+                if idx + 3 < len(out) and not out[idx + 3].strip():
+                    to_drop.add(idx + 3)
+        else:
+            seen_paths[path] = idx
+            combined_nums[idx] = [num]
+
+    # Rewrite the alt text + italic caption on kept image lines to
+    # list every figure number the PNG covers, sorted ascending.
+    for first_idx, nums in combined_nums.items():
+        if len(nums) == 1:
+            continue
+        nums = sorted(nums, key=int)
+        line = out[first_idx]
+        m = IMAGE_LINE_RE.match(line)
+        path = m.group(2)
+        captions = [
+            FIGURE_IMAGES[n][1].split(" — ", 1)[1]
+            if " — " in FIGURE_IMAGES[n][1] else FIGURE_IMAGES[n][1]
+            for n in nums
+        ]
+        joined_nums = " / ".join(nums)
+        joined_captions = "; ".join(f"({n}) {c}" for n, c in zip(nums, captions))
+        out[first_idx] = f"![Figures {joined_nums} — {joined_captions}]({path})"
+        if first_idx + 2 < len(out) and out[first_idx + 2].startswith("*Figure"):
+            out[first_idx + 2] = f"*Figures {joined_nums}. {joined_captions}*"
+
+    deduped = [l for i, l in enumerate(out) if i not in to_drop]
+    # Collapse multiple blank lines left by deletion.
+    cleaned: list[str] = []
+    prev_blank = False
+    for l in deduped:
+        if not l.strip():
+            if prev_blank:
+                continue
+            prev_blank = True
+        else:
+            prev_blank = False
+        cleaned.append(l)
+
+    # Record every figure that now has an image in this body so
+    # subsequent chapters can skip re-injection.
+    for l in cleaned:
+        m = IMAGE_LINE_RE.match(l)
+        if m:
+            emitted.add(m.group(1))
+            # Multi-figure captions list additional numbers after
+            # "Figures X / Y / Z" — record them all.
+            alt_m = re.match(r"^!\[Figures\s+([0-9 /]+)\s+—", l)
+            if alt_m:
+                for n in re.findall(r"\d+", alt_m.group(1)):
+                    emitted.add(n)
+    return cleaned
+
+
 def convert(lines: list[str]) -> list[Chapter]:
     """Walk cleaned raw lines, emit a list of Chapter records."""
     chapters: list[Chapter] = []
@@ -779,29 +1062,149 @@ def _magick_available() -> bool:
         return False
 
 
-def extract_figures() -> None:
+def discover_figures() -> None:
+    """
+    Scan every source PDF page-by-page for "Figure N." captions and
+    populate FIGURE_IMAGES with one entry per figure number.  Each
+    figure is rendered as the full PDF page it's on — PageMaker 3
+    drew these as PDF primitives (lines + text boxes) rather than
+    raster images, so they come through as crisp vector art when
+    rasterised by pdftoppm but are unreadable in the pdftotext
+    extraction.
+
+    Pages that carry two figures (1+2, 3+4, 8+9, 16+17, 20+21,
+    30+31) share a single rendered PNG — both figure numbers in
+    FIGURE_IMAGES map to the same file, so the Markdown shows the
+    page once rather than duplicating it.
+    """
+    figures: dict[str, tuple[Path, int, str]] = {}
+    # Deliberate order: Part2 first so its entries win if Part1
+    # duplicates the figure.  Then Part1 fills in anything missing.
+    ordered = [
+        PDF_DIR / "FinalYearProject-Part2.pdf",
+        PDF_DIR / "FinalYearProject-Part1.pdf",
+    ]
+    caption_re = re.compile(r"^\s*Figure\s+(\d+)\.\s+(.*?)\s*$")
+    for pdf in ordered:
+        assert pdf.exists(), f"missing source PDF: {pdf}"
+        info = subprocess.run(
+            ["pdfinfo", str(pdf)], check=True, capture_output=True, text=True,
+        ).stdout
+        pages_line = next(l for l in info.splitlines() if l.startswith("Pages:"))
+        page_count = int(pages_line.split()[1])
+        for page in range(1, page_count + 1):
+            text = subprocess.run(
+                ["pdftotext", "-f", str(page), "-l", str(page),
+                 str(pdf), "-"],
+                check=True, capture_output=True, text=True,
+            ).stdout
+            lines = text.splitlines()
+            for i, line in enumerate(lines):
+                m = caption_re.match(line)
+                if not m:
+                    continue
+                num = m.group(1)
+                if num in figures:
+                    continue
+                caption_parts = [m.group(2).strip()]
+                if not caption_parts[0].endswith("."):
+                    j = i + 1
+                    while j < len(lines) and j < i + 4:
+                        nxt = lines[j].strip()
+                        if not nxt:
+                            j += 1
+                            continue
+                        if len(nxt) > 40:
+                            break
+                        if re.match(r"^-?\s*\d+\s*-?\s*$", nxt):
+                            break
+                        if re.match(r"^-?\s*Appendix\b", nxt):
+                            break
+                        if re.match(r"^(Figure\s+\d+|\d+\.|[A-Z]{3,})", nxt):
+                            break
+                        caption_parts.append(nxt)
+                        if nxt.endswith("."):
+                            break
+                        j += 1
+                caption = " ".join(caption_parts)
+                caption = re.sub(r"\s+", " ", caption).strip().rstrip(".")
+                figures[num] = (pdf, page, caption)
+
     fig_dir = MD_DIR / "figures"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    # Figure 6 — 68000 instruction format diagram — Part 1 page 21.
-    # The figure itself sits in the lower 2/3 of the page after the
-    # preamble paragraphs; crop to roughly that region before trimming.
-    extract_figure(
-        PDF_DIR / "FinalYearProject-Part1.pdf",
-        21,
-        fig_dir / "fig-06-instruction-formats.png",
-        crop=(200, 850, 2100, 2300),
-    )
+    # Group figures by (pdf, page) so we render each unique page
+    # only once.  All figures on the same page share a PNG whose
+    # filename lists every figure number it contains.
+    by_page: dict[tuple[Path, int], list[str]] = {}
+    for num in sorted(figures, key=int):
+        pdf, page, _ = figures[num]
+        by_page.setdefault((pdf, page), []).append(num)
 
-    # Figure 30 — Hash-table performance — Part 2 page 2.  The figure
-    # is small and near the top of the page; crop to the top half and
-    # let -trim tighten from there.
-    extract_figure(
-        PDF_DIR / "FinalYearProject-Part2.pdf",
-        2,
-        fig_dir / "fig-30-hash-table-performance.png",
-        crop=(200, 400, 2100, 1100),
+    page_to_png: dict[tuple[Path, int], str] = {}
+    for (pdf, page), nums in by_page.items():
+        first_caption = figures[nums[0]][2]
+        slug = re.sub(r"[^a-z0-9]+", "-", first_caption.lower()).strip("-")[:40]
+        slug = slug or f"figure-{nums[0]}"
+        if len(nums) == 1:
+            fname = f"fig-{int(nums[0]):02d}-{slug}.png"
+        else:
+            ids = "-".join(f"{int(n):02d}" for n in nums)
+            fname = f"fig-{ids}-{slug}.png"
+        out = fig_dir / fname
+        if not out.exists():
+            _render_full_page(pdf, page, out)
+        page_to_png[(pdf, page)] = f"figures/{fname}"
+
+    for num, (pdf, page, caption) in figures.items():
+        path = page_to_png[(pdf, page)]
+        FIGURE_IMAGES[num] = (path, f"Figure {num} — {caption}")
+
+    # Known manual override: Figure 6 sits alone on its page and is
+    # clean enough to isolate via a pixel crop.  The crop coords are
+    # in pixels against the 300 dpi page render.  (Figure 30 used to
+    # have one too but now shares a render with Figure 31, so the
+    # whole-page version wins.)
+    manual_crops = {
+        "6":  (PDF_DIR / "FinalYearProject-Part1.pdf", 21,
+               (200, 850, 2100, 2300)),
+    }
+    shared_pages = {k for k, v in by_page.items() if len(v) > 1}
+    for num, (pdf, page, crop) in manual_crops.items():
+        if num not in figures:
+            continue
+        if (pdf, page) in shared_pages:
+            continue
+        _, _, caption = figures[num]
+        slug = re.sub(r"[^a-z0-9]+", "-", caption.lower()).strip("-")[:40]
+        fname = f"fig-{int(num):02d}-{slug}.png"
+        out = fig_dir / fname
+        extract_figure(pdf, page, out, crop=crop)
+        FIGURE_IMAGES[num] = (f"figures/{fname}", f"Figure {num} — {caption}")
+
+
+def _render_full_page(pdf: Path, page: int, out: Path) -> None:
+    """Render a whole PDF page to PNG at 300 dpi with a trim pass to
+    remove the empty white margin.  Used for figures that are easier
+    to show in full-page context than to isolate by pixel crop."""
+    tmp = out.parent / f".tmp-{out.stem}"
+    subprocess.run(
+        ["pdftoppm", "-r", "300", "-f", str(page), "-l", str(page),
+         "-png", str(pdf), str(tmp)],
+        check=True,
     )
+    cands = sorted(tmp.parent.glob(f"{tmp.name}-*.png"))
+    assert cands, "pdftoppm produced no output"
+    src = cands[0]
+    if _magick_available():
+        subprocess.run(
+            ["magick", str(src), "-trim", "+repage",
+             "-bordercolor", "white", "-border", "32x32", str(out)],
+            check=True,
+        )
+        src.unlink()
+    else:
+        src.rename(out)
 
 
 def main() -> int:
@@ -818,7 +1221,7 @@ def main() -> int:
         return 0
 
     if not args.skip_figures:
-        extract_figures()
+        discover_figures()
 
     raw = combined.read_text()
     lines = clean_raw(raw)
@@ -835,6 +1238,15 @@ def main() -> int:
         if ch.number == 8 and ch.title.lower() == "appendix":
             ch.body = APPENDIX_BODY.splitlines()
             break
+
+    # Clean up PageMaker diagram residue and inject missing figures.
+    # `emitted` threads across chapters so a figure referenced in
+    # chapter 5 but already shown in chapter 4 isn't re-emitted.
+    emitted: set[str] = set()
+    for ch in sorted(chapters, key=lambda c: c.number):
+        if ch.number == 8:
+            continue
+        ch.body = cleanup_body(ch.body, emitted=emitted)
 
     (MD_DIR / "README.md").write_text(build_readme(chapters))
     for ch in chapters:

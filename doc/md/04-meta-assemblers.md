@@ -31,6 +31,10 @@ Skordalakis mentions that he had, at that time (1983), not come across any meta-
 
 The classification of meta-assemblers was detailed by Skordalakis in his report on meta-assemblers24. Figure 1 shows the classification of the more general term assembler, which incorporates both dedicated assemblers and meta-assemblers. A dedicated-assembler is the traditional view of an assembler, i.e., one which has been coded specifically to assemble one assembly language and cannot easily be adapted to assemble another. The principles of operation of the dedicated assembler are shown in figure 2.
 
+![Figures 1 / 2 — (1) Meta-Assembler Classification; (2) Dedicated assembler operation](figures/fig-01-02-meta-assembler-classification.png)
+
+*Figures 1 / 2. (1) Meta-Assembler Classification; (2) Dedicated assembler operation*
+
 Meta-assemblers can be divided into a number of categories. The first selection depends on the time at which the meta-assembler becomes dedicated to a specific assembly language. A compile-time meta-assembler, as its name suggests, becomes dedicated at compile-time. The assembly language specifics must be contained in a manner which is incorporated into a meta-assembler shell, which contains the code for the assembly-language- independent components of the meta-assembler. The definition of the assembly-language-specifics might be contained in source code statements, tables or a mixture of both.
 
 Meta-assemblers which are dedicated at run-time, like any system which incorporates late-binding of components, tend to be more complicated to implement9. There are two types of run-time dedicated meta-assembler, the generative type and the adaptive type. The principles of operation of these two types are shown in figure 3 and figure 4. In a generative meta-assembler the assembler description is used to produce a dedicated assembler based on that description. A number of dedicated assemblers can therefore be produced by one meta-assembler by writing many assembler descriptions. The adaptive meta-assembler, on the other hand, takes the assembler description file and adapts itself to mimic the corresponding dedicated assembler. Thus, although many assembler descriptions are required there is only one assembler program.
@@ -47,58 +51,15 @@ Assembly language is just one type of language in a sequence which have develope
 
 The lowest level language, microprogramming, is not usually used to present problems to a microcomputer but rather to implement the computer itself. As such, they are specialised and not of general interest.
 
-```
-                  ASSEMBLERS
-       DEDICATED                                        META- AS-
-       ASSEMBLERS
-                              COMPILE-                                 RUN-TIME
-                                TIME                                     DEDI-
-                                                    GENERATIVE                        ADAPTIVE
-                                                       TYPE                            TYPE
-       Figure 1. Meta-Assembler
-       Classification.
-```
-
-```
-                                                              FERGUSON                NON-FERGUSON
-                                                                TYPE                      TYPE
-```
-
 Binary machine languages contain the actual bit patterns for each operation and data element in the problem to be solved. They are directly executable by microcomputers, but prove very difficult for humans to comprehend. For the earliest computers, this was the way in which they were programmed, but the development of the assembler provided a higher level language to specify the problem to be solved, the basic assembly language.
 
-```
-                                     SOURCE
-                                     ASSEMBLY
-                                     PROGRAM
-                         DEDICATED
-                         ASSEMBLER
-                                    OBJECT                     Figure 2. Dedicated
-                                    CODE                       assembler operation.
-```
-
-```
-                                                              META-                         DEDICATED
-          ASSEMBLER DESCRIPTION                             ASSEMBLER                       ASSEMBLER
-             Figure 3. Generic Meta-
-               Assembler Operation
-```
+![Figures 3 / 4 — (3) Generic MetaAssembler Operation; (4) Adaptive MetaAssembler Operation](figures/fig-03-04-generic-metaassembler-operation.png)
 
 The assembly languages (basic and macro) presents the programmer with a human-readable form of binary machine languages. It does this by assigning mnemonic representations to binary commands and decimal/ hexadecimal equivalents of binary numbers. Because of the close relationship between assembly languages and machine languages, most microcomputers have their own specific assembly language. This is used to describe a problem and its solution in terms of the specific resources that a computer is able to offer. Macro-based languages are more powerful in that they allow many basic assembly language instructions to be grouped and manipulated as single entities.
 
 Procedural-Oriented (high level) programming languages abstract from the implementation details and allow the specification of the solution to a problem to be made without regard to the computer on which it is operating. This is an ideal description to which languages such as Pascal, Modula-2 and ADA, amongst others, achieve with a high level of success.
 
 Very high level functional programming languages (such as PROLOG) allow a problem to be specified without regard to its solution. The microcomputer is responsible for providing the means and solution to the problem. There are currently few languages which meet this specification.
-
-```
-                                                                      SOURCE
-                                                                      ASSEMBLY
-                                                                      PROGRAM
-                                                                                PROGRAM LISTING
-                                                              META-
-          ASSEMBLER DESCRIPTION                             ASSEMBLER
-            Figure 4. Adaptive Meta-                                  OBJECT
-            Assembler Operation.                                      CODE
-```
 
 ### 4.4.2. Assembly Language Structure
 
@@ -196,26 +157,7 @@ It can be seen that the MC68000 instruction set, while providing some degree of 
 
 The Zilog Z80 Machine Language.
 
-```
-                                                        Opcode
-                                                          (a)
-```
-
-```
-                                  Opcode                        Address
-                                                          (b)
-```
-
-```
-                                  Opcode            Address 1             Address 2
-                                                          (c)
-```
-
-```
-              Figure 5. Three typical instruction formats: (a) zero-
-              address instruction. (b) one-address instruction. (c)
-              two-address instruction.
-```
+![Figure 5 — Three typical instruction formats: (a) zeroaddress instruction. (b) one-address instruction. (c) two-address instruction](figures/fig-05-three-typical-instruction-formats-a-zero.png)
 
 The format of the Z80 Machine Language is neither regular, othorgonal or composible. This is mainly due to the decision taken by the Z80 designers that it should be bit-compatible with the earlier 8080 processor which in turn was semi-compatible with the 8008 processor (which was an 8-bit version of the 4004!). This meant that all the new Z80-specific instructions had to be encoded using the spare opcode patterns of the 8080 processor, because the Z80 had to be able to run unmodified 8080 programs. The instruction formats which resulted are obviously more complex than they would have been if they had been designed from scratch. In total there are 26 possible instruction formats.
 
@@ -261,21 +203,13 @@ In an assembler this task becomes fairly trivial because of the small number of 
 
 The output from the lexical analyser could take a number of forms. It might produce pointers to the start of each of the tokens in the source program. For example, the statement 15 14 13 12 11 10 9 8 7 Example Instructions 1 OP SIZE OPERAND OPERAND MOVE 2 OPCODE REG MOD OPERAND ADD, AND, CMP, SUB 3 OPCODE REG OP OPERAND CHK, DIVS, LEA, MULS 4 OPCODE REG MOD OP REG MOVEP 5 OPCODE REG SIZE OP REG ASL, ASR, ROL, ROR 6 OPCODE REG OPCODE REG ABCD, EXG, SBCD 7 OPCODE REG 8-BIT CONSTANT MOVEQ 8 OPCODE COUNT SIZE OP REG ASL, ASR, ROL, ROR 9 OPCODE DATA SIZE OPERAND ADDQ, SUBQ 10 OPCODE CONDITION OP OPERAND Scc 11 OPCODE CONDITION DISPLACEMENT Bcc 12 OPCODE CONDITION OPCODE REG DBcc 13 OPCODE SIZE OPERAND ADDI, CMPI, NEG, TST 14 OPCODE OPERAND 15 OPCODE OPERAND JMP, JSR, NBCD, PEA 16 OPCODE VECTOR TRAP 17 OPCODE REG EXT, LINK, SWAP, UNLINK 18 OPCODE NOP, RESET, RTS, TRAPV OPCODE determines instruction OPERAND determines data operated on REG selects a register SIZE chooses byte, word, long MOD determines if OPERAND is source or destination, and length COUNT, DATA are constants in the range 1-8 CONDITION specifies one of 16 possible conditions to test DISPLACEMENT is signed offset for branches VECTOR specifies where to trap
 
-![68000 instruction format bit fields](figures/fig-06-instruction-formats.png)
-
-*Figure 6. Instruction formats used on the MC68000 (first word only)*
+![Figure 6 — Instruction formats used on the MC68000 (first word only)](figures/fig-06-instruction-formats-used-on-the-mc68000-.png)
 
 Start: MOVE D0, D3 ;comment ^ ^ ^ Label Operation Operands would produce three pointers to the start of the label, operation and operand fields. These could be CARDINAL numbers representing the position in the source line or could be POINTERs TO CHAR.
 
 Another method of expressing the output of the lexical analyser could be to fill a data structure with copies of the fields in the source program line. Given a declaration of a RECORD structure TYPE String = ARRAY [1..30] OF CHAR;
 
-```
-    ADDQ        0       1    0      1          DATA          0      SIZE            MODE               REG
-    SUBQ        0       1    0      1          DATA          1      SIZE            MODE               REG
-      Scc       0       1    0      1         CONDITION            1     1          MODE               REG
-      DBcc      0       1    0      1         CONDITION            1     1      0     0     1          REG
-                             Figure 7. Four MC68000 Instructions.
-```
+![Figure 7 — Four MC68000 Instructions](figures/fig-07-four-mc68000-instructions.png)
 
 ```
     LexOutput       = RECORD
@@ -309,17 +243,7 @@ In a compiler, the semantic analysis phase determines the meaning of the source 
 
 In an assembler, the semantic analyser performs a number of tasks.
 
-```
-        TST.L D0
-                                                                                          01001010
-                                                                                          10000000
-                                               TRANSLATOR
-                                      INSTRUCTION TRANSLATION
-                                 Figure 8. The Assembly Language
-        ASSEMBLY                       Translation Process.                               MACHINE
-        LANGUAGE                                                                          LANGUAGE
-        PROGRAM                                                                           PROGRAM
-```
+![Figures 8 / 9 — (8) The Assembly Language Translation Process; (9) Phases of the Assembly Process](figures/fig-08-09-the-assembly-language-translation-proces.png)
 
 1. It must extract information about the operation such as the type (either assembler directive or machine instruction) and the valid number and type of operands.
 
@@ -333,12 +257,9 @@ Errors produced might include:
 - The wrong use of labels.
 - Bad addressing modes.
 
-```
-             lexical                  syntax                 semantic                  code
-             analysis                analysis                analysis               generation
-```
+source object program program
 
-source object program program Figure 9. Phases of the Assembly Process The output of the semantic analyser of an assembler could take the form of a more detailed structure similar to the one produced by the lexical analyser, with fields for 1. Operation mask (if appropriate). 2. Operation type (assembler directive or machine instruction). 3. Operand values. 4. Operand types (in terms of addressing modes).
+The output of the semantic analyser of an assembler could take the form of a more detailed structure similar to the one produced by the lexical analyser, with fields for 1. Operation mask (if appropriate). 2. Operation type (assembler directive or machine instruction). 3. Operand values. 4. Operand types (in terms of addressing modes).
 
 ### 4.6.4. Code Generation
 
@@ -410,7 +331,9 @@ The CASS-8 assembler was developed to solve problems in the first environment ab
 5. A flag indicating whether the instruction gives rise to a branch condition.
 6. An optional descriptive comment.
 
-As the second field is only one byte in size, only 8-bit processors can be assembled to. The source language is an adaptation of any manufacturer's assembly language in that the operation code must contain the instruction's concerned register (if applicable) and the addressing mode to be applied. This significantly reduces the amount of lexical analysis required because the addressing mode of any instruction is instantly known when the assembler mnemonic is retrieved from the opcode table. All the assembler dependent features are therefore described using data (as opposed to algorithms). This tends to lead to an easier implementation but also to inflexibility in the variety of processors whose machine and assembly languages can be translated. This is reflected in the fact that only 8- Line Label Opcode Operands 1 Start CMP #10,D0 2 BNE NotEqual 3 CLR D0 4 BRA.S Continue Figure 10. The 5 NotEqual ADD #15,D1 forward reference 6 Continue RTS problem.
+As the second field is only one byte in size, only 8-bit processors can be assembled to. The source language is an adaptation of any manufacturer's assembly language in that the operation code must contain the instruction's concerned register (if applicable) and the addressing mode to be applied. This significantly reduces the amount of lexical analysis required because the addressing mode of any instruction is instantly known when the assembler mnemonic is retrieved from the opcode table. All the assembler dependent features are therefore described using data (as opposed to algorithms). This tends to lead to an easier implementation but also to inflexibility in the variety of processors whose machine and assembly languages can be translated. This is reflected in the fact that only 8- Line Label Opcode Operands 1 Start CMP #10,D0 2 BNE NotEqual 3 CLR D0 4 BRA.S Continue
+
+![Figure 10 — The forward reference problem](figures/fig-10-the-forward-reference-problem.png)
 
 bit processors are catered for and even then some are not applicable. This is because of the strict structuring imposed on the object code generated, which must be of the form of a 1 byte opcode followed by a 0, 1 or 2 byte operand. Eight bit processors which do not conform to this format of object code include the Signetics 2650 and Zilog Z80.
 
@@ -472,9 +395,7 @@ IF LineIsNotComment(line) THEN (* Is it a comment? *) CheckForSymbol(line, symbo
 
 END END PassOne;
 
-```
-                   Figure 11. Pass one of a simple assembler.
-```
+![Figure 11 — Pass one of a simple assembler](figures/fig-11-pass-one-of-a-simple-assembler.png)
 
 equivalent values (a maximum of 19). This also assumes that the equivalent values for registers do not change between machine language instructions. The format of the object code produced is similar to that of the previous implementation described in that non-orthogonal processors such as the Zilog Z80 cannot be handled satisfactorily. Opcode tables have, however, been written for the Intel 8080 and the Motorola M6800.
 
@@ -562,9 +483,7 @@ High-Level Languages, such as Pascal, can be used to write very efficient implem
 
 END PassTwo;
 
-```
-                       Figure 12. Pass two of a simple assembler.
-```
+![Figure 12 — Pass two of a simple assembler](figures/fig-12-pass-two-of-a-simple-assembler.png)
 
 assemblers. Modifications to a dedicated assembler written in a HLL to make it assemble for another processor usually involve only 20 to 30 percent of the source program. However, the modifications are scattered throughout the text of the source program and a comprehension of the operation of the complete assembler is required. This inevitably leads to an excessive amount of work which can only be performed by the author of the assembler or a programmer who is fully conversant on the operation of the assembler.
 
@@ -587,15 +506,11 @@ XMETA Language.
 
 Figure 19 shows the XMETA assembly process. It can be seen that it is an adaptive, non-Ferguson type meta- assembler (non-Ferguson in the sense that the assembler specification is not macro-based). The assembler specification is written in a Pascal dialect. Each assembly language mnemonic and assembler directive is described as a Pascal procedure with the same name. The procedures describe what action is to be taken to translate the assembly language instruction into a machine language instruction or what action is to be taken when an assembler directive is encountered. Each procedure can make use of built-in procedures and functions to analyse the source program statement and to generate object code, listing lines and error messages where appropriate.
 
-```
-                                                               META-                      OUTPUT
-          ASSEMBLER DESCRIPTION                              ASSEMBLER
-           AND SOURCE PROGRAM                                                             OBJECT
-                                                                                          PROGRAM
-                                                              LISTING
-                                                               FILE
-                        Figure 13. Early Meta-Assembler Operation
-```
+![Figure 19 — XMETA system assembly process](figures/fig-19-xmeta-system-assembly-process.png)
+
+*Figure 19. XMETA system assembly process*
+
+![Figure 13 — Early Meta-Assembler Operation](figures/fig-13-early-meta-assembler-operation.png)
 
 The language chosen for the first implementation of XMETA was kept to a minimum for the following reasons:
 
@@ -616,6 +531,10 @@ Features of the Pascal dialect used include:
 
 Figure 20 shows the XMETA predefined functions which allow access to the assembly language source statement, which must conform to the IEEE standard25. The function Symbol returns a character string corresponding to the identifier requested, while all other functions return integer values. Arg, Xf1 and Xf2 return the results of expression evaluation while Pref1-Pref3 and Post return an integer representing the ASCII value of the single prefix/postfix character. A predefined value of nul is returned when the requested syntactic item does not exist.
 
+![Figures 20 / 21 — (20) XMETA Predefined Functions and Procedures; (21) Examples of predefined function evaluations (assuming BETA has not yet been defined)](figures/fig-20-21-xmeta-predefined-functions-and-procedure.png)
+
+*Figures 20 / 21. (20) XMETA Predefined Functions and Procedures; (21) Examples of predefined function evaluations (assuming BETA has not yet been defined)*
+
 Figure 21 gives an example of the values produced by these functions when applied to a typical IEEE-compatible assembly language statement. Because the symbol BETA has not yet been defined, Arg(1) returns an arbitrary value and Type(1) returns a flag indicating that this is a forward reference. The evaluation is deferred to a later fix-up routine when the value of BETA is known (after the first pass). This method, however, restricts the number of forward references allowable in any expression to one.
 
 Other special purpose procedures and functions allow symbol table insertion, location counter definition and output of listing, code and error messages.
@@ -631,11 +550,21 @@ The second program, XASM, performs the assembly process. There are three main se
 
 3. An interpreter of the intermediate code corresponding to the assembler definition (this is the code generator - see section 4.6.4.).
 
-The syntax and semantic analysers generate data structures from which the predefined procedures described above can be evaluated. The intermediate code which is interpreted can only access the results of the syntax and semantic processor identification number of instructions 6800 197 1 NOP 01 0 2 No Operation 2 TAP 06 0 2 CCR = A 3 TPA 07 0 2 A = CCR 4 INX 08 0 4 X = X + 1 5 DEX 09 0 4 X = X - 1 6 CLV OA 0 2 V = 0 7 SEV 0B 0 2 V = 1 meaningless mnemonic opera- operand execution comment sequence tion type time number code Figure 14. Sample part of CASS-8 Assembler Description File.
+The syntax and semantic analysers generate data structures from which the predefined procedures described above can be evaluated. The intermediate code which is interpreted can only access the results of the syntax and semantic processor identification number of instructions 6800 197 1 NOP 01 0 2 No Operation 2 TAP 06 0 2 CCR = A 3 TPA 07 0 2 A = CCR 4 INX 08 0 4 X = X + 1 5 DEX 09 0 4 X = X - 1 6 CLV OA 0 2 V = 0 7 SEV 0B 0 2 V = 1 meaningless mnemonic opera- operand execution comment sequence tion type time number code
+
+![Figure 14 — Sample part of CASS-8 Assembler Description File](figures/fig-14-sample-part-of-cass-8-assembler-descript.png)
 
 analysis via these predefined procedures. Other semantic structures (such as allocation counters, flags, etc.) are kept within the interpreter's global data area. Figure 22 shows the flow of control within the complete XMETA system.
 
+![Figure 22 — Flow of control in the XMETA system](figures/fig-22-flow-of-control-in-the-xmeta-system.png)
+
+*Figure 22. Flow of control in the XMETA system*
+
 The operation of the XASM program consists of a loop between the analysers and the interpreter. For every statement in the source program, the syntax and semantics analysers are employed to fill data structures with the decoded statement. If no errors occur during the analysis phase, control is passed to the interpreter which calls up the intermediate code procedure with the same name as the command in the assembly language source statement. This is interpreted and the remaining assembly actions are performed by the interpreter (code generation, listing control, etc.). At completion of the intermediate code procedure control is passed back to the analysers, which fetch the next source statement. This process is summarised in Figure 23.
+
+![Figure 23 — Information flow within XASM](figures/fig-23-information-flow-within-xasm.png)
+
+*Figure 23. Information flow within XASM*
 
 Implementation Experiences.
 
@@ -656,21 +585,17 @@ Implemented processors : TMS1000, M6800, I8048, TMS9900, MC68000 and Z8000.
                        Specification                                   Assembly
                                                                        Program
                                                                          Object
-                 Figure 15. Configuration                               Program
-                  of the General Purpose
-                      Cross-Assembler
 ```
+
+![Figure 15 — Configuration of the General Purpose Cross-Assembler](figures/fig-15-configuration-of-the-general-purpose-cro.png)
 
 Supported host computers: PDP11/03, /23, /40, VAX11/780, PDT11/150, MINIMINC and microprocessor development systems.
 
 The ease with which assembler definitions can be written is proportional to the experience gained using the system. An experienced XMETA programmer can code an assembler definition for a new processor in a few hours, most of which is spent reading documentation. The amount of debugging and testing time depends greatly on the Sort Microprocessor Name 4 bit 4004, 4040, uCOM4, uCOM41, PPS-4 8 bit 8008, 8080, M6800, MB8861, F-8, PPS-8, SCAMP, Z-80, COSMAC (CDP 1801/02)
 
-```
-             12 bit            TLCS-12, TLCS-12A, IM6100
-             16 bit            PFL-16A, uCOM-16, LSI-11, TMS9900, CP-1600, PACE
-```
+![Figures 16 / 17 — (16) Microprocessors to which the General Purpose Cross-Assembler is applicable; (17) Number of MASP Source Statements required to describe an assembler](figures/fig-16-17-microprocessors-to-which-the-general-pur.png)
 
-Figure 16. Microprocessors to which the General Purpose Cross-Assembler is applicable orthogonality of the target processor and the complexity of the object code required. Detection of some errors also increases development time. By partitioning machine instructions into appropriate format classes (see section 4.5.2.) the debugging and testing time was reduced to an average of two days, which is comparable to the time required to debug and test a Pascal program of the same length.
+orthogonality of the target processor and the complexity of the object code required. Detection of some errors also increases development time. By partitioning machine instructions into appropriate format classes (see section 4.5.2.) the debugging and testing time was reduced to an average of two days, which is comparable to the time required to debug and test a Pascal program of the same length.
 
 ```
            Sort          Microprocessor Name                   Number of Source Statements
@@ -682,8 +607,6 @@ Figure 16. Microprocessors to which the General Purpose Cross-Assembler is appli
           12 bit         TLCS-12A                              169
           16 bit         PFL-16A                               257
                          TMS9900                               204
-    Figure 17. Number of MASP Source Statements required to describe an
-                                 assembler.
 ```
 
 The length of assembler definition programs compares favourably to the length of dedicated assemblers for the same target processor. A ratio of 3/5 was obtained when comparing with a dedicated cross-assembler written in Pascal for the TMS1000 processor, and a ratio of 1/4 was obtained when comparing with a dedicated cross- assembler written in XPL for the TMS9900 processor.
@@ -693,6 +616,10 @@ The speed of execution also compared favourably with that of a dedicated, two-pa
 ### 4.7.6. MAUFI - A Meta-Assembler with a User Friendly Interface
 
 MAUFI15 is an adaptive, non-Ferguson type meta-assembler which is table-driven. Unlike other table-driven meta-assemblers, however, the method used to enter assembler descriptions is user friendly. This reduces both the time and skill necessary to enter an assembler description. Figure 24 shows the structure of MAUFI.
+
+![Figure 24 — Structure of MAUFI Object](figures/fig-24-structure-of-maufi-object.png)
+
+*Figure 24. Structure of MAUFI Object*
 
 PREPROCESSOR.
 
@@ -710,6 +637,10 @@ The preprocessor groups the assembler description into a number of sections:
 
 Figure 25 shows the form for the Code Arrangement section. Some forms, such as this one, simply consist of fields which must be entered with the correct information. The Addressing Modes form, on the other hand, requires more detailed information in the form of simple equations.
 
+![Figure 25 — Code Arrangement Form](figures/fig-25-code-arrangement-form.png)
+
+*Figure 25. Code Arrangement Form*
+
 Instructions are entered into the preprocessor one at a time and no preliminary grouping is necessary. For each instruction, the following information is required:
 
 1. Mnemonic.
@@ -718,10 +649,6 @@ Instructions are entered into the preprocessor one at a time and no preliminary 
 ```
                    0        Contains the value of the maximum user’s allotted
                             memory address (e.g., 65526).
-```
-
-```
-                  1-5       Reserved for future assembler directives.
 ```
 
 ```
@@ -766,8 +693,9 @@ Instructions are entered into the preprocessor one at a time and no preliminary 
                                   ; register A = 7 and register D = 2
           Assembled opcode for the MOV A,D instruction equal to assembled opcode =
           (064 + 7*2^3 + 2*2^0)10 = (122)10 = (7A)16
-                 Figure 18. Format of the assembler definition file.
 ```
+
+![Figure 18 — Format of the assembler definition file](figures/fig-18-format-of-the-assembler-definition-file.png)
 
 3. Operation of instruction: Byte/Word/Long.
 4. Number of operands.
@@ -785,6 +713,10 @@ An implementation of MAUFI has been written by its authors in the high level lan
 
 The latest report to be published on meta-assemblers (to my knowledge) is written by Peter Chiu and Sammy Fu of the Hong Kong Polytechnic32. They present a radically different approach to the meta-assembler problem. The approach incorporates high level language development tools and considers assemblers as high level language compilers. The result is an adaptive, compile-time dedicated meta-assembler, the structure of which is shown in figure 26.
 
+![Figure 26 — Structure of UCA](figures/fig-26-structure-of-uca.png)
+
+*Figure 26. Structure of UCA*
+
 By defining syntax rules at the source program stage (i.e., compile-time dedication) a much more flexible syntax can be obtained, enabling the production of assemblers which can accept the same source programs as a dedicated assembler. Two development tools, YACC and LEX, are used to simplify the generation of lexical and syntax analysers. Included with the 'modules' which contain the lexical and syntax analysers are other modules which can be placed into two broad categories. These are 'assembler-dependent' and 'assembler-independent' modules. To make up a complete assembler the following modules are required:
 
 1. Main overall control module - independent.
@@ -800,5 +732,9 @@ By defining syntax rules at the source program stage (i.e., compile-time dedicat
 The lexical and syntax analysers are dependent on the assembly language structure of the source program. It is possible with this system to write two assemblers for the same processor with different assembly languages by changing just the analyser modules and equally possible to use the same assembly language for two different processors (if this is physically possible).
 
 Two primitive assemblers have been implemented by the authors of the report for the Intel 8086 and the Motorola MC68000. The results of extensive testing on the assemblers compared with dedicated assemblers and other universal cross-assemblers are shown in figure 27. It can be seen that the assemblers produced are 4 to 5 times slower than comparable dedicated assemblers and 2 to 3 times slower than comparable universal cross-assemblers.
+
+![Figure 27 — Assembly speed statistics](figures/fig-27-assembly-speed-statistics.png)
+
+*Figure 27. Assembly speed statistics*
 
 Implementation time for a new assembler is quoted as about 20 to 30 days which is considerably longer than other implementations discussed earlier (although it is still substantially less than the time required to write a dedicated assembler).

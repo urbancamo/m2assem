@@ -11,7 +11,6 @@ The construction of meta-assemblers will continue to reflect the changes affecti
 
 ## 6.2. Evaluation of Implementation
 
-
 ### 6.2.1. Overview
 
 The sample implementation takes a data and algorithm-driven approach to the meta-assembler problem. By using the principles of Object Oriented Programming it was possible to re-design a traditional two-pass dedicated assembler into its assembler-dependent and assembler-independent parts. This enabled the implementation of an assembler in Modula-2 which can be re- configured easily to assemble for another processor.
@@ -33,55 +32,6 @@ The structure of the ADM and its function suggest that development time for proc
                                                         (Implementation Modules)
                                                TableTrees (3.5%)
                                           TableExt (4.7%)
-```
-
-```
-                                     Table (3.4%)
-```
-
-```
-                            Strings (4.1%)
-                                                                                                               ADM (29.9%)
-```
-
-```
-                   PseudoOps (5.1%)
-```
-
-```
-       ObjectGenerator (2.9%)
-```
-
-```
-                   M2Assem (3.6%)
-```
-
-```
-               Location (1.1%)
-```
-
-```
-                                                                                                                     Exceptions (1.9%)
-```
-
-```
-                         Listing (9.4%)
-```
-
-```
-                                                                                                        Expression (13.3%)
-```
-
-```
-                                           Lex (8.2%)
-```
-
-```
-                                                                                Interface (8.7%)
-```
-
-```
-                                                             Figure 36.
 ```
 
 Figure 36 shows how much of the complete program the separate modules of the implementation constitute. It can be seen that the MC68000 ADM constitutes 30% of the complete meta-assembler source program. It is felt, however, that a significant improvement on the length of this file could be made given more time (see section 6.2.4.)

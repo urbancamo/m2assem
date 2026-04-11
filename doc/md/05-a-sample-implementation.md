@@ -17,17 +17,6 @@ For a more detailed description of these properties refer to section 4.2.
 
 The purpose of the system analysis phase is to describe what is to be achieved and put forward suggestions of how this can be achieved. By doing background research into the problem, which was the concern of section 4, 1. The problem is well defined. 2. A number of alternatives for solving the problem have been suggested (and in most cases, implemented).
 
-```
-                                                                       SOURCE
-                                                                       ASSEMBLY
-                                                                       PROGRAM
-                                                                                 LISTING & ERRORS
-                 CROSS-ASSEMBLER                                XMETA
-                    SEMANTICS
-           Figure 19. XMETA system                                     OBJECT
-           assembly process.                                           PROGRAM
-```
-
 There would be little point in repeating the information in section 4. The main task for the system analysis phase of the software cycle in this case, therefore, is to select an appropriate method of solving the problem, justifying that decision.
 
 ### 5.2.1. Approach to Solution
@@ -58,10 +47,6 @@ Every dedicated assembler which is written is data and algorithm-driven. This ha
       Ident(0) Narg             Pref1(i)       Arg(i)         Xf1(i)      Xf2(i)         Post(i)
 ```
 
-```
-               Figure 20. XMETA Predefined Functions and Procedures.
-```
-
 Once the outline design had been chosen, the choice of which language to program the implementation in had to be made.
 
 ### 5.2.2. Selection of Programming Language
@@ -87,18 +72,11 @@ A number of factors affected the decision of which programming language to use w
      any other function with argument > Narg = nul.
 ```
 
-Figure 21. Examples of predefined function evaluations (assuming BETA has not yet been defined).
-
 4. Support in some way for the principles of Object Oriented Software Construction.
 5. Facilities for low-level, machine-oriented manipulations.
 6. Fast enough to produce a usable product.
 7. Good development environment with extensive debugging facilities.
 8. Be available on the computer which is to be used for the implementation.
-
-```
-                                              Cross-assembler
-                                              source (XMETA)
-```
 
 ```
                      XMETA
@@ -121,7 +99,6 @@ Figure 21. Examples of predefined function evaluations (assuming BETA has not ye
                          Undefined                  Symbol                    Object
                           forward                   table                      code
                            table
-                   Figure 22. Flow of control in the XMETA system.
 ```
 
 The languages which were considered against this criteria were:
@@ -137,7 +114,14 @@ All of these languages are available for the IBM XT computer which was to be use
 1. Modula-2 was a familiar language as it was the programming language chosen for the 'Programming and Programming Design' course in year 2 and for the 'Computer Systems' course in year 3.
 2. Modula-2 development systems are available for virtually all well known computers, and it is small enough to be used on microcomputer development systems.
 
-Interpreter Analyser Procedure name Procedures Syntax analyser table Syntactic Intr. Information Function on the Procedures current line intermediate code Semantic Intr. Global Function information symbol table Data area: stack Define defloc Semantic analyser Figure 23. Information flow within XASM 3. Very good facilities are provided for decomposing large programs in manageable chunks via the 'MODULE' structure. 4. Although support for OOP in Modula-2 is limited, an OOP approach to the design process maps well onto implementations. 5. Good low-level facilities are provided via the bitset type and associated set operations. 6. Recent benchmarks place Modula-2 compilers at the top in terms of generated code efficiency. 7. The implementation of Modula-2 chosen, JPI Topspeed Modula-2, has an excellent integrated environment with extensive debugging facilities. 8. JPI Topspeed Modula-2 is available for the complete range of IBM-compatible computers.
+Interpreter Analyser Procedure name Procedures Syntax analyser table Syntactic Intr. Information Function on the Procedures current line intermediate code Semantic Intr. Global Function information symbol table Data area: stack Define defloc Semantic analyser
+
+3. Very good facilities are provided for decomposing large programs in manageable chunks via the 'MODULE' structure.
+4. Although support for OOP in Modula-2 is limited, an OOP approach to the design process maps well onto implementations.
+5. Good low-level facilities are provided via the bitset type and associated set operations.
+6. Recent benchmarks place Modula-2 compilers at the top in terms of generated code efficiency.
+7. The implementation of Modula-2 chosen, JPI Topspeed Modula-2, has an excellent integrated environment with extensive debugging facilities.
+8. JPI Topspeed Modula-2 is available for the complete range of IBM-compatible computers.
 
 ## 5.3. System Design
 
@@ -175,10 +159,6 @@ Decoder from free-format module (lexical scanner).
                         Preprocessor
                                                                     Program
                   Logfile            Database                       Assembler
-                    Figure 24. Structure
-                                                              Object             Listing
-                          of MAUFI
-                                                               file               file
 ```
 
 If this module is made assembler-independent the syntax of the assembly language statements for any assembly language must be fixed. This would mean that the meta-assembler could not mimic any dedicated assemblers and existing software would need converting from the dedicated assembler's syntax to the meta-assembler's syntax. The alternative is to supply the syntax of the assembly language in the assembler description. This has been done32 but requires larger assembler descriptions and a more complicated meta-assembler.
@@ -200,10 +180,6 @@ If this module is made independent of the assembly language then the set of dire
                                            (byte first)                     : x
                           Any modifications (y/n) ?
                           MESSAGE:
-```
-
-```
-                               Figure 25. Code Arrangement Form.
 ```
 
 For the same reasons given for the lexical scanner, it was decided that this module should be assembler- independent. In that way, assembler directives are constant throughout the range of assemblers implemented.
@@ -256,7 +232,7 @@ As the decision had been taken that the lexical scanner module should be assembl
                                  file                                 file
 ```
 
-1 - syntax rules 2 - lexical rules Figure 26. Structure of UCA.
+1 - syntax rules 2 - lexical rules
 
 be input. Rather than develop a model for all assembly languages, five were chosen to start with, so that the model was not initially over-complicated. The five processors were MC68000, 6800, 6502, Z80 and 80x86. The manufacturer's assembly languages were selected in each case.
 
@@ -267,10 +243,6 @@ It was found by examination that all of the assembly languages had the same gene
 ```
                     assembler              no of source             time            speed
                   (for which uP)              lines                 (sec)        (lines/sec)
-```
-
-```
-                  Dedicated assemblers (from CROSS-8 package)
 ```
 
 ```
@@ -298,7 +270,6 @@ It was found by examination that all of the assembly languages had the same gene
                   Chiu & Fu Implemented Assemblers
                   8086/88 COMASM           130                      50           2.60
                   68000 X68000             200                      73           2.74
-                              Figure 27. Assembly speed statistics.
 ```
 
 [label] directive argument(s) [comment] The differences in the syntax of the languages came when examining the individual fields of a statement.
@@ -525,9 +496,7 @@ This module was reused from a previously implemented version. The module impleme
 
 This module handles all the exceptional conditions which can occur within the operation of the meta-assembler. The module implements an object whose data structure is an abstract state machine. This approach is used because Syntax: = equivalent | one or the other (OR) [] zero or one times {} zero or more times "" literal symbol .. OR between sequence of characters Statement = [Label] Seperator Command [Specifier] Seperator [Operand {"," Operand}] [Seperator Comment] EOL Seperator = {"<TAB>"} | {"<SPACE>"} Label = Alphabetic {Alphanumeric} [":"] Alphabetic = "A".."Z"|"a".."z" Alphanumeric = Alphabetic | Numeric | Special Numeric = "0".."9" Special = "_" (dependent on implementation) Command = Alphabetic {Alphabetic} Specifier = ["." Alphabetic] Operand = {Value | "(" Value ")" "+" | "-" "(" Value ")" | "[" Value "]" | "#" Value} Value = Alphanumeric [Alphanumeric] [Specifier] | Expression Expression = dependent on implementation (includes logical and arithmetic ops)
 
-```
-                   Figure 28. A Generalised Model of Assembly Languages.
-```
+![Figure 28 — A Generalised Model of Assembly Languages](figures/fig-28-a-generalised-model-of-assembly-language.png)
 
 only one exception can be raised at any time. There are three possible levels of exception which can be raised:
 
@@ -662,10 +631,6 @@ This module is very similar to the listing module in design and functionality. I
 
 function f:
 
-```
-                  l     =        f(k)
-```
-
 The performance of the implementation is determined by the choice of function f and the method of handling collisions.
 
 Hashing Function.
@@ -680,9 +645,7 @@ The main drawback to hash tables is that collisions occur where two or more keys
 
 - Linear Probing. When a collision occurs, one of the colliding data elements
 
-![Hash table collisions vs load](figures/fig-30-hash-table-performance.png)
-
-*Figure 30. Affect of Loading on the Performance of a Hash Table*
+![Figures 30 / 31 — (30) Affect of Loading on the Performance of a Hash Table is; (31) Performance of a Hash Table with Binary Search Tree 'Buckets'](figures/fig-30-31-affect-of-loading-on-the-performance-of-.png)
 
 is put in the next available location in the table.
 
@@ -705,12 +668,11 @@ is put in the next available location in the table.
                                 Report                    O(N2)                     O(N3)
 ```
 
-```
-                     Figure 31. Performance of a Hash Table with Binary
-                                   Search Tree 'Buckets'.
-```
-
 The method selected for the implementation is bucket hashing because it is less complicated than the other methods and can be dynamic which allows a hash table of any size (which stops the performance of the table from dropping drastically). In terms of overall performance, it is better to use a binary search tree when bucket hashing because they are quicker than linked lists (see figure 29) but are still dynamic (which hash tables are not).
+
+![Figure 29 — Performances of Table Structures](figures/fig-29-performances-of-table-structures.png)
+
+*Figure 29. Performances of Table Structures*
 
 Figure 31 gives the big O performance of the hashing table and binary search tree buckets combination. Performance on all functions is good except the 3 report function where performance drops to O(N ). This, is still acceptable, however, as the operation is only used when symbol tables are being dumped (i.e., at most once in an assembly run). The other possibility would be to report without alphabetical sorting of the key items which would reduce big O value.
 
@@ -746,8 +708,9 @@ WORDLENGTH. The wordlength describes the length of a basic machine code instruct
                                            Motorola 68000                    16
                                            Commodore 6510                    8
                                            Zilog Z80                         8
-                           Figure 32. Wordlengths of Various Processors.
 ```
+
+![Figure 32 — Wordlengths of Various Processors](figures/fig-32-wordlengths-of-various-processors.png)
 
 MAXINDICES. This constant describes the maximum number of indices allowable in an operand.
 
@@ -807,9 +770,9 @@ The Assemble operation must produce two data items:
                                            NoCommandError
                                          end
                                        end
-                                 Figure 33. Internal Structure of Assemble
-                                                 Operation.
 ```
+
+![Figure 33 — Internal Structure of Assemble Operation](figures/fig-33-internal-structure-of-assemble-operation.png)
 
 The task which the Type operations must perform is dependent on which pass the meta-assembler is currently on.
 
@@ -840,9 +803,11 @@ The InsertOpcodesInTable operation then needed to be filled with the appropriate
 
 The other mapping which took place was from the IEEE standard addressing modes to the appropriate Motorola addressing modes. This can be seen in figure 35.
 
-An operation, RegisterType, was is used to determine whether a register is a data or address register. Another operation allows the addition of a binary word at any position in another word. Many of the Motorola instruction formats include a field for a register and an effective address (see figure 6). Two IEEE Machine Code Mask STD MSB LSB Class Motorola Mnemonic 15 0 Mnemonic ADD 1101000000000000 19 ADD,ADDA,ADDQ,ADDI ADDD 1100000100000000 6 ABCD ADDC 1101000100000000 5 ADDX SUB 1001000000000000 19 SUB,SUBA,SUBQ,SUBI SUBD 1000000100000000 6 SBCD SUBC 1001000100000000 5 SUBX MULU 1100000011000000 3 MULU MUL 1100000111000000 3 MULS DIVU 1000000011000000 3 DIVU DIV 1000000111000000 3 DIVS CMP 1011000000000000 19 CMP,CMPA,CMPI,CMPM NEG 0100010000000000 13 NEG NEGC 0100000000000000 13 NEGX NEGD 0100100000000000 15 NBCD EXT 0100100000000000 17 EXT DBR 0101000011001000 12 DBRA,DBF DBE 0101011111001000 12 DBEQ DBNE 0101011011001000 12 DBNE DBC 0101010111001000 12 DBCS DBNC 0101010011001000 12 DBCC DBP 0101101011001000 12 DBPL DBN 0101101111001000 12 DBMI DBNV 0101100111001000 12 DBVS DBGT 0101111011001000 12 DBGT DBGE 0101110011001000 12 DBGE DBLT 0101110111001000 12 DBLT DBLE 0101111111001000 12 DBLE DBH 0101001011001000 12 DBHI DBNH 0101001111001000 12 DBLS AND 1100000000000000 19 AND,ANDI OR 1000000000000000 19 OR,ORI XOR 1011000000000000 19 EOR,EORI NOT 0100011000000000 13 NOT SHR 1110000000001000 21 LSR SHL 1110000100001000 21 LSL SHRA 1110000000000000 21 ASR SHLA 1110000100000000 21 ASL ROR 1110000000011000 21 ROR ROL 1110000100011000 21 ROL RORC 1110000000010000 21 ROXR ROLC 1110000100010000 21 ROXL TEST 0100101000000000 13 TST TEST1 0000000100000000 22 BTST TESTSET 0000000111000000 22 BSET TESTCLR 0000000110000000 22 BCLR TESTNOT 0000000101000000 22 BCHG Figure 34. IEEE Standard Opcodes with Motorola Equivalents (1 of 2).
+An operation, RegisterType, was is used to determine whether a register is a data or address register. Another operation allows the addition of a binary word at any position in another word. Many of the Motorola instruction formats include a field for a register and an effective address (see figure 6). Two IEEE Machine Code Mask STD MSB LSB Class Motorola Mnemonic 15 0 Mnemonic ADD 1101000000000000 19 ADD,ADDA,ADDQ,ADDI ADDD 1100000100000000 6 ABCD ADDC 1101000100000000 5 ADDX SUB 1001000000000000 19 SUB,SUBA,SUBQ,SUBI SUBD 1000000100000000 6 SBCD SUBC 1001000100000000 5 SUBX MULU 1100000011000000 3 MULU MUL 1100000111000000 3 MULS DIVU 1000000011000000 3 DIVU DIV 1000000111000000 3 DIVS CMP 1011000000000000 19 CMP,CMPA,CMPI,CMPM NEG 0100010000000000 13 NEG NEGC 0100000000000000 13 NEGX NEGD 0100100000000000 15 NBCD EXT 0100100000000000 17 EXT DBR 0101000011001000 12 DBRA,DBF DBE 0101011111001000 12 DBEQ DBNE 0101011011001000 12 DBNE DBC 0101010111001000 12 DBCS DBNC 0101010011001000 12 DBCC DBP 0101101011001000 12 DBPL DBN 0101101111001000 12 DBMI DBNV 0101100111001000 12 DBVS DBGT 0101111011001000 12 DBGT DBGE 0101110011001000 12 DBGE DBLT 0101110111001000 12 DBLT DBLE 0101111111001000 12 DBLE DBH 0101001011001000 12 DBHI DBNH 0101001111001000 12 DBLS AND 1100000000000000 19 AND,ANDI OR 1000000000000000 19 OR,ORI XOR 1011000000000000 19 EOR,EORI NOT 0100011000000000 13 NOT SHR 1110000000001000 21 LSR SHL 1110000100001000 21 LSL SHRA 1110000000000000 21 ASR SHLA 1110000100000000 21 ASL ROR 1110000000011000 21 ROR ROL 1110000100011000 21 ROL RORC 1110000000010000 21 ROXR ROLC 1110000100010000 21 ROXL TEST 0100101000000000 13 TST TEST1 0000000100000000 22 BTST TESTSET 0000000111000000 22 BSET TESTCLR 0000000110000000 22 BCLR TESTNOT 0000000101000000 22 BCHG
 
-CHK 0100000110000000 3 CHK LD 0000000000000000 23 LEA,MOVE,MOVEA, MOVEP,MOVEQ LDM 0100110010000000 14 MOVEM ST 0000000000000000 23 MOVE,MOVEP STM 0100100010000000 14 MOVEM MOV 0000000000000000 23 MOVE,MOVEM,MOVEP, MOVEA,MOVEQ XCH 1100000100000000 24 EXG,SWAP CLR 0100001000000000 13 CLR SET 0101000011000000 10 ST SETE 0101011111000000 10 SEQ SETNE 0101011011000000 10 SNE SETC 0101010111000000 10 SCS SETNC 0101010011000000 10 SCC SETP 0101101011000000 10 SPL SETN 0101101111000000 10 SMI SETV 0101100111000000 10 SVS SETNV 0101100011000000 10 SVC SETGT 0101111011000000 10 SGT SETGE 0101110011000000 10 SGE SETLT 0101110111000000 10 SLT SETLE 0101111111000000 10 SLE SETH 0101001011000000 10 SHI SETNH 0101001111000000 10 SLS BR 0110000000000000 25 BRA,JMP BE 0110011100000000 11 BEQ BNE 0110011000000000 11 BNE BC 0110010100000000 11 BCS BNC 0110010000000000 11 BCC BP 0110101000000000 11 BPL BV 0110100100000000 11 BVS BNV 0110100000000000 11 BVC BGT 0110111000000000 11 BGT BGE 0110110000000000 11 BGE BLT 0110110100000000 11 BLT BLE 0110111100000000 11 BLE BH 0110001000000000 11 BHI BNH 0110001100000000 11 BLS CALL 0110000100000000 25 BSR,JSR RET 0100111001110101 18 RTS RETR 0100111001110111 18 RTR RETE 0100111001110011 18 RTE NOP 0100111001110001 18 NOP PUSH 0100100001000000 26 LINK,PEA,MOVE POP 0100000111000000 26 UNLK,MOVE WAIT 0100111001110010 18 STOP BRK 0100111001000000 16 TRAP BRKV 0100111001110110 18 TRAPV RESET 0100111001110000 18 RESET Figure 34. IEEE Standard Opcodes with Motorola Equivalents (2 of 2).
+![Figure 34 — IEEE Standard Opcodes with Motorola Equivalents (1 of 2)](figures/fig-34-ieee-standard-opcodes-with-motorola-equi.png)
+
+CHK 0100000110000000 3 CHK LD 0000000000000000 23 LEA,MOVE,MOVEA, MOVEP,MOVEQ LDM 0100110010000000 14 MOVEM ST 0000000000000000 23 MOVE,MOVEP STM 0100100010000000 14 MOVEM MOV 0000000000000000 23 MOVE,MOVEM,MOVEP, MOVEA,MOVEQ XCH 1100000100000000 24 EXG,SWAP CLR 0100001000000000 13 CLR SET 0101000011000000 10 ST SETE 0101011111000000 10 SEQ SETNE 0101011011000000 10 SNE SETC 0101010111000000 10 SCS SETNC 0101010011000000 10 SCC SETP 0101101011000000 10 SPL SETN 0101101111000000 10 SMI SETV 0101100111000000 10 SVS SETNV 0101100011000000 10 SVC SETGT 0101111011000000 10 SGT SETGE 0101110011000000 10 SGE SETLT 0101110111000000 10 SLT SETLE 0101111111000000 10 SLE SETH 0101001011000000 10 SHI SETNH 0101001111000000 10 SLS BR 0110000000000000 25 BRA,JMP BE 0110011100000000 11 BEQ BNE 0110011000000000 11 BNE BC 0110010100000000 11 BCS BNC 0110010000000000 11 BCC BP 0110101000000000 11 BPL BV 0110100100000000 11 BVS BNV 0110100000000000 11 BVC BGT 0110111000000000 11 BGT BGE 0110110000000000 11 BGE BLT 0110110100000000 11 BLT BLE 0110111100000000 11 BLE BH 0110001000000000 11 BHI BNH 0110001100000000 11 BLS CALL 0110000100000000 25 BSR,JSR RET 0100111001110101 18 RTS RETR 0100111001110111 18 RTR RETE 0100111001110011 18 RTE NOP 0100111001110001 18 NOP PUSH 0100100001000000 26 LINK,PEA,MOVE POP 0100000111000000 26 UNLK,MOVE WAIT 0100111001110010 18 STOP BRK 0100111001000000 16 TRAP BRKV 0100111001110110 18 TRAPV RESET 0100111001110000 18 RESET
 
 Addressing Mode Equivalents:
 
@@ -854,7 +819,9 @@ Absolute Long Address Absolute xxx.L /xxx Absolute Short Address Absolute xxx.W 
 
 Program Counter with Index Auto-post-index d8(PC,Xn.W) or (d8,PC,Xn.W) @*(d8,.Xn) d8(PC,Xn.L) or (d8,PC,Xn.L)
 
-Immediate Data Immediate #xxx or #<data> #xxx or #<data> Figure 35. IEEE Addressing Modes and their Motorola Equivalents.
+Immediate Data Immediate #xxx or #<data> #xxx or #<data>
+
+![Figure 35 — IEEE Addressing Modes and their Motorola Equivalents](figures/fig-35-ieee-addressing-modes-and-their-motorola.png)
 
 operations were therefore provided to add a register and an effective address at any point within a machine instruction word.
 
