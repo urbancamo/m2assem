@@ -181,28 +181,29 @@ BEGIN
 END AlphabeticallyLess;
 
 
-PROCEDURE EqualStrings(S1, S2: String): BOOLEAN;
-	
+PROCEDURE EqualStrings(S1, S2: ARRAY OF CHAR): BOOLEAN;
+
+(* Open-array variant — see MyStrings.def comment.  Walks both inputs in
+   parallel using 0-based indexing, terminating when either side hits
+   EndOfLine or runs past HIGH.  Both inputs must end at the same
+   logical position to compare equal. *)
+
 VAR
-  Index: CARDINAL;
-  Comparing, Same:  BOOLEAN;
-	
+  Index, H1, H2: CARDINAL;
+  End1, End2: BOOLEAN;
+
 BEGIN
-  Index := 1;
-  Comparing := TRUE;
-  WHILE Comparing DO
-    IF (Index > LongestString) OR
-		 ((S1[Index] = EndOfLine) AND (S2[Index] = EndOfLine)) THEN
-      Comparing := FALSE;
-      Same := TRUE
-    ELSIF S1[Index] = S2[Index] THEN
-      INC(Index)
-    ELSE
-      Comparing := FALSE;
-      Same := FALSE
-    END
-  END;
-  RETURN Same
+  H1 := HIGH(S1);
+  H2 := HIGH(S2);
+  Index := 0;
+  LOOP
+    End1 := (Index > H1) OR (S1[Index] = EndOfLine);
+    End2 := (Index > H2) OR (S2[Index] = EndOfLine);
+    IF End1 AND End2 THEN RETURN TRUE END;
+    IF End1 OR End2 THEN RETURN FALSE END;
+    IF S1[Index] <> S2[Index] THEN RETURN FALSE END;
+    INC(Index)
+  END
 END EqualStrings;
 
 

@@ -22,7 +22,6 @@ IMPORT FIO;
 IMPORT NumberIO;
 IMPORT Args;
 IMPORT FileSysOp;
-IMPORT SysClock;
 
 CONST
   FileMissingError	= "File to be opened cannot be found";
@@ -95,10 +94,9 @@ END OpenAFile;
 PROCEDURE CloseAFile(F: FileHandle);
 BEGIN
   IF (F <> NULLFile) AND FIO.IsActive(F) THEN
-    FIO.Close(F);
-    IF NOT FIO.IsNoError(F) THEN
-      Raise(Environment, Error, FileCloseError)
-    END
+    FIO.Close(F)
+    (* Don't probe IsNoError after Close — the file is gone, the state
+       lookup raises a runtime error in gm2's FIO. *)
   END
 END CloseAFile;
 
@@ -124,6 +122,7 @@ END EndOfFile;
 PROCEDURE ReadAString(F: FileHandle; VAR S: String);
 VAR
   Buf	: ARRAY [0..LongestString] OF CHAR;
+  Len	: CARDINAL;
 BEGIN
   IF F = NULLFile THEN
     Raise(Internal, Error, NotOpenError);
@@ -133,6 +132,17 @@ BEGIN
   FIO.ReadString(F, Buf);
   IF NOT FIO.IsNoError(F) THEN
     Raise(Environment, Fatal, ReadError)
+  END;
+  (* gm2 FIO.ReadString consumes the trailing LF but leaves a trailing CR
+     in place when reading DOS-style CRLF source files (such as the
+     historical sample.asm).  Strip it so the lex/parse pipeline sees
+     clean lines. *)
+  Len := 0;
+  WHILE (Len <= HIGH(Buf)) AND (Buf[Len] <> EndOfLine) DO
+    INC(Len)
+  END;
+  IF (Len > 0) AND (Buf[Len - 1] = CHR(13)) THEN
+    Buf[Len - 1] := EndOfLine
   END;
   ArrayToString(Buf, S)
 END ReadAString;
@@ -296,12 +306,21 @@ END ReadALongHex;
 PROCEDURE WriteALongHex(F: FileHandle; L: LONGCARD; Length: CARDINAL);
 VAR
   Buf	: ARRAY [0..31] OF CHAR;
+  i	: CARDINAL;
 BEGIN
   IF F = NULLFile THEN
     Raise(Internal, Error, NotOpenError);
     RETURN
   END;
   NumberIO.HexToStr(VAL(CARDINAL, L), Length, Buf);
+  (* gm2's NumberIO.HexToStr zero-pads to width.  TopSpeed's WrLngHex
+     space-padded; preserve historical behaviour by replacing leading
+     zeros with spaces, but always keep at least one digit. *)
+  i := 0;
+  WHILE (i + 1 < Length) AND (Buf[i] = '0') DO
+    Buf[i] := ' ';
+    INC(i)
+  END;
   FIO.WriteString(F, Buf);
   IF NOT FIO.IsNoError(F) THEN
     Raise(Environment, Fatal, WriteError)
@@ -333,25 +352,26 @@ BEGIN
 END NumberOfArguments;
 
 
+(* Time/date support is currently stubbed out — see GM2-BUGS.md bug 3.
+   gm2's SysClock.GetClock returns all zeros on macOS, and the alternative
+   wraptime library crashes immediately because its Init* functions use
+   malloc gated on HAVE_MALLOC_H, which is undefined on macOS (libc malloc
+   lives in <stdlib.h> there).  Until either is fixed upstream the
+   listing's date/time stamp will read all zeros. *)
+
 PROCEDURE GetTime(VAR Hours, Minutes, Seconds: CARDINAL);
-VAR
-  dt: SysClock.DateTime;
 BEGIN
-  SysClock.GetClock(dt);
-  Hours := dt.hour;
-  Minutes := dt.minute;
-  Seconds := dt.second
+  Hours := 0;
+  Minutes := 0;
+  Seconds := 0
 END GetTime;
 
 
 PROCEDURE GetDate(VAR Year, Month, Day: CARDINAL);
-VAR
-  dt: SysClock.DateTime;
 BEGIN
-  SysClock.GetClock(dt);
-  Year := CARDINAL(dt.year);
-  Month := dt.month;
-  Day := dt.day
+  Year := 0;
+  Month := 0;
+  Day := 0
 END GetDate;
 
 

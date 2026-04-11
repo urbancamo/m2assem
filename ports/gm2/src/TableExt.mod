@@ -76,18 +76,20 @@ BEGIN
 END ConvertFrom;
 
 
-PROCEDURE InsertCommand(Key: String; Mask: Word; Type: CARDINAL);
+PROCEDURE InsertCommand(Key: ARRAY OF CHAR; Mask: Word; Type: CARDINAL);
 
 VAR
   Temp: TableType;
+  KeyStr: String;
 
 BEGIN
-  Temp.Key	:= Key;
+  ArrayToString(Key, KeyStr);
+  Temp.Key	:= KeyStr;
   Temp.Kind	:= Command;
   Temp.Mask	:= Mask;
   Temp.Type	:= Type;
   IF IsRoom() THEN
-    IF IsIn(Key) THEN
+    IF IsIn(KeyStr) THEN
       Raise(User, Error, InsertError)
     ELSE
       Insert(Temp)

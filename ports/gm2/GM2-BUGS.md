@@ -232,6 +232,144 @@ passed to the same open-array parameter.
 
 ---
 
+## Bug 3 — Time/date library is broken on macOS (SysClock and wraptime)
+
+### Summary
+
+On gm2 15.2 / Apple Silicon, both of gm2's date/time access paths return
+invalid data:
+
+- `SysClock.GetClock(VAR userData: DateTime)` populates the record with
+  all zeros — year, month, day, hour, minute, second are all `0`.
+- `wraptime.InitTimeval()`, `InitTimezone()`, `InitTM()` all return `NIL`.
+  Any subsequent call that dereferences them crashes with
+  `RTExceptions.mod:650:35: invalid address referenced`.
+
+### Root cause (wraptime)
+
+`libgm2/libm2iso/wraptime.cc` gates its `Init*` allocators on the
+preprocessor macro `HAVE_MALLOC_H`. On macOS, libc's `malloc` lives in
+`<stdlib.h>`, not `<malloc.h>`, so `HAVE_MALLOC_H` is undefined in
+`libgm2/config.h`:
+
+```
+/* libgm2/config.h on aarch64-apple-darwin25.4.0 */
+/* #undef HAVE_MALLOC_H */
+#define HAVE_STRUCT_TIMEVAL 1
+#define HAVE_SYS_TIME_H 1
+```
+
+The fall-through `#else` branch returns `NULL` unconditionally, so every
+opaque-type allocator returns NULL on macOS, and any code that uses
+wraptime immediately segfaults.
+
+### Reproducer (wraptime)
+
+`bug3.mod`:
+
+```modula-2
+MODULE bug3;
+
+FROM FIO IMPORT StdOut, WriteString, WriteLine;
+FROM NumberIO IMPORT WriteCard;
+IMPORT wraptime;
+
+VAR
+  tv: wraptime.timeval;
+  tz: wraptime.timezone;
+  m:  wraptime.tm;
+  ignoredInt: INTEGER;
+  ignoredTM:  wraptime.tm;
+BEGIN
+  tv := wraptime.InitTimeval();
+  tz := wraptime.InitTimezone();
+  m  := wraptime.InitTM();
+  ignoredInt := wraptime.gettimeofday(tv, tz);
+  ignoredTM  := wraptime.localtime_r(tv, m);
+  WriteString(StdOut, "year=");  WriteCard(wraptime.GetYear(m), 1);
+  WriteLine(StdOut)
+END bug3.
+```
+
+```sh
+gm2 -fpim -flibs=pim,iso -o bug3 bug3.mod
+./bug3
+```
+
+### Expected
+
+```
+year=2026
+```
+
+### Actual
+
+```
+RTExceptions.mod:650:35: invalid address referenced
+```
+
+### Reproducer (SysClock)
+
+`bug3b.mod`:
+
+```modula-2
+MODULE bug3b;
+
+FROM FIO IMPORT StdOut, WriteString, WriteLine;
+FROM NumberIO IMPORT WriteCard;
+IMPORT SysClock;
+
+VAR dt: SysClock.DateTime;
+
+BEGIN
+  SysClock.GetClock(dt);
+  WriteString(StdOut, "year=");  WriteCard(dt.year, 1);
+  WriteString(StdOut, " hour="); WriteCard(dt.hour, 1);
+  WriteLine(StdOut)
+END bug3b.
+```
+
+### Expected
+
+```
+year=2026 hour=14
+```
+
+### Actual
+
+```
+year=0 hour=0
+```
+
+The call returns successfully but populates nothing. `SysClock` likely
+chains to `wraptime` internally and silently swallows the NULL state.
+
+### Suggested fix
+
+`wraptime.cc` should not gate `malloc` on `HAVE_MALLOC_H` alone. On
+modern Unix (and POSIX in general), `malloc` is declared in `<stdlib.h>`,
+which is always present. The check should also accept `HAVE_STDLIB_H`,
+or be made unconditional since `malloc` is part of C89.
+
+### Workaround
+
+Stub `GetTime` / `GetDate` to return zero (or implement them via a small
+C shim called through gm2's foreign-function interface). The m2assem
+port currently stubs them; the listing's date/time stamp reads
+`0/ 0/ 0  0: 0: 0` until the upstream library is fixed.
+
+### Notes
+
+- The same fall-through-to-NULL pattern affects `InitTimeval`,
+  `InitTimezone` and `InitTM`. All three are unusable on macOS.
+- This affects every macOS user of gm2 — not specific to Iain Sandoe's
+  darwin branch.
+- Found while porting m2assem to gm2 — the visible symptom was the
+  listing file's header showing `0/ 0/ 0  0: 0: 0` instead of the
+  actual local time.
+
+---
+
 ## How to file these upstream
 
 The gm2 maintainer is Gaius Mulley. Issues are accepted at:

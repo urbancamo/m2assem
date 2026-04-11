@@ -133,7 +133,9 @@ PROCEDURE AlphabeticallyLess(S1, S2: String): BOOLEAN;
 		then the function returns a value of FALSE.
 *)
 	
-PROCEDURE EqualStrings(S1, S2: String): BOOLEAN;
+PROCEDURE EqualStrings(S1, S2: ARRAY OF CHAR): BOOLEAN;
+(* gm2 port: open-array parameters work around the gm2 15.2 literal-to-
+   fixed-array off-by-one bug.  String variables still pass cleanly. *)
 	
 (*
 	PRE:	S1 & S2 are strings that are ready for processing.

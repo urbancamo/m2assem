@@ -11,8 +11,9 @@ untouched as a historical artifact; all edits happen here under
 |---|---|
 | Build | ✅ all 13 implementation modules + main compile and link cleanly |
 | Run   | ✅ binary executes, prints banner, parses command line, opens input file, scans source lines |
-| Smoke test against `sample.asm` | ⚠ runs through both passes but emits semantic errors ("Key has already been inserted in table", "Command not defined") — debugging the runtime is the next milestone |
+| Smoke test against `sample.asm` | ✅ assembles all 12 lines, **0 exceptions**, produces `sample.lst` and `sample.obj` byte-equivalent to the historical TopSpeed reference (modulo line endings and the stubbed date/time stamp) |
 | Test harnesses (`TestLex.mod`, `TestStrings.mod`, `TestTable.mod`) | ⏳ deferred — not in main build dependency closure |
+| Date/time in listing header | ⚠ stubbed to zeros — gm2's `wraptime` library is broken on macOS, see GM2-BUGS.md bug 3 |
 
 ## Build
 
@@ -225,46 +226,116 @@ copy loop.
 - `ReadALongInt` / `ReadALongHex` use `FIO.ReadCardinal` and widen — no
   reads of values > 2³² are expected.
 
-## What's still broken (next session)
+## End-to-end smoke test result
 
 Running `m2assem sample` against `src/demo/sample.asm`:
 
 ```
 Modula-2 Meta-Assembler Version 1.0 (c)1990 Mark Wickens
-Assembling: Pass 1User error: Key has already been inserted in table
-User error: Key has already been inserted in table          ← × 6
-...
-Source line 0 error: Command not defined                    ← × 7
-Source line 0 error: Command contains non-alphabetic characters
+Assembling: Pass 1
+Assembling: Pass 2
+Assembled 12 lines at a rate of 0 lines per minute.
+There were 0 exception(s) raised during assembly.
+A valid object code file was writted.
 ```
 
-Diagnoses for next time:
+The generated `sample.lst` and `sample.obj` are functionally identical to
+the historical 1990 TopSpeed reference under `src/demo/`. Diffs are
+limited to:
 
-1. **"Key has already been inserted" × 6** at startup → `InsertOpcodesInTable`
-   is detecting duplicates. Most likely cause: another `: String` value
-   parameter receiving a literal somewhere in the table-insertion path
-   (`Insert`, `InsertCommand`, `InsertSymbol`, `InsertOpcode`), getting
-   the same Bug 2 corruption that `WriteAString` had. Worth grepping for
-   any remaining `: String` value parameters that could be receiving
-   literals.
+1. **Line endings** — the gm2 port writes Unix LF; the historical files
+   are DOS CRLF. (1 byte/line difference.)
+2. **Listing header date/time** — the gm2 port writes `0/ 0/ 0  0: 0: 0`
+   instead of a real timestamp. See "What's still cosmetically off" below.
 
-2. **"Source line 0 error: Command not defined"** → `LineNo` is reset or
-   never incremented, AND `EqualStrings` / table-lookup is returning false
-   for valid commands. May be the same root cause as (1).
+The opcodes match byte-for-byte:
 
-3. **No `.LST` / `.OBJ` produced** → execution proceeds far enough to
-   error out before file generation. Once (1) and (2) are clear the demo
-   should produce both files which can be diff'd against the historical
-   TopSpeed output for byte-level correctness.
+```
+       3E8 4E71      ← LABEL4: NOP
+       3E9 D941      ← LABEL3: ADDC .D1,.D4
+       3EA EB8C      ← LABEL2: SHL.L #5,.D4
+       3EB 4E4A      ← LABEL1: BRK #10
+       3EC 4E4A
+```
 
-## Suggested order of attack for the next session
+The symbol table matches: `End=15, Start=37, LABEL1..4 = 1003..1000`.
 
-1. Grep for `: String` value parameters across all `.def` files and check
-   each one's call sites for literals. Convert affected procedures to
-   `ARRAY OF CHAR` parameters.
-2. Once Pass 1 produces no spurious errors against an empty source file,
-   re-run against `sample.asm` and validate the listing/object output.
-3. File the two gm2 bugs upstream with the minimal reproducers documented
-   in this file.
-4. Optionally port `TestLex.mod` last (uses TopSpeed `IO.RdStr` /
-   `IO.WrCard`).
+## Additional fixes made during the runtime debugging pass
+
+In addition to the build-level fixes documented above, the following
+were needed to get the runtime working end-to-end:
+
+### CRLF handling in `Interface.ReadAString`
+
+The historical `sample.asm` uses DOS CRLF line endings. gm2's
+`FIO.ReadString` strips the trailing LF but leaves the CR in place,
+which then propagates into `Decoded.Operand[1].Argument` and confuses
+`Expression.Evaluate` ("Invalid operator in expression"). Added a
+trailing-CR strip after `FIO.ReadString` to make the lex/parse pipeline
+see clean lines regardless of source file line endings.
+
+### `Interface.CloseAFile` post-close error probe
+
+The original called `FIO.IOresult()` after `Close` to detect close
+errors. gm2's `FIO.IsNoError(F)` raises a runtime panic if `F` has
+already been freed by `Close`. Removed the post-close probe — gm2's FIO
+doesn't expose a way to check the result of a close cleanly.
+
+### More `: String` value parameters → `ARRAY OF CHAR`
+
+The build-level fix had handled `WriteAString`, `Raise`, `AddError`,
+and `ConcatStrings`. Two more procedures turned out to receive literals
+during runtime:
+
+- **`TableExt.InsertCommand(Key: String, ...)`** — called once per
+  opcode (`InsertCommand("ADD", ...)`, `("SUB", ...)`, ~100 sites in
+  `ADM.mod` and `PseudoOps.mod`). Off-by-one corruption made `"ADD"`
+  become `"DD"`, `"SUB"` become `"UB"`, etc., producing dozens of
+  spurious "Key has already been inserted in table" errors at startup
+  as the corrupted opcodes collided with each other. Changed `Key` to
+  `ARRAY OF CHAR`, with internal conversion to `String` via
+  `ArrayToString` before storing in the hash table.
+- **`MyStrings.EqualStrings(S1, S2: String): BOOLEAN`** — called many
+  times in `ADM.mod` with literals (`EqualStrings("SP", Register)`,
+  `EqualStrings(DecInstr.Command, "LD")`, etc.). Without the fix, the
+  command-dispatch in `Assemble` couldn't recognise valid commands.
+  Rewrote the implementation to walk both inputs as 0-based open
+  arrays, terminating on `EndOfLine` or `HIGH(S)`.
+
+### `MyStrings.StringToArray` NUL-termination
+
+`StringToArray` did not write a NUL terminator. Benign on TopSpeed
+(callers re-initialised the destination), but gm2's `FIO.Exists` reads
+`ARRAY OF CHAR` arguments as C strings, so passing an unterminated array
+caused `FileExists` to read garbage past the actual filename. Added one
+line to terminate.
+
+### `WriteALongHex` formatting
+
+gm2's `NumberIO.HexToStr` zero-pads to width (`000003E8`), while
+TopSpeed's `WrLngHex` space-padded (`     3E8`). Added a leading-zero
+to leading-space replacement in `Interface.WriteALongHex` to preserve
+historical listing format.
+
+## What's still cosmetically off
+
+1. **Date/time stamp in listing header** reads `0/ 0/ 0  0: 0: 0`. gm2's
+   time libraries are broken on macOS — see GM2-BUGS.md bug 3. Stubbed
+   for now.
+2. **Output line endings** are LF rather than the historical CRLF. Could
+   be fixed by writing `\r\n` explicitly in `WriteALine`, but it's
+   arguably correct for a modern Unix port to use Unix line endings.
+3. **`TestLex.mod`** still uses TopSpeed `IO.RdStr` / `IO.WrCard` and
+   isn't in the build closure. Would need a small port if anyone wants
+   to run the test harnesses.
+
+## Suggested next steps
+
+1. **File the three gm2 bugs upstream** (see GM2-BUGS.md for ready-to-use
+   reproducers and reports).
+2. **Port `TestLex.mod`** if test coverage is desired.
+3. **Decide on line-ending policy** for output files — keep Unix, or
+   match the original CRLF for byte-identical historical reproduction.
+4. **Time/date** — once gm2 wraptime is fixed upstream, swap the stubs
+   in `Interface.GetTime` / `GetDate` for the wraptime calls (the
+   commented-out code is preserved in git history).

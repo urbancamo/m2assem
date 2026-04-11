@@ -38,7 +38,10 @@ TYPE
 
 (* Extended Operations. *)
 
-PROCEDURE InsertCommand(Key: String; Mask: Word; Type: CARDINAL);
+PROCEDURE InsertCommand(Key: ARRAY OF CHAR; Mask: Word; Type: CARDINAL);
+(* gm2 port: open-array Key parameter, called with string literals
+   ("ADD", "SUB", ...) which would be corrupted by the gm2 15.2 literal-
+   to-fixed-array off-by-one bug if declared as String. *)
 (*
         PRE:    Key is a string that is ready for processing.
         POST:   Enables the insertion of a record into the hash table
