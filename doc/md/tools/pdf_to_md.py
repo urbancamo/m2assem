@@ -1154,7 +1154,7 @@ def discover_figures() -> None:
             fname = f"fig-{ids}-{slug}.png"
         out = fig_dir / fname
         if not out.exists():
-            _render_full_page(pdf, page, out)
+            _render_full_page(pdf, page, out, fig_nums=nums)
         page_to_png[(pdf, page)] = f"figures/{fname}"
 
     for num, (pdf, page, caption) in figures.items():
@@ -1184,10 +1184,345 @@ def discover_figures() -> None:
         FIGURE_IMAGES[num] = (f"figures/{fname}", f"Figure {num} — {caption}")
 
 
-def _render_full_page(pdf: Path, page: int, out: Path) -> None:
-    """Render a whole PDF page to PNG at 300 dpi with a trim pass to
-    remove the empty white margin.  Used for figures that are easier
-    to show in full-page context than to isolate by pixel crop."""
+_PAGE_BBOX_RE = re.compile(
+    r'<page width="([\d.]+)" height="([\d.]+)">'
+)
+_WORD_BBOX_RE = re.compile(
+    r'<word xMin="([\d.]+)" yMin="([\d.]+)"'
+    r' xMax="([\d.]+)" yMax="([\d.]+)">([^<]+)</word>'
+)
+
+# Cached body-margin x for each source PDF — computed once by
+# scanning every page, so individual figure pages with lots of
+# table rows don't confuse the per-page heuristic.
+_BODY_X_CACHE: dict[Path, float] = {}
+
+
+def _body_left_margin(pdf: Path) -> float:
+    """Return the body-text left margin in PDF points for `pdf`,
+    computed as the modal left-x of lines that have many words
+    (>= 8) across the entire document.  Short table/figure rows
+    contribute fewer to the tally so the paragraph column wins."""
+    cached = _BODY_X_CACHE.get(pdf)
+    if cached is not None:
+        return cached
+    info = subprocess.run(
+        ["pdfinfo", str(pdf)], check=True, capture_output=True, text=True,
+    ).stdout
+    pages = int(next(l for l in info.splitlines()
+                     if l.startswith("Pages:")).split()[1])
+    from collections import Counter
+    left_counts: Counter = Counter()
+    for page in range(1, pages + 1):
+        try:
+            out = subprocess.run(
+                ["pdftotext", "-bbox", "-f", str(page), "-l", str(page),
+                 str(pdf), "-"],
+                check=True, capture_output=True, text=True,
+            ).stdout
+        except subprocess.CalledProcessError:
+            continue
+        raw = _WORD_BBOX_RE.findall(out)
+        if not raw:
+            continue
+        words = [
+            (float(xmin), float(ymin), float(xmax), float(ymax), txt)
+            for xmin, ymin, xmax, ymax, txt in raw
+        ]
+        words.sort(key=lambda w: w[1])
+        lines: list[list[tuple[float, float, float, float, str]]] = []
+        for w in words:
+            if lines and abs(w[1] - lines[-1][0][1]) < 3:
+                lines[-1].append(w)
+            else:
+                lines.append([w])
+        for ln in lines:
+            if len(ln) < 8:          # only long paragraph-shaped lines vote
+                continue
+            left_counts[round(min(w[0] for w in ln))] += 1
+    if not left_counts:
+        return 119.0                 # sensible default for this report
+    body_x, _ = left_counts.most_common(1)[0]
+    _BODY_X_CACHE[pdf] = float(body_x)
+    return float(body_x)
+
+
+def _figure_caption_y_points(
+    pdf: Path, page: int, fig_nums: list[str],
+) -> tuple[list[tuple[float, float]], float] | None:
+    """Return ([(ymin_pt, ymax_pt), ...], page_height_pt) for each
+    Figure-N caption found on the given PDF page, or None if no
+    caption was located.  Uses pdftotext -bbox to locate the word
+    'Figure' followed by 'N.'."""
+    try:
+        out = subprocess.run(
+            ["pdftotext", "-bbox", "-f", str(page), "-l", str(page),
+             str(pdf), "-"],
+            check=True, capture_output=True, text=True,
+        ).stdout
+    except subprocess.CalledProcessError:
+        return None
+    words = _WORD_BBOX_RE.findall(out)
+    if not words:
+        return None
+    targets = {f"{n}." for n in fig_nums}
+    ys: list[tuple[float, float]] = []
+    for i, (_xmin, ymin, _xmax, ymax, txt) in enumerate(words):
+        if txt != "Figure" or i + 1 >= len(words):
+            continue
+        nxt = words[i + 1][4]
+        if nxt in targets:
+            ys.append((float(ymin), float(ymax)))
+    if not ys:
+        return None
+    m = _PAGE_BBOX_RE.search(out)
+    if not m:
+        return None
+    return ys, float(m.group(2))
+
+
+def _figure_extent_from_layout(
+    pdf: Path, page: int, fig_nums: list[str],
+) -> tuple[float, float, float] | None:
+    """Return (ymin_pt, ymax_pt, page_height_pt) for the figure
+    region containing the listed captions, derived from text-line
+    layout analysis.
+
+    Body text on this report is always left-aligned at a constant
+    x-margin (~119 pt).  Figure labels, table entries and multi-
+    line figure captions sit at other x positions.  The figure
+    region is therefore the run of non-body lines on the page
+    containing the caption, bounded above and below by the nearest
+    body lines.
+    """
+    try:
+        out = subprocess.run(
+            ["pdftotext", "-bbox", "-f", str(page), "-l", str(page),
+             str(pdf), "-"],
+            check=True, capture_output=True, text=True,
+        ).stdout
+    except subprocess.CalledProcessError:
+        return None
+    raw = _WORD_BBOX_RE.findall(out)
+    if not raw:
+        return None
+    page_m = _PAGE_BBOX_RE.search(out)
+    if not page_m:
+        return None
+    page_h = float(page_m.group(2))
+
+    words = [
+        (float(xmin), float(ymin), float(xmax), float(ymax), txt)
+        for xmin, ymin, xmax, ymax, txt in raw
+    ]
+    words.sort(key=lambda w: w[1])
+
+    # Group into lines whose yMin clusters within 3 pt.
+    lines: list[list[tuple[float, float, float, float, str]]] = []
+    for w in words:
+        if lines and abs(w[1] - lines[-1][0][1]) < 3:
+            lines[-1].append(w)
+        else:
+            lines.append([w])
+
+    if not lines:
+        return None
+
+    # Body-text left margin (computed once globally from the PDF so
+    # figure-heavy pages like page 55 — which has more table rows
+    # than body lines — don't confuse the per-page mode).
+    body_x = _body_left_margin(pdf)
+
+    # A "body line" is one whose left margin matches body_x AND
+    # which has more than a handful of words (so short items like
+    # "above." or "Zilog Z80." don't count).  Running-header and
+    # page-number lines also count as fences: they always appear at
+    # the very top/bottom of the page and we never want them in
+    # a figure crop.
+    body_line_idx: list[int] = []
+    page_num_re = re.compile(r"^-\s*\d+\s*-$")
+    for i, ln in enumerate(lines):
+        min_x = min(w[0] for w in ln)
+        joined = " ".join(w[4] for w in ln).strip()
+        if page_num_re.match(joined):
+            body_line_idx.append(i)
+            continue
+        if "Project Report" in joined and "Meta" in joined:
+            body_line_idx.append(i)
+            continue
+        if abs(min_x - body_x) <= 4 and len(ln) >= 4:
+            body_line_idx.append(i)
+
+    body_set = set(body_line_idx)
+
+    def line_top(i: int) -> float:
+        return min(w[1] for w in lines[i])
+
+    def line_bottom(i: int) -> float:
+        return max(w[3] for w in lines[i])
+
+    # Locate every caption line on this page.
+    targets = {f"{n}." for n in fig_nums}
+    caption_lines: list[int] = []
+    for i, ln in enumerate(lines):
+        texts = [w[4] for w in ln]
+        for j, t in enumerate(texts):
+            if t == "Figure" and j + 1 < len(texts) and texts[j + 1] in targets:
+                caption_lines.append(i)
+                break
+    if not caption_lines:
+        return None
+
+    # For each caption, find the nearest body fence above and
+    # below.  The figure's extent on the page is the union of
+    # (upper_fence_pt, lower_fence_pt) across all captions so
+    # pages that carry two figures end up with a crop spanning
+    # both — the walk-out for each caption stops at the first
+    # real body line or the running header / page-number line.
+    extents: list[tuple[float, float]] = []
+    for cap in caption_lines:
+        upper_pt = 0.0
+        for i in reversed(body_line_idx):
+            if i < cap:
+                upper_pt = line_bottom(i)
+                break
+        lower_pt = page_h
+        for i in body_line_idx:
+            if i > cap:
+                lower_pt = line_top(i)
+                break
+        extents.append((upper_pt, lower_pt))
+
+    upper_fence_pt = min(e[0] for e in extents)
+    lower_fence_pt = max(e[1] for e in extents)
+
+    if upper_fence_pt >= lower_fence_pt:
+        return None
+    return upper_fence_pt, lower_fence_pt, page_h
+
+
+def _row_means(png: Path) -> bytes:
+    """Return one byte per row of `png` (0..255) representing the
+    mean grayscale value of that row.  Uses ImageMagick to scale the
+    image down to 1 pixel wide, one row per source row."""
+    info = subprocess.run(
+        ["magick", "identify", "-format", "%h", str(png)],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    h = int(info)
+    out = subprocess.run(
+        ["magick", str(png), "-colorspace", "Gray",
+         "-scale", f"1x{h}!", "-depth", "8", "gray:-"],
+        check=True, capture_output=True,
+    ).stdout
+    return out
+
+
+def _blank_runs(row_means: bytes, min_length: int = 20) -> list[tuple[int, int]]:
+    """Return a list of (start, length) tuples for contiguous runs
+    of blank rows (mean >= 252) at least `min_length` rows long."""
+    runs: list[tuple[int, int]] = []
+    start: int | None = None
+    for i, b in enumerate(row_means):
+        if b >= 252:
+            if start is None:
+                start = i
+        else:
+            if start is not None:
+                length = i - start
+                if length >= min_length:
+                    runs.append((start, length))
+                start = None
+    if start is not None:
+        length = len(row_means) - start
+        if length >= min_length:
+            runs.append((start, length))
+    return runs
+
+
+def _crop_to_caption_band(
+    src: Path,
+    out: Path,
+    caption_bands_px: list[tuple[int, int]],
+    img_height: int,
+) -> None:
+    """Crop `src` vertically to the content band containing all
+    captions in `caption_bands_px` (list of (ymin, ymax) pairs).
+
+    Strategy:
+      * Compute per-row darkness and find blank-row gutters.
+      * Above the caption: pick the blank run with length >= 150 px
+        (~1/2 inch at 300 dpi) whose bottom sits closest to the
+        caption.  That skips over short intra-diagram gutters (which
+        are usually shorter than 120 px) and lands on the real
+        margin between the diagram and the body text above.
+      * Below the caption: pick the blank run with length >= 60 px
+        whose top sits closest to the bottom of the caption.  The
+        bottom margin of the figure is almost always the largest
+        blank band before the "- N -" page-number footer.
+      * Clamp both bounds to a 6%/94% header/footer safety margin
+        so the running head and page-number footer are always
+        stripped regardless of blank-run detection.
+    """
+    row_means = _row_means(src)
+    runs = _blank_runs(row_means, min_length=40)
+    caption_top = min(b[0] for b in caption_bands_px)
+    caption_bottom = max(b[1] for b in caption_bands_px)
+
+    header_floor = int(img_height * 0.06)
+    footer_ceiling = int(img_height * 0.94)
+
+    # Top crop.  Candidates: blank runs whose bottom edge is above
+    # the caption AND whose length is substantial enough to be a
+    # real margin (>= 150 px at 300 dpi).  Among those, pick the
+    # one whose bottom edge is closest to the caption — i.e. the
+    # margin immediately above the diagram.
+    above = [
+        r for r in runs
+        if r[0] + r[1] <= caption_top
+        and r[1] >= 150
+        and r[0] + r[1] >= header_floor
+    ]
+    if above:
+        best_above = max(above, key=lambda r: r[0] + r[1])
+        crop_top = best_above[0] + best_above[1]
+    else:
+        crop_top = header_floor
+
+    # Bottom crop.  Candidates: blank runs whose top edge is below
+    # the caption AND length >= 60.  Pick the one whose top is
+    # closest to the caption bottom.
+    below = [
+        r for r in runs
+        if r[0] >= caption_bottom
+        and r[1] >= 60
+        and r[0] <= footer_ceiling
+    ]
+    if below:
+        best_below = min(below, key=lambda r: r[0])
+        crop_bottom = best_below[0]
+    else:
+        crop_bottom = footer_ceiling
+
+    crop_h = max(1, crop_bottom - crop_top)
+    subprocess.run(
+        ["magick", str(src),
+         "-crop", f"0x{crop_h}+0+{crop_top}", "+repage",
+         "-trim", "+repage",
+         "-bordercolor", "white", "-border", "32x32",
+         str(out)],
+        check=True,
+    )
+
+
+def _render_full_page(
+    pdf: Path, page: int, out: Path, fig_nums: list[str] | None = None,
+) -> None:
+    """Render a PDF page to PNG at 300 dpi and crop it to the figure
+    region containing the listed captions.  Uses text-layout analysis
+    (preferred) to find the figure's upper/lower fences, then falls
+    back to blank-row gutter detection around the caption, and
+    finally to a header/footer-only strip."""
     tmp = out.parent / f".tmp-{out.stem}"
     subprocess.run(
         ["pdftoppm", "-r", "300", "-f", str(page), "-l", str(page),
@@ -1197,15 +1532,69 @@ def _render_full_page(pdf: Path, page: int, out: Path) -> None:
     cands = sorted(tmp.parent.glob(f"{tmp.name}-*.png"))
     assert cands, "pdftoppm produced no output"
     src = cands[0]
-    if _magick_available():
-        subprocess.run(
-            ["magick", str(src), "-trim", "+repage",
-             "-bordercolor", "white", "-border", "32x32", str(out)],
-            check=True,
-        )
-        src.unlink()
-    else:
+
+    if not _magick_available():
         src.rename(out)
+        return
+
+    info = subprocess.run(
+        ["magick", "identify", "-format", "%w %h", str(src)],
+        check=True, capture_output=True, text=True,
+    ).stdout.split()
+    img_w, img_h = int(info[0]), int(info[1])
+    header_floor = int(img_h * 0.06)
+    footer_ceiling = int(img_h * 0.94)
+
+    crop_top: int | None = None
+    crop_bottom: int | None = None
+
+    if fig_nums:
+        extent = _figure_extent_from_layout(pdf, page, fig_nums)
+        if extent is not None:
+            upper_pt, lower_pt, page_h_pt = extent
+            scale = img_h / page_h_pt
+            # The extent returned by the finder is the body-fence
+            # (where body text or the running header/page number
+            # begins).  Pull the crop INWARDS by 10 pt (~42 px
+            # at 300 dpi) so none of the fence text itself sneaks
+            # into the figure image, while still leaving enough
+            # whitespace around the figure that its own border
+            # isn't chopped.
+            inset_pt = 10.0
+            crop_top = max(header_floor, int((upper_pt + inset_pt) * scale))
+            crop_bottom = min(footer_ceiling, int((lower_pt - inset_pt) * scale))
+            if crop_top >= crop_bottom:
+                crop_top = crop_bottom = None
+
+    if crop_top is None and fig_nums:
+        # Fallback: blank-row gutter approach.
+        found = _figure_caption_y_points(pdf, page, fig_nums)
+        if found is not None:
+            bands_pt, page_h_pt = found
+            scale = img_h / page_h_pt
+            caption_bands_px = [
+                (int(ymin * scale), int(ymax * scale))
+                for ymin, ymax in bands_pt
+            ]
+            _crop_to_caption_band(src, out, caption_bands_px, img_h)
+            src.unlink()
+            return
+
+    if crop_top is None or crop_bottom is None:
+        # Final fallback: header/footer-only strip.
+        crop_top = header_floor
+        crop_bottom = footer_ceiling
+
+    crop_h = max(1, crop_bottom - crop_top)
+    subprocess.run(
+        ["magick", str(src),
+         "-crop", f"0x{crop_h}+0+{crop_top}", "+repage",
+         "-trim", "+repage",
+         "-bordercolor", "white", "-border", "32x32",
+         str(out)],
+        check=True,
+    )
+    src.unlink()
 
 
 def main() -> int:
