@@ -63,9 +63,11 @@ sed -e 's|Version 1\.0 .*$|Version 1.0 <DATETIME>|' \
 
 ## Coverage
 
-**91 of 92 opcodes** and **10 of 10 pseudo-ops** are exercised by at
-least one fixture. The one uncovered opcode is `TEST1`, which is
-unreachable due to a real 1990 lexer bug described below.
+**92 of 92 opcodes** and **10 of 10 pseudo-ops** are exercised by at
+least one fixture. `TEST1` was formerly unreachable due to a 1990
+lexer bug (details in the "Historical discoveries" section below);
+the lexer has since been extended to accept digits after the first
+letter of a mnemonic, and `TEST1` is now covered by `bits.asm`.
 
 The full per-opcode matrix lives in [`test/COVERAGE.md`](test/COVERAGE.md).
 Summary:
@@ -168,7 +170,7 @@ Fixed by threading `AI` through `AssemblePseudoOp`'s signature so
 `DoDATA` writes to the shared buffer; `Pass2`'s single `AddCode`
 call then handles the emission.
 
-### 4. `TEST1` cannot be lexed
+### 4. `TEST1` cannot be lexed (fixed)
 
 **Found writing `bits.asm`.** `Lex.ExtractCommand` reads command
 names one character at a time while `CurrentChar IN AlphabetSet`
@@ -176,13 +178,30 @@ names one character at a time while `CurrentChar IN AlphabetSet`
 stops. So any mnemonic containing a digit is unparseable — and
 `TEST1` is the only such mnemonic in the opcode table.
 
-`TEST1` is registered in `InsertOpcodesInTable` (mapping to 68000
-`BTST`), but the lexer bails with "Command contains non-alphabetic
-characters" before ever reaching the table lookup. The opcode has
+`TEST1` was registered in `InsertOpcodesInTable` (mapping to 68000
+`BTST`), but the lexer bailed with "Command contains non-alphabetic
+characters" before ever reaching the table lookup. The opcode had
 been dead code for 35 years.
 
-`bits.asm` covers the other three Type 22 bit instructions
-(`TESTSET`, `TESTCLR`, `TESTNOT`) and documents TEST1 as unreachable.
+**Fixed** by extending `ExtractCommand` to accept trailing digits
+after the first alphabetic character — the usual identifier rule.
+A letter is still required for the first character (no mnemonics
+can start with a digit), but subsequent characters may be letters
+or digits:
+
+```modula-2
+IF CurrentChar IN AlphabetSet THEN
+  INC(CurrentPos);
+  CurrentChar := CharInString(Line, CurrentPos);
+  WHILE CurrentChar IN AlphabetSet + DigitSet DO
+    INC(CurrentPos);
+    CurrentChar := CharInString(Line, CurrentPos)
+  END
+END;
+```
+
+`TEST1 .D0,.D1` now encodes to `0300` (68000 `BTST D0,D1`). The
+`bits.asm` fixture is the regression test for this fix.
 
 ### 5. `PUSH` and `POP` are empty stubs
 

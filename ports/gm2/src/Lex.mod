@@ -31,6 +31,7 @@ CONST
 
   (* Character Sets *)
   AlphabetSet	= CharSet{'A'..'Z', 'a'..'z'};
+  DigitSet	= CharSet{'0'..'9'};
   AlphaNumSet	= CharSet{'A'..'Z', 'a'..'z', '0'..'9', "'"};
   WhiteSpaceSet	= CharSet{SP, HT};
   CommentSet	= CharSet{';'};
@@ -275,9 +276,17 @@ VAR
     CurrentChar := CharInString(Line, CurrentPos);
     IF NOT(CurrentChar IN EOLSet + CommentSet) THEN
       StartPos := CurrentPos;
-      WHILE CurrentChar IN AlphabetSet DO
+      (* A command name must start with a letter but may then contain
+         letters or digits — the 1990 code accepted only letters, which
+         left the TEST1 mnemonic unreachable because the lexer bailed
+         on the digit before ever looking up the opcode table. *)
+      IF CurrentChar IN AlphabetSet THEN
         INC(CurrentPos);
         CurrentChar := CharInString(Line, CurrentPos);
+        WHILE CurrentChar IN AlphabetSet + DigitSet DO
+          INC(CurrentPos);
+          CurrentChar := CharInString(Line, CurrentPos);
+        END
       END;
       IF CurrentChar IN SeperatorSet THEN
   	INC(CurrentPos);

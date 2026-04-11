@@ -11,27 +11,28 @@ Run `./test/test.sh` from `ports/gm2/` to exercise every fixture.
 
 ## Summary
 
-- **Tested opcodes**: 91 / 92  (99%) — only TEST1 is unreachable due to
-  a latent 1990-era lexer bug.
+- **Tested opcodes**: 92 / 92 (100%) 🎉
 - **Tested pseudo-ops**: 10 / 10 (100%)
 - **Total fixtures**: 12
 
 ### Caveats
 
-Three entries in the opcode table have known issues in the original
-1990 code that we worked around rather than fix:
+Two entries still have pre-existing 1990-era issues worked around in
+the fixtures rather than fixed:
 
-- **TEST1 (BTST)** — unreachable.  The 1990 `Lex.ExtractCommand` only
-  reads alphabetic characters (`AlphabetSet`) for the command name,
-  so any mnemonic containing a digit can't be parsed.  `TEST1` is
-  registered in `InsertOpcodesInTable` but the lexer bails on it
-  with "Command contains non-alphabetic characters".
 - **PUSH / POP** — Type 26 is a stub that returns 0 with no encoding
   logic.  The test fixture includes them so the mnemonics are
   recognised, but no bytes are emitted.
 - **XCH** — Type 24 falls through to Type 6, which only accepts `.B`
   as a modifier.  Fixture uses `XCH.B` even though 68000 `EXG` is
   long-only.
+
+**TEST1 (BTST)** was formerly unreachable because the 1990
+`Lex.ExtractCommand` only read alphabetic characters for the command
+name.  The port extended the lexer to accept trailing digits (letters
+first, then letters-or-digits), following the usual identifier rule.
+`TEST1` is now tested in `bits.asm` and encodes correctly to 68000
+BTST.
 
 ## Fixtures
 
@@ -101,7 +102,7 @@ Three entries in the opcode table have known issues in the original
 
 | Opcode  | Type | Mnemonic | Fixture(s) |
 |---|---|---|---|
-| TEST1   | 22 | BTST | **unreachable** (lexer bug) |
+| TEST1   | 22 | BTST | bits (after lexer fix) |
 | TESTSET | 22 | BSET | bits |
 | TESTCLR | 22 | BCLR | bits |
 | TESTNOT | 22 | BCHG | bits |
