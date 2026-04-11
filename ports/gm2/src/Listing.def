@@ -10,6 +10,7 @@ DEFINITION MODULE Listing;
 
 FROM ADM	IMPORT	Instruction;
 FROM MyStrings	IMPORT	String;
+IMPORT Interface;
 
 CONST
   MINPAGELENGTH		= 3;
@@ -163,6 +164,27 @@ PROCEDURE MCAssemblyRate(): LONGINT;
         PRE:    Previous calls to StartListing and StopListing have been made.
         POST:   The LONGINT returned contains the assembly rate in lines/min
                 of the program assembled.
+*)
+
+PROCEDURE AssemblyElapsedMicros(): LONGINT;
+(*
+        PRE:    Previous calls to StartListing and StopListing have been made.
+        POST:   The LONGINT returned contains the elapsed wall-clock time
+                of the assembly in microseconds.
+*)
+
+PROCEDURE WriteElapsed(F: Interface.FileHandle; Micros: LONGINT);
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   Micros is written to F as a human-readable elapsed time
+                ("Nus" / "N.NNNms" / "N.NNNs" / "MM:SS.NNN").
+*)
+
+PROCEDURE WriteRate(F: Interface.FileHandle; Rate: LONGINT);
+(*
+        PRE:    F is a valid FileHandle.
+        POST:   Rate is written to F with K/M/G unit suffixes for values
+                above 1_000.
 *)
 
 PROCEDURE ListingShutdown;

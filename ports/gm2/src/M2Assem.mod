@@ -13,7 +13,9 @@ FROM ADM                IMPORT InsertOpcodesInTable, Assemble, Instruction,
 FROM MyStrings            IMPORT String, InitialiseAString, EqualStrings,
                                ConcatStrings, MakeSubstring, LengthOfString;
 FROM Listing            IMPORT StartListing, StopListing, AddLine, PurgeError,
-                               SymbolTable, CurrentSourceLine, MCAssemblyRate;
+                               SymbolTable, CurrentSourceLine, MCAssemblyRate,
+                               AssemblyElapsedMicros, WriteElapsed,
+                               WriteRate;
 FROM ObjectGenerator    IMPORT StartObject, StopObject, SetFormat, ObjectFormat,
                                AddCode;
 FROM Exceptions         IMPORT Raise, ExceptionLevel, ExceptionType, Number,
@@ -107,9 +109,11 @@ PROCEDURE WriteStats;
 BEGIN
   WriteAString(StdOut, "Assembled ");
   WriteACard(StdOut, CurrentSourceLine()-1, 1);
-  WriteAString(StdOut, " lines at a rate of ");
-  WriteALongInt(StdOut, MCAssemblyRate(), 1);
-  WriteAString(StdOut, " lines per minute.");
+  WriteAString(StdOut, " lines in ");
+  WriteElapsed(StdOut, AssemblyElapsedMicros());
+  WriteAString(StdOut, " (");
+  WriteRate(StdOut, MCAssemblyRate());
+  WriteAString(StdOut, " lines/min).");
   WriteALine(StdOut);
   WriteAString(StdOut, "There were ");
   WriteACard(StdOut, Number(), 1);

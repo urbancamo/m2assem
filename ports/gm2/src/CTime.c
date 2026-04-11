@@ -18,6 +18,22 @@
  */
 
 #include <time.h>
+#include <sys/time.h>
+
+
+/* Returns local wall-clock microseconds since the Unix epoch as a
+ * 64-bit signed integer.  gm2 LONGINT on aarch64-apple-darwin is
+ * 64-bit, matching C `long` under LP64, so the parameter binds
+ * directly without any conversion. */
+
+void
+CTime_GetMicros (long *out)
+{
+  struct timeval tv;
+
+  gettimeofday (&tv, NULL);
+  *out = (long) tv.tv_sec * 1000000L + (long) tv.tv_usec;
+}
 
 
 void

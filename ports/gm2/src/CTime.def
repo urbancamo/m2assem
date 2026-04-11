@@ -14,6 +14,13 @@ DEFINITION MODULE CTime;
    bodies and the gm2 module-framework symbols all live in the .c file.
 *)
 
+PROCEDURE GetMicros(VAR Micros: LONGINT);
+(*
+   POST: Micros is set to the current local wall-clock time, expressed
+         as microseconds since the Unix epoch.  Useful for measuring
+         short elapsed durations with sub-second precision.
+*)
+
 PROCEDURE GetTime(VAR Hours, Minutes, Seconds: CARDINAL);
 (*
    POST: Hours, Minutes and Seconds are populated with the local time
