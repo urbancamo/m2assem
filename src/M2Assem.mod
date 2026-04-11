@@ -115,7 +115,7 @@ BEGIN
   WriteAString(StdOut, " exception(s) raised during assembly.");
   WriteALine(StdOut);
   IF ProgramStatus() = Normal THEN
-    WriteAString(StdOut, "A valid object code file was writted.")
+    WriteAString(StdOut, "A valid object code file was written.")
   ELSE
     WriteAString(StdOut, "Exceptions caused Object Code output to be halted.")
   END;
