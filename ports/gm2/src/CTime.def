@@ -1,0 +1,29 @@
+DEFINITION MODULE CTime;
+
+(*
+   CTime — libc-backed time/date helpers for the m2assem gm2 port.
+
+   gm2 15.2's bundled wraptime / SysClock libraries are broken on macOS
+   (see ports/gm2/GM2-BUGS.md bug 3) and either return all-zero
+   structures (SysClock) or NIL pointers that crash on first use
+   (wraptime).  This module provides the same functionality directly
+   from libc time(2) / localtime_r(3), via a small C implementation
+   in CTime.c that is linked in by build.sh.
+
+   There is no Modula-2 implementation file (CTime.mod) — the procedure
+   bodies and the gm2 module-framework symbols all live in the .c file.
+*)
+
+PROCEDURE GetTime(VAR Hours, Minutes, Seconds: CARDINAL);
+(*
+   POST: Hours, Minutes and Seconds are populated with the local time
+         of day from the host operating system.
+*)
+
+PROCEDURE GetDate(VAR Year, Month, Day: CARDINAL);
+(*
+   POST: Year (full 4-digit), Month (1..12) and Day (1..31) are
+         populated from the host operating system.
+*)
+
+END CTime.

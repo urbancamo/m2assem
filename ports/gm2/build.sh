@@ -55,6 +55,16 @@ cd "$SRC_DIR"
 echo "Building with $("$GM2" --version | head -1)"
 echo
 
+echo "Compiling C shims..."
+# CTime.c is a libc-backed time/date helper that sidesteps gm2's broken
+# wraptime / SysClock on macOS — see GM2-BUGS.md bug 3.  It is a
+# definition-only Modula-2 module (CTime.def with no CTime.mod) whose
+# procedure bodies and gm2 framework symbols both live in CTime.c.
+printf '  %-20s' "CTime.c"
+cc -g -O0 -c -o "$OBJ_DIR/CTime.o" CTime.c
+printf ' ok\n'
+
+echo
 echo "Compiling implementation modules..."
 for m in "${IMPLEMENTATION_MODULES[@]}"; do
   printf '  %-20s' "$m"
@@ -73,7 +83,7 @@ echo "Linking..."
 # gm2 -c on a program module does not emit main(); instead, pass the .mod
 # file to the final link step so gm2 compiles the main and generates the
 # bootstrap scaffold, linking in the pre-compiled implementation .o files.
-OBJS=()
+OBJS=("$OBJ_DIR/CTime.o")
 for m in "${IMPLEMENTATION_MODULES[@]}"; do
   OBJS+=("$OBJ_DIR/${m}.o")
 done

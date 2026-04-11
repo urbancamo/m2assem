@@ -11,9 +11,9 @@ untouched as a historical artifact; all edits happen here under
 |---|---|
 | Build | ✅ all 13 implementation modules + main compile and link cleanly |
 | Run   | ✅ binary executes, prints banner, parses command line, opens input file, scans source lines |
-| Smoke test against `sample.asm` | ✅ assembles all 12 lines, **0 exceptions**, produces `sample.lst` and `sample.obj` byte-equivalent to the historical TopSpeed reference (modulo line endings and the stubbed date/time stamp) |
+| Smoke test against `sample.asm` | ✅ assembles all 12 lines, **0 exceptions**, produces `sample.lst` and `sample.obj` byte-equivalent to the historical TopSpeed reference (modulo line endings) |
 | Test harnesses (`TestLex.mod`, `TestStrings.mod`, `TestTable.mod`) | ⏳ deferred — not in main build dependency closure |
-| Date/time in listing header | ⚠ stubbed to zeros — gm2's `wraptime` library is broken on macOS, see GM2-BUGS.md bug 3 |
+| Date/time in listing header | ✅ via `CTime` C shim that calls libc directly (works around the broken gm2 `wraptime` on macOS — see GM2-BUGS.md bug 3) |
 
 ## Build
 
@@ -317,17 +317,41 @@ TopSpeed's `WrLngHex` space-padded (`     3E8`). Added a leading-zero
 to leading-space replacement in `Interface.WriteALongHex` to preserve
 historical listing format.
 
+## CTime — libc-backed time/date shim
+
+Because gm2's `wraptime` and `SysClock` are both broken on macOS
+(see GM2-BUGS.md bug 3), the port includes a small definition-only
+Modula-2 module `CTime` whose procedure bodies and gm2 framework symbols
+all live in `ports/gm2/src/CTime.c`. The C file calls libc `time(3)` /
+`localtime_r(3)` directly and exports the symbols gm2 mangling expects:
+
+- `CTime_GetTime` / `CTime_GetDate` — the procedure bodies
+- `_M2_CTime_init` / `_fini` / `_dep` / `_ctor` — the gm2 module framework
+
+The constructor calls `m2pim_M2RTS_RegisterModule` to wire the module
+into the runtime, mirroring what `libgm2/libm2iso/wraptime.cc` does for
+the standard library.
+
+`build.sh` compiles `CTime.c` with `cc -c` before the gm2 modules and
+includes the resulting `CTime.o` in the final link. No corresponding
+`CTime.mod` file is needed — gm2 is happy with a definition-only module
+as long as the symbols resolve at link time.
+
+This is a useful pattern for integrating any C code with gm2 from user
+projects, not just for working around the wraptime bug.
+
 ## What's still cosmetically off
 
-1. **Date/time stamp in listing header** reads `0/ 0/ 0  0: 0: 0`. gm2's
-   time libraries are broken on macOS — see GM2-BUGS.md bug 3. Stubbed
-   for now.
-2. **Output line endings** are LF rather than the historical CRLF. Could
+1. **Output line endings** are LF rather than the historical CRLF. Could
    be fixed by writing `\r\n` explicitly in `WriteALine`, but it's
    arguably correct for a modern Unix port to use Unix line endings.
-3. **`TestLex.mod`** still uses TopSpeed `IO.RdStr` / `IO.WrCard` and
+2. **`TestLex.mod`** still uses TopSpeed `IO.RdStr` / `IO.WrCard` and
    isn't in the build closure. Would need a small port if anyone wants
    to run the test harnesses.
+3. **Assembly Time stat** reads `0: 0: 0` because the modern host
+   assembles 12 lines in well under a second. This is correct, not a
+   bug — just an artifact of the speed differential between an Apple
+   M4 and a 1990 DOS PC. Larger inputs would show non-zero durations.
 
 ## Suggested next steps
 
@@ -336,6 +360,7 @@ historical listing format.
 2. **Port `TestLex.mod`** if test coverage is desired.
 3. **Decide on line-ending policy** for output files — keep Unix, or
    match the original CRLF for byte-identical historical reproduction.
-4. **Time/date** — once gm2 wraptime is fixed upstream, swap the stubs
-   in `Interface.GetTime` / `GetDate` for the wraptime calls (the
-   commented-out code is preserved in git history).
+4. **Once gm2 `wraptime` is fixed upstream**, the `CTime` shim could be
+   replaced with a pure-Modula-2 implementation if that's preferred —
+   though the C shim is small and self-contained, and works as a useful
+   illustration of gm2 ↔ C linkage for future maintainers.

@@ -22,6 +22,7 @@ IMPORT FIO;
 IMPORT NumberIO;
 IMPORT Args;
 IMPORT FileSysOp;
+IMPORT CTime;
 
 CONST
   FileMissingError	= "File to be opened cannot be found";
@@ -352,26 +353,19 @@ BEGIN
 END NumberOfArguments;
 
 
-(* Time/date support is currently stubbed out — see GM2-BUGS.md bug 3.
-   gm2's SysClock.GetClock returns all zeros on macOS, and the alternative
-   wraptime library crashes immediately because its Init* functions use
-   malloc gated on HAVE_MALLOC_H, which is undefined on macOS (libc malloc
-   lives in <stdlib.h> there).  Until either is fixed upstream the
-   listing's date/time stamp will read all zeros. *)
+(* Time/date support delegates to CTime, a small C-backed module that
+   sidesteps gm2's broken-on-macOS wraptime / SysClock libraries.  See
+   ports/gm2/GM2-BUGS.md bug 3 and ports/gm2/src/CTime.c for details. *)
 
 PROCEDURE GetTime(VAR Hours, Minutes, Seconds: CARDINAL);
 BEGIN
-  Hours := 0;
-  Minutes := 0;
-  Seconds := 0
+  CTime.GetTime(Hours, Minutes, Seconds)
 END GetTime;
 
 
 PROCEDURE GetDate(VAR Year, Month, Day: CARDINAL);
 BEGIN
-  Year := 0;
-  Month := 0;
-  Day := 0
+  CTime.GetDate(Year, Month, Day)
 END GetDate;
 
 
