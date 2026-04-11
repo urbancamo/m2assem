@@ -24,6 +24,32 @@ cp -r src/demo build/ && cd build/demo
 ../m2assem sample                          # smoke test
 ```
 
+## Tests
+
+```sh
+./test/test.sh                  # test against current build
+BUILD=1 ./test/test.sh          # rebuild first, then test
+```
+
+The test runner (`ports/gm2/test/test.sh`) runs the built `m2assem`
+against `src/demo/sample.asm` in a fresh scratch directory under
+`test/tmp/` and compares the generated output against golden files in
+`test/golden/`:
+
+- **`sample.OBJ`** — compared **byte-for-byte**. The object file content
+  is fully deterministic, so any difference is a regression.
+- **`sample.LST`** — compared after **normalising** the three fields
+  that vary legitimately between runs (page-header date/time, assembly
+  elapsed time, assembly rate). The golden LST stores these slots as
+  `<DATETIME>` / `<ELAPSED>` / `<RATE>` placeholders. Everything else —
+  addresses, machine code, symbol table, formatting — must match
+  exactly.
+
+The runner exits non-zero and prints a unified diff on any mismatch,
+so regressions are immediately visible. An auto-discovery step adds
+`/usr/local/gcc-m2/bin` to `PATH` if `gm2` isn't already on it, so
+`BUILD=1 ./test/test.sh` works from any fresh shell.
+
 `build.sh` compiles each implementation module to `build/obj/*.o` with
 `gm2 -c`, then links by passing `M2Assem.mod` plus all `.o` files to a final
 gm2 invocation so gm2 generates the bootstrap scaffold and `main()`.

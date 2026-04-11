@@ -1,0 +1,30 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            	OBJECT 1
+   2         0                            	SYMBOL 1
+   3       3E8                                    ORG 1000
+   4       3E8                            	BASE 16
+   5       3E8                            Start   EQU 25
+   6       3E8                            	BASE D'10
+   7       3E8                            End     EQU 25-10
+   8       3E8  4E71                      LABEL4: NOP
+   9       3E9  D941                      LABEL3: ADDC .D1,.D4
+  10       3EA  EB8C                      LABEL2: SHL.L #5,.D4
+  11       3EB  4E4A                      LABEL1: BRK #10
+  12       3EC  4E4A                      
+
+
+Symbol Table Dump: 
+
+      15  Abs  End  
+    1003  Rel  LABEL1  
+    1002  Rel  LABEL2  
+    1001  Rel  LABEL3  
+    1000  Rel  LABEL4  
+      37  Abs  Start  
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+
