@@ -17,22 +17,25 @@ Run `./test/test.sh` from `ports/gm2/` to exercise every fixture.
 
 ### Caveats
 
-Two entries still have pre-existing 1990-era issues worked around in
-the fixtures rather than fixed:
+One entry still has a pre-existing 1990-era quirk worked around in
+the fixture rather than fixed:
 
-- **PUSH / POP** — Type 26 is a stub that returns 0 with no encoding
-  logic.  The test fixture includes them so the mnemonics are
-  recognised, but no bytes are emitted.
 - **XCH** — Type 24 falls through to Type 6, which only accepts `.B`
   as a modifier.  Fixture uses `XCH.B` even though 68000 `EXG` is
-  long-only.
+  long-only.  The underlying encoding is still correct.
 
-**TEST1 (BTST)** was formerly unreachable because the 1990
-`Lex.ExtractCommand` only read alphabetic characters for the command
-name.  The port extended the lexer to accept trailing digits (letters
-first, then letters-or-digits), following the usual identifier rule.
-`TEST1` is now tested in `bits.asm` and encodes correctly to 68000
-BTST.
+### Fixed during the port
+
+- **TEST1 (BTST)** — formerly unreachable because the 1990
+  `Lex.ExtractCommand` only read alphabetic characters for the
+  command name.  The port extended the lexer to accept trailing
+  digits (letters first, then letters-or-digits), following the
+  usual identifier rule.  Tested by `bits.asm`.
+- **PUSH / POP** — formerly a Type 26 stub that returned 0 with no
+  encoding logic.  The port implements the data-register forms as
+  `MOVE.L Dn,-(SP)` / `MOVE.L (SP)+,Dn`.  Tested by `call.asm` for
+  both `.D0` and `.D7` to verify the register number lands in the
+  correct bit position for source (PUSH) and destination (POP).
 
 ## Fixtures
 
@@ -117,8 +120,8 @@ BTST.
 | STM    | 14 | MOVEM | call |
 | MOV    | 23 | MOVE/MOVEM/MOVEP/MOVEA/MOVEQ | bubble, math |
 | XCH    | 24 | EXG/SWAP | call |
-| PUSH   | 26 | LINK/PEA/MOVE | call (stub) |
-| POP    | 26 | UNLK/MOVE     | call (stub) |
+| PUSH   | 26 | MOVE.L Dn,-(SP)  | call (implemented during port) |
+| POP    | 26 | MOVE.L (SP)+,Dn  | call (implemented during port) |
 
 ### Set on condition / Scc (Type 10)
 

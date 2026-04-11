@@ -45,20 +45,27 @@ Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
   42       40C  48D0 000F                         STM.L   #RMASK,@.A0             ; MOVEM.L D0-D3,(A0)
   43       40E  4CD0 000F                         LDM.L   #RMASK,@.A0             ; MOVEM.L (A0),D0-D3
   44       410                            
-  45       410                                    ;  PUSH / POP — Type 26 is a stub in the 1990 code (returns 0
-  46       410                                    ;  with no encoding logic), so these just verify that the
-  47       410                                    ;  mnemonic is recognised.  No bytes are emitted.
-  48       410                                    PUSH    .D0
-  49       410                                    POP     .D0
-  50       410                            
-  51       410  4E40                              BRK     #0
-  52       411                            
-  53       800                                    ORG     SUBLOC
-  54       800  4E75                              RET                             ; RTS
-  55       801  4E77                              RETR                            ; RTR  (covered here too)
-  56       802  4E73                              RETE                            ; RTE
-  57       803                                    END
-
+  45       410                                    ;  PUSH / POP — ported Type 26 encodes these as 68000
+  46       410                                    ;  MOVE.L Dn,-(SP)  and  MOVE.L (SP)+,Dn respectively, so
+  47       410                                    ;  each emits one 16-bit instruction word:
+  48       410                                    ;    PUSH .D0  ->  2F00   POP .D0  ->  201F
+  49       410                                    ;    PUSH .D7  ->  2F07   POP .D7  ->  2E1F
+  50       410  2F00                              PUSH    .D0
+  51       411  201F                              POP     .D0
+  52       412  2F07                              PUSH    .D7
+  53       413  2E1F                              POP     .D7
+  54       414                            
+  55       414  4E40                              BRK     #0
+  56       415                            
+  57       800                                    ORG     SUBLOC
+Page:    2    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+  58       800  4E75                              RET                             ; RTS
+  59       801  4E77                              RETR                            ; RTR  (covered here too)
+  60       802  4E73                              RETE                            ; RTE
+  61       803                                    END
+
 
 Symbol Table Dump: 
 

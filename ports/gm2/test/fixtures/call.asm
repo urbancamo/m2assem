@@ -42,11 +42,15 @@ Main:
         STM.L   #RMASK,@.A0             ; MOVEM.L D0-D3,(A0)
         LDM.L   #RMASK,@.A0             ; MOVEM.L (A0),D0-D3
 
-        ;  PUSH / POP — Type 26 is a stub in the 1990 code (returns 0
-        ;  with no encoding logic), so these just verify that the
-        ;  mnemonic is recognised.  No bytes are emitted.
+        ;  PUSH / POP — ported Type 26 encodes these as 68000
+        ;  MOVE.L Dn,-(SP)  and  MOVE.L (SP)+,Dn respectively, so
+        ;  each emits one 16-bit instruction word:
+        ;    PUSH .D0  ->  2F00   POP .D0  ->  201F
+        ;    PUSH .D7  ->  2F07   POP .D7  ->  2E1F
         PUSH    .D0
         POP     .D0
+        PUSH    .D7
+        POP     .D7
 
         BRK     #0
 

@@ -203,10 +203,10 @@ END;
 `TEST1 .D0,.D1` now encodes to `0300` (68000 `BTST D0,D1`). The
 `bits.asm` fixture is the regression test for this fix.
 
-### 5. `PUSH` and `POP` are empty stubs
+### 5. `PUSH` and `POP` are empty stubs (fixed)
 
 **Found writing `call.asm`.** `Type26` — the dispatcher for PUSH and
-POP — is:
+POP — was:
 
 ```modula-2
 PROCEDURE Type26(): CARDINAL;
@@ -215,15 +215,43 @@ BEGIN
 END Type26;
 ```
 
-That's the whole body. No encoding logic at all. The mnemonics are
-recognised (the outer `Assemble` loop finds them in the table), but
-`Type26` returns length 0 so no bytes are emitted and the location
-counter doesn't advance.
+That's the whole body. No encoding logic at all. The mnemonics were
+recognised (the outer `Assemble` loop found them in the table), but
+`Type26` returned length 0 so no bytes were emitted and the location
+counter didn't advance.
 
-The original code intended PUSH to map to 68000 `LINK`/`PEA`/`MOVE`
-and POP to `UNLK`/`MOVE`, but that dispatch was never written. The
-fixture includes `PUSH .D0` / `POP .D0` just to confirm the
-mnemonics are recognised — no bytes are emitted.
+Looking at the opcode table, the original author had set the PUSH
+mask to `0x4840` (68000 `PEA` base) and POP to `0x41C0` (68000 `LEA`
+base), which never really made sense — LEA isn't a pop.
+
+**Fixed** in the port by implementing `Type26` as a stack-oriented
+MOVE encoder.  The IEEE draft interpretation most useful to a real
+programmer is:
+
+```
+PUSH .Dn  <->  MOVE.L Dn,-(SP)     (68000: 0x2F00 | n)
+POP  .Dn  <->  MOVE.L (SP)+,Dn     (68000: 0x201F | (n << 9))
+```
+
+The implementation overwrites `AI[1]` with the correct MOVE base —
+`Word{8,9,10,11,13}` for PUSH (= 0x2F00) or `Word{0,1,2,3,4,13}`
+for POP (= 0x201F) — and then calls `AddRegister` to merge in the
+register number at bit position 0 (for PUSH source) or 9 (for POP
+destination).  The original opcode-table masks are therefore
+ignored: the real encoding comes from `Type26` itself.
+
+Verified in `call.asm` against two register numbers to catch any
+off-by-one in the bit positioning:
+
+```
+PUSH .D0 -> 2F00      POP .D0 -> 201F
+PUSH .D7 -> 2F07      POP .D7 -> 2E1F
+```
+
+Restrictions: only single-data-register forms are supported.
+Address-register PUSH/POP (which 68000 encodes differently, using
+`-(SP)` / `(SP)+` with a MOVEA destination) is not implemented —
+you can use explicit `MOV.L .An,-.SP` and `MOV.L .SP+,.An` instead.
 
 ### 6. `BR` and `CALL` with a bare label don't work
 

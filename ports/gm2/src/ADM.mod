@@ -1380,8 +1380,48 @@ VAR
 
 
   PROCEDURE Type26(): CARDINAL;
+  (*
+        Format: PUSH / POP  single data register to/from the stack.
+
+        In the 1990 code Type26 was an empty stub that returned 0
+        with no encoding logic, which left PUSH and POP as dead
+        mnemonics.  The port implements the data-register forms:
+
+          PUSH .Dn  <->  MOVE.L Dn,-(SP)   (68000: 0x2F00 | n)
+          POP  .Dn  <->  MOVE.L (SP)+,Dn   (68000: 0x201F | (n << 9))
+
+        The mask bits in the ADM.mod opcode table for PUSH / POP are
+        set to the PEA / LEA bases respectively, which don't match
+        what a stack push/pop actually should look like, so we
+        overwrite AI[1] with the correct MOVE base and fill in the
+        register number via AddRegister.
+  *)
+  VAR
+    Register: String;
   BEGIN
-    RETURN 0
+    IF PassNo = 1 THEN
+      RETURN 1
+    END;
+    InitialiseAString(Register);
+    IF NOT CheckRegister(DecInstr.Operand[1].Argument, Register) THEN
+      Raise(Code, Error, RegisterError);
+      RETURN 1
+    END;
+    IF RegisterType(Register) <> Data THEN
+      Raise(Code, Error, WrongRegisterError);
+      RETURN 1
+    END;
+
+    IF EqualStrings("PUSH", DecInstr.Command) THEN
+      (* MOVE.L <src>,-(SP) base: 0010 1111 0000 0000 = 0x2F00 *)
+      AI[1] := Word{8,9,10,11,13};
+      AddRegister(AI[1], Register, 0)    (* src reg at bits 0..2 *)
+    ELSE
+      (* MOVE.L (SP)+,<dst> base: 0010 0000 0001 1111 = 0x201F *)
+      AI[1] := Word{0,1,2,3,4,13};
+      AddRegister(AI[1], Register, 9)    (* dst reg at bits 9..11 *)
+    END;
+    RETURN 1
   END Type26;
 
 
