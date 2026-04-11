@@ -18,4 +18,4 @@ python3 doc/md/tools/pdf_to_md.py
 - [Chapter 7 — Bibliography](07-bibliography.md)
 - [Chapter 8 — Appendix](08-appendix.md)
 
-The two real figures — the 68000 instruction-format diagram (Figure 6) and the hash-table performance graph (Figure 30) — live under [`figures/`](figures/).  Every other "figure" in the original is an ASCII-art table or layout that comes through verbatim in the Markdown.
+All 35 figures from the original report live under [`figures/`](figures/).  Each one is rendered as a 300 dpi PNG of the PDF page (or a pixel-cropped region for Figure 6, which sits alone on its page).  Pages that carry two adjacent figures — 1+2, 3+4, 8+9, 16+17, 20+21, 30+31 — share a single PNG; both figure numbers appear in the combined caption.
