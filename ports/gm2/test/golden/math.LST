@@ -1,0 +1,110 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   math.asm -- arithmetic / logical / shift / DBR-loop coverage
+   3         0                            ;
+   4         0                            ;   Exercises a broader slice of the IEEE-draft 68000 opcode set than
+   5         0                            ;   bubble.asm: AND, OR, XOR, SHL.L, SHRA.L, DBR, and DATA.L (the last
+   6         0                            ;   of which was broken in the original 1990 code — this fixture is
+   7         0                            ;   also the regression test for that fix).
+   8         0                            ;
+   9         0                            ;   The program writes eight 32-bit result words to RESLOC:
+  10         0                            ;
+  11         0                            ;     [0]  sum   of ARRAY[0..N-1]
+  12         0                            ;     [1]  AND   of ARRAY[0..N-1]
+  13         0                            ;     [2]  OR    of ARRAY[0..N-1]
+  14         0                            ;     [3]  XOR   of ARRAY[0..N-1]   (running parity)
+  15         0                            ;     [4]  X + Y                    (scalar)
+  16         0                            ;     [5]  X - Y
+  17         0                            ;     [6]  X << 2                   (SHL.L  #2,Dn)
+  18         0                            ;     [7]  X >> 2 arithmetic        (SHRA.L #2,Dn)
+  19         0                            ;
+  20         0                            
+  21         0                                    OBJECT  1
+  22         0                                    SYMBOL  1
+  23         0                                    BASE    D'10
+  24         0                            
+  25         0                            N       EQU     6                       ; number of array elements
+  26         0                            ARRLOC  EQU     4096                    ; array at absolute 4096
+  27         0                            RESLOC  EQU     8192                    ; results at absolute 8192
+  28         0                            
+  29       400                                    ORG     1024                    ; code at 1024
+  30       400                            
+  31       400                            ;
+  32       400                            ;   --- scalar ops on X = 100, Y = 37 ---
+  33       400                            ;
+  34       400  223C 0000 0064            Main:   LD.L    #100,.D1                ; X
+  35       403  243C 0000 0025                    LD.L    #37,.D2                 ; Y
+  36       406  207C 0000 2000                    LD.L    #RESLOC,.A0             ; .A0 -> results
+  37       409                            
+  38       409  2001                              MOV.L   .D1,.D0
+  39       40A  D580                              ADD.L   .D2,.D0                 ;   X + Y     = 137
+  40       40B  2140 0010                         MOV.L   .D0,@.A0(16)            ; -> results[4]
+  41       40D                            
+  42       40D  2001                              MOV.L   .D1,.D0
+  43       40E  9580                              SUB.L   .D2,.D0                 ;   X - Y     = 63
+  44       40F  2140 0014                         MOV.L   .D0,@.A0(20)            ; -> results[5]
+  45       411                            
+  46       411  2001                              MOV.L   .D1,.D0
+  47       412  E588                              SHL.L   #2,.D0                  ;   X << 2    = 400
+  48       413  2140 0018                         MOV.L   .D0,@.A0(24)            ; -> results[6]
+  49       415                            
+  50       415  2001                              MOV.L   .D1,.D0
+  51       416  E480                              SHRA.L  #2,.D0                  ;   X >>s 2   = 25   (arith right)
+  52       417  2140 001C                         MOV.L   .D0,@.A0(28)            ; -> results[7]
+  53       419                            
+  54       419                            ;
+  55       419                            ;   --- array loop: sum / AND / OR / XOR accumulators ---
+  56       419                            ;
+  57       419  227C 0000 1000                    LD.L    #ARRLOC,.A1             ; .A1 -> array
+Page:    2    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+  58       41C                            
+  59       41C  2011                              MOV.L   @.A1,.D0                ; sum <- a[0]
+  60       41D  2611                              MOV.L   @.A1,.D3                ; AND <- a[0]
+  61       41E  2811                              MOV.L   @.A1,.D4                ; OR  <- a[0]
+  62       41F  2A11                              MOV.L   @.A1,.D5                ; XOR <- a[0]
+  63       420  D3FC 0000 0004                    ADD.L   #4,.A1                  ; advance past a[0]
+  64       423  3E3C 0004                         LD.W    #N-2,.D7                ; DBR counter: N-1 more elements
+  65       425                            
+  66       425  2C11                      Loop:   MOV.L   @.A1,.D6                ; .D6 = a[j]
+  67       426  DD80                              ADD.L   .D6,.D0                 ; sum += a[j]
+  68       427  CD83                              AND.L   .D6,.D3                 ; AND
+  69       428  8D84                              OR.L    .D6,.D4                 ; OR
+  70       429  BD85                              XOR.L   .D6,.D5                 ; XOR (parity)
+  71       42A  D3FC 0000 0004                    ADD.L   #4,.A1                  ; advance
+  72       42D  50CF FFF6                         DBR     .D7,Loop                ; decrement and branch
+  73       42F                            
+  74       42F  2080                              MOV.L   .D0,@.A0                ; -> results[0] = sum
+  75       430  2143 0004                         MOV.L   .D3,@.A0(4)             ; -> results[1] = AND
+  76       432  2144 0008                         MOV.L   .D4,@.A0(8)             ; -> results[2] = OR
+  77       434  2145 000C                         MOV.L   .D5,@.A0(12)            ; -> results[3] = XOR
+  78       436                            
+  79       436  4E40                              BRK     #0                      ; halt
+  80       437                            
+  81      1000                                    ORG     ARRLOC                  ; data lives at 4096
+  82      1000                            
+  83      1000  0000 000A                         DATA.L  10
+  84      1002  0000 0014                         DATA.L  20
+  85      1004  0000 001E                         DATA.L  30
+  86      1006  0000 0028                         DATA.L  40
+  87      1008  0000 0032                         DATA.L  50
+  88      100A  0000 003C                         DATA.L  60
+  89      100C                            
+  90      100C                                    END
+
+
+Symbol Table Dump: 
+
+    4096  Abs  ARRLOC  
+    1061  Rel  Loop  
+    1024  Rel  Main  
+       6  Abs  N  
+    8192  Abs  RESLOC  
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

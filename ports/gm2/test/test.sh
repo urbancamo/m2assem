@@ -44,6 +44,7 @@ WORK_DIR="$TEST_DIR/tmp"
 CASES=(
   "sample:$SRC_DIR/demo/sample.asm"
   "bubble:$FIXTURE_DIR/bubble.asm"
+  "math:$FIXTURE_DIR/math.asm"
 )
 
 fail() { printf '%s\n' "$*" >&2; exit 1; }
