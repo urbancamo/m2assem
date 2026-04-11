@@ -1,0 +1,94 @@
+Page:    1    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+   1         0                            ;
+   2         0                            ;   modes.asm -- addressing mode coverage sweep
+   3         0                            ;
+   4         0                            ;   Exercises every IEEE addressing mode listed in ADM.def's
+   5         0                            ;   ValidAddressingModes enum that isn't already covered by the
+   6         0                            ;   existing fixtures and that is actually implemented by the Type
+   7         0                            ;   dispatchers in ADM.mod.
+   8         0                            ;
+   9         0                            ;   Modes already covered elsewhere:
+  10         0                            ;
+  11         0                            ;     Dir         (.Dn / .An)        — everywhere
+  12         0                            ;     Imm         (#expr)            — everywhere
+  13         0                            ;     Ind         (@.An)             — bubble, math, call
+  14         0                            ;     Abs         (/xxx)             — call
+  15         0                            ;     IndPostIdx  (@.An(d16))        — bubble, math
+  16         0                            ;
+  17         0                            ;   This fixture adds:
+  18         0                            ;
+  19         0                            ;     AutoPostInc (.An+)             — 68000 (An)+
+  20         0                            ;     AutoPreDec  (-.An)             — 68000 -(An)
+  21         0                            ;     Index       (@.An(.Xn,d8))     — 68000 d8(An,Xn.W)
+  22         0                            ;     Rel         ($label)           — 68000 immediate that accepts
+  23         0                            ;                                      a Relative-typed operand
+  24         0                            ;
+  25         0                            ;   The remaining four modes in ValidAddressingModes are either
+  26         0                            ;   unreachable or buggy in the 1990 code and therefore NOT covered:
+  27         0                            ;
+  28         0                            ;     BPage       (!xxx)             — never appears in any AMS
+  29         0                            ;                                      set, so no instruction accepts
+  30         0                            ;                                      it.  Dead mnemonic.
+  31         0                            ;     AutoPreInc  (+.An)             — Type 1 has no dispatch for it;
+  32         0                            ;                                      Pass 1 returns an uninitialised
+  33         0                            ;                                      length and the location counter
+  34         0                            ;                                      blows past MEMHIGH on the first
+  35         0                            ;                                      use.
+  36         0                            ;     AutoPostDec (.An-)             — same as AutoPreInc.
+  37         0                            ;     PC-indexed  (@*(.Xn,d8))       — CalcEA's IndPostIndex branch
+  38         0                            ;                                      calls RegisterType on a Register
+  39         0                            ;                                      string that was never populated
+  40         0                            ;                                      when the argument is "*", so it
+  41         0                            ;                                      raises "Badly formed register"
+  42         0                            ;                                      before ever reaching the PC case.
+  43         0                            ;
+  44         0                            ;   These limitations are documented in TEST.md under the "Historical
+  45         0                            ;   discoveries" section.
+  46         0                            ;
+  47         0                            
+  48         0                                    OBJECT  1
+  49         0                                    SYMBOL  1
+  50         0                                    BASE    D'10
+  51         0                            
+  52         0                            ARRLOC  EQU     4096
+  53         0                            
+  54       400                                    ORG     1024
+  55       400                            
+  56       400                            Main:
+  57       400  2079 0000 1000                    LD.L    /ARRLOC,.A0             ; set A0 (Abs — already tested)
+Page:    2    MetaASSEM  (c) 1990 M S Wickens  Version 1.0 <DATETIME>
+
+
+  58       403                            
+  59       403                                    ;  AutoPostInc — .An+   ->  68000 (An)+
+  60       403  2018                              MOV.L   .A0+,.D0
+  61       404                            
+  62       404                                    ;  AutoPreDec  — -.An   ->  68000 -(An)
+  63       404  2220                              MOV.L   -.A0,.D1
+  64       405                            
+  65       405                                    ;  Index       — @.An(.Xn,d8)  ->  68000 d8(An,Xn.W)
+  66       405                                    ;  IEEE order is (index_reg,disp) — register first, then displacement.
+  67       405  2430 6804                         MOV.L   @.A0(.D6,4),.D2
+  68       407                            
+  69       407                                    ;  Rel         — $label  ->  #imm with a Relative-typed value
+  70       407                                    ;  (The 1990 code lets you use a label's address as an
+  71       407                                    ;  immediate without tripping the "Argument must be absolute"
+  72       407                                    ;  check.)
+  73       407  263C 0000 1000                    MOV.L   $ARRLOC,.D3
+  74       40A                            
+  75       40A  4E40                              BRK     #0
+  76       40B                            
+  77       40B                                    END
+
+
+Symbol Table Dump: 
+
+    4096  Abs  ARRLOC  
+    1024  Rel  Main  
+
+Assembly Statistics: 
+Assembly Time: <ELAPSED>
+Assembly Rate: <RATE>
+

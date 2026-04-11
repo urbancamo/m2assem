@@ -54,6 +54,7 @@ CASES=(
   "system:$FIXTURE_DIR/system.asm"
   "pseudo:$FIXTURE_DIR/pseudo.asm"
   "call:$FIXTURE_DIR/call.asm"
+  "modes:$FIXTURE_DIR/modes.asm"
 )
 
 fail() { printf '%s\n' "$*" >&2; exit 1; }

@@ -13,7 +13,32 @@ Run `./test/test.sh` from `ports/gm2/` to exercise every fixture.
 
 - **Tested opcodes**: 92 / 92 (100%) 🎉
 - **Tested pseudo-ops**: 10 / 10 (100%)
-- **Total fixtures**: 12
+- **Tested addressing modes**: 9 / 14 (see matrix below)
+- **Total fixtures**: 13
+
+## Addressing mode coverage
+
+m2assem's `ValidAddressingModes` enum has 14 entries.  Four of them
+are unreachable or buggy in the 1990 code and are documented rather
+than tested; one is only reachable via an instruction-specific
+code path we haven't specifically exercised.
+
+| Mode        | Syntax              | 68000 equivalent      | Fixture(s) |
+|---|---|---|---|
+| Dir         | `.Dn` / `.An`       | Register direct       | everywhere |
+| Imm         | `#xxx`              | Immediate             | everywhere |
+| Ind         | `@.An`              | `(An)`                | bubble, math, call |
+| IndPostIdx  | `@.An(d16)`         | `d16(An)`             | bubble, math |
+| IndPostIdx  | `@.An(.Xn,d8)`      | `d8(An,Xn.W)`         | modes |
+| Abs         | `/xxx`              | `xxx.L`               | call |
+| Rel         | `$xxx`              | "relocatable imm"     | modes |
+| AutoPostInc | `.An+`              | `(An)+`               | modes |
+| AutoPreDec  | `-.An`              | `-(An)`               | modes |
+| BPage       | `!xxx`              | (short abs, intended) | ✗ unreachable — not in any AMS set |
+| AutoPreInc  | `+.An`              | —                     | ✗ Type 1 has no dispatch; location counter overflows |
+| AutoPostDec | `.An-`              | —                     | ✗ same as AutoPreInc |
+| IndPreIdx   | postfix `@` + `(...)` | —                   | ✗ untested, likely similar |
+| PC-indexed  | `@*(d16)` / `@*(.Xn,d8)` | `d16(PC)` / `d8(PC,Xn)` | ✗ CalcEA's PC path reads an uninitialised Register string |
 
 ### Caveats
 
@@ -60,7 +85,8 @@ the fixture rather than fixed:
 | `bits.asm`      | TESTSET, TESTCLR, TESTNOT  (TEST1 unreachable — see caveats) |
 | `system.asm`    | WAIT, BRKV, RESET, RET, RETR, RETE |
 | `pseudo.asm`    | DATA.B, PAGE, TITLE, RES |
-| `call.asm`      | BR, CALL, XCH, ST, STM, LDM, PUSH, POP (via `/addr` absolute form) |
+| `call.asm`      | BR, CALL, XCH, ST, STM, LDM, PUSH, POP (bare-label and `/addr` forms) |
+| `modes.asm`     | AutoPostInc (`.An+`), AutoPreDec (`-.An`), Index (`@.An(.Xn,d8)`), Rel (`$label`) |
 
 ## Opcode coverage matrix
 
