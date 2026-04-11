@@ -1,3 +1,4 @@
 /src/m2assem/ADM.OBJ
 ports/*/build/
 ports/*/test/tmp/
+doc/md/raw/
